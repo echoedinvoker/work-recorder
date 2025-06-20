@@ -12,6 +12,14 @@
     <p class="text-2xl font-bold text-green-600 pt-2">
       獲得分數: {{ score }} 分
     </p>
+
+    <!-- 顯示當日總分 -->
+    <div class="border-t pt-3 mt-3">
+      <p class="text-xl font-bold text-blue-600">
+        今日總分: {{ todayTotalScore }} 分
+      </p>
+    </div>
+
   </div>
 </template>
 
@@ -24,6 +32,7 @@ const {
   endTime,
   formatTime,
   workDuration,
-  score
+  score,
+  todayTotalScore
 } = useRecorder()
 </script>
