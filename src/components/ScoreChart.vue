@@ -6,10 +6,9 @@
     <div class="relative h-48 mb-4">
       <!-- Y軸標籤 -->
       <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 pr-2">
-        <span>100</span>
-        <span>75</span>
-        <span>50</span>
-        <span>25</span>
+        <span>30</span>
+        <span>20</span>
+        <span>10</span>
         <span>0</span>
       </div>
       
@@ -25,7 +24,7 @@
             <div 
               class="bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600 relative group"
               :style="{ 
-                height: `${(item.score / 100) * 160}px`, 
+                height: `${Math.min(item.score / 30, 1) * 160}px`, 
                 width: '24px',
                 minHeight: item.score > 0 ? '4px' : '0px'
               }"
