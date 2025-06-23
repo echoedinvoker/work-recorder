@@ -6,6 +6,8 @@
     <div class="relative h-48 mb-4">
       <!-- Y軸標籤 -->
       <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 pr-2">
+        <span>100</span>
+        <span>75</span>
         <span>50</span>
         <span>25</span>
         <span>0</span>
