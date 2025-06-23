@@ -12,6 +12,8 @@
       
       <RecordingDisplay />
 
+      <ScoreChart />
+
     </div>
   </div>
 </template>
@@ -20,5 +22,6 @@
 import TheButton from '@/components/TheButton.vue';
 import ResultDisplay from '@/components/ResultDisplay.vue';
 import RecordingDisplay from '@/components/RecordingDisplay.vue';
-import ScoreDisplay from '@/components/ScoreDisplay.vue'; // 新增
+import ScoreDisplay from '@/components/ScoreDisplay.vue';
+import ScoreChart from '@/components/ScoreChart.vue';
 </script>
