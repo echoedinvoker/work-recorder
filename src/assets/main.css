@@ -1,1 +1,7 @@
 @import "tailwindcss"; /* 直接導入，無需配置文件 */
+
+@layer base {
+  body {
+    @apply overflow-hidden;
+  }
+}

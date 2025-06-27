@@ -1,5 +1,9 @@
 <template>
-  <div v-if="startTime && !isRecording" class="bg-gray-50 rounded-lg p-6 text-left space-y-2">
+  <div
+    v-if="startTime && !isRecording && isDisplayingResult"
+    class="bg-gray-50 rounded-lg p-6 text-left space-y-2"
+    @click="disableResultDisplay"
+  >
     <p class="text-gray-700">
       <span class="font-medium">開始時間:</span> {{ formatTime(startTime) }}
     </p>
@@ -28,11 +32,13 @@ import { useRecorder } from '@/composables/useRecorder';
 
 const {
   isRecording,
+  isDisplayingResult,
   startTime,
   endTime,
   formatTime,
   workDuration,
   score,
-  todayTotalScore
+  todayTotalScore,
+  disableResultDisplay
 } = useRecorder()
 </script>

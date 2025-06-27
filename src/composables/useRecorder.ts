@@ -39,6 +39,7 @@ export function useRecorder() {
       // 結束記錄
       dailyScoreStore.endTime = new Date()
       dailyScoreStore.isRecording = false
+      dailyScoreStore.isDisplayingResult = true
       stopTimeUpdater() // 停止定時器
 
       // 將獲得的分數添加到每日總分
@@ -46,6 +47,10 @@ export function useRecorder() {
         dailyScoreStore.addScore(score.value)
       }
     }
+  }
+
+  const disableResultDisplay = () => {
+    dailyScoreStore.isDisplayingResult = false
   }
 
   // 計算工作時長（分鐘）
@@ -130,6 +135,7 @@ export function useRecorder() {
 
   return {
     isRecording: computed(() => dailyScoreStore.isRecording),
+    isDisplayingResult: computed(() => dailyScoreStore.isDisplayingResult),
     startTime: computed(() => dailyScoreStore.startTime),
     endTime: computed(() => dailyScoreStore.endTime),
     toggleTimer,
@@ -140,6 +146,7 @@ export function useRecorder() {
     progressPercentage,
     estimatedNextScoreTime,
     formatTime,
-    todayTotalScore: computed(() => dailyScoreStore.todayScore) // 新增：暴露今日總分
+    todayTotalScore: computed(() => dailyScoreStore.todayScore), // 新增：暴露今日總分
+    disableResultDisplay,
   }
 }

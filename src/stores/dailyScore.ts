@@ -16,8 +16,8 @@ const generateMockData = () => {
       timeZone: 'Asia/Taipei'
     }).replace(/\//g, '-')
     
-    // 隨機分數 0-100
-    mockData[dateKey] = Math.floor(Math.random() * 101)
+    // 隨機分數 0-30
+    mockData[dateKey] = Math.floor(Math.random() * 31) // 假資料分數範圍 0-30
   }
   
   return mockData
@@ -30,6 +30,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
 
   // 狀態管理
   const isRecording = ref(false)
+  const isDisplayingResult = ref(false)
   const startTime = ref<Date | null>(null)
   const endTime = ref<Date | null>(null)
 
@@ -68,6 +69,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
   
   return { 
     isRecording,
+    isDisplayingResult,
     startTime,
     endTime,
     dailyScores, 

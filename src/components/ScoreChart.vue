@@ -1,30 +1,32 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6" v-if="!dailyScoreStore.isRecording" >
+  <div
+    class="bg-white rounded-lg shadow-md p-6"
+    v-if="!dailyScoreStore.isRecording &&  !dailyScoreStore.isDisplayingResult" >
     <h3 class="text-lg font-semibold text-gray-800 mb-4">近七日分數趨勢</h3>
     
     <!-- 圖表容器 -->
-    <div class="relative h-48 mb-4">
-      <!-- Y軸標籤 -->
-      <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 pr-2">
-        <span>30</span>
-        <span>20</span>
-        <span>10</span>
+    <div class="relative mb-4">
+      <!-- Y軸標籤 - 只對應長條圖區域 -->
+      <div class="absolute left-0 top-0 h-48 flex flex-col justify-between text-xs text-gray-500 pr-2">
+        <span>{{ yAxisMax }}</span>
+        <span>{{ Math.round(yAxisMax * 0.67) }}</span>
+        <span>{{ Math.round(yAxisMax * 0.33) }}</span>
         <span>0</span>
       </div>
       
-      <!-- 圖表區域 -->
-      <div class="ml-8 h-full flex items-end justify-between space-x-1">
+      <!-- 長條圖區域 - 固定高度，不包含日期標籤 -->
+      <div class="ml-8 h-48 flex items-end justify-between space-x-1">
         <div 
           v-for="(item, index) in chartData" 
           :key="index"
           class="flex flex-col items-center flex-1"
         >
           <!-- 長條圖 -->
-          <div class="w-full flex justify-center mb-2">
+          <div class="w-full flex justify-center">
             <div 
               class="bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600 relative group"
               :style="{ 
-                height: `${Math.min(item.score / 30, 1) * 160}px`, 
+                height: `${(item.score / yAxisMax) * chartHeight}px`, 
                 width: '24px',
                 minHeight: item.score > 0 ? '4px' : '0px'
               }"
@@ -35,12 +37,18 @@
               </div>
             </div>
           </div>
-          
-          <!-- 日期標籤 -->
-          <div class="text-xs text-gray-600 text-center">
-            <div>{{ item.dayLabel }}</div>
-            <div class="text-gray-400">{{ item.dateLabel }}</div>
-          </div>
+        </div>
+      </div>
+      
+      <!-- 日期標籤區域 - 獨立於長條圖區域 -->
+      <div class="ml-8 flex justify-between space-x-1 mt-2">
+        <div 
+          v-for="(item, index) in chartData" 
+          :key="`label-${index}`"
+          class="flex-1 text-xs text-gray-600 text-center"
+        >
+          <div>{{ item.dayLabel }}</div>
+          <div class="text-gray-400">{{ item.dateLabel }}</div>
         </div>
       </div>
     </div>
@@ -64,6 +72,9 @@ import { computed } from 'vue'
 import { useDailyScoreStore } from '@/stores/dailyScore'
 
 const dailyScoreStore = useDailyScoreStore()
+
+// 長條圖區域高度 (h-48 = 192px)
+const chartHeight = 192
 
 // 計算圖表數據 (最近7天)
 const chartData = computed(() => {
@@ -105,6 +116,15 @@ const chartData = computed(() => {
   }
   
   return data
+})
+
+// 動態計算 Y 軸最大值
+const yAxisMax = computed(() => {
+  const maxDataScore = Math.max(...chartData.value.map(item => item.score), 0)
+  // 設定合理的上限，至少為 10，並向上取整到 5 的倍數
+  const minMax = 10
+  const calculatedMax = Math.max(maxDataScore * 1.2, minMax)
+  return Math.ceil(calculatedMax / 5) * 5
 })
 
 // 計算平均分數
