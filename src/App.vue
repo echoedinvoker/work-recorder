@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-md mx-auto mt-12 p-6 text-center">
+  <div class="max-w-md mx-auto mt-8 p-6 text-center">
     <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
     
     <div class="space-y-6">
