@@ -18,6 +18,7 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@argos-ci/playwright": "^5.0.4",
     "@playwright/test": "^1.53.1",
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.14.0",
