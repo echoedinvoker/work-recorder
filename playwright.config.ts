@@ -4,7 +4,7 @@ export default defineConfig({
   reporter: 'html',
   use: {
     trace: 'on-first-retry',
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:5173',
   },
   projects: [
     {
@@ -13,8 +13,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run preview',
-    url: 'http://localhost:4173/',
+    command: 'npm run dev',
+    url: 'http://localhost:5173/',
     timeout: 120 * 1000
   }
 });
