@@ -14,5 +14,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run preview',
+    url: 'http://localhost:4173/',
+    timeout: 120 * 1000
   }
 });
