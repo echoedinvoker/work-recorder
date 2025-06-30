@@ -15,6 +15,8 @@
       <ScoreChart />
 
     </div>
+
+    <p>Test Branch</p>
   </div>
 </template>
 
