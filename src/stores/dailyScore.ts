@@ -66,6 +66,16 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     const today = getTodayKey()
     dailyScores.value[today] = 0
   }
+
+  const getScoreByDate = (date: Date) => {
+    const dateKey = date.toLocaleDateString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit', 
+      day: '2-digit',
+      timeZone: 'Asia/Taipei'
+    }).replace(/\//g, '-')
+    return dailyScores.value[dateKey] || 0
+  }
   
   return { 
     isRecording,
@@ -76,7 +86,8 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     todayScore, 
     addScore, 
     resetTodayScore,
-    useMockData
+    useMockData,
+    getScoreByDate
   }
 }, {
   persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
