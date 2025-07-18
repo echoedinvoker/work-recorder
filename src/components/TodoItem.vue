@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 border-l-4" :class="borderColor">
+  <div class="h-80 bg-white rounded-lg shadow-md p-6 border-l-4" :class="borderColor">
     <div class="flex flex-col items-start justify-between">
       <div class="flex-1">
         <!-- 任務標題和描述 -->
