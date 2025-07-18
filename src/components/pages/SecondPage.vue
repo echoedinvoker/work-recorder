@@ -54,7 +54,7 @@
 
       <!-- 單一 Todo 檢視 -->
       <div v-if="!showAddForm" class="flex-1 flex flex-col min-h-0">
-        <div v-if="todos.length === 0" class="flex-1 flex items-center justify-center text-gray-500">
+        <div v-if="todos.length === 0" class="text-gray-500 mt-8 mx-auto text-center">
           還沒有任何任務，開始新增第一個吧！
         </div>
         <div v-else class="flex-1 flex flex-col">
