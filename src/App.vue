@@ -1,5 +1,6 @@
 <template>
-  <div class="max-w-md mx-auto mt-8 p-6 text-center">
+  <!-- 完全移除高度限制，讓內容自然流動 -->
+  <div class="max-w-md mx-auto p-6 text-center">
     <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
     
     <!-- 頁面指示器 -->
@@ -9,7 +10,7 @@
       @go-to-page="goToPage"
     />
 
-    <!-- 滑動容器 -->
+    <!-- 滑動容器 - 移除 overflow hidden -->
     <div 
       @touchstart="handleTouchStart"
       @touchmove="handleTouchMove"
@@ -64,49 +65,3 @@ const {
   goToPage
 } = usePageNavigation(pages)
 </script>
-
-<style scoped>
-.app-container {
-  /* 設置容器高度為視窗高度 */
-  height: 100vh;
-  max-width: 28rem; /* max-w-md */
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  /* 啟用移動端滾動 */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-}
-
-.swipe-container {
-  /* 讓滑動容器佔用剩餘空間 */
-  flex: 1;
-  overflow: hidden;
-  /* 確保觸摸事件正常工作 */
-  touch-action: pan-x;
-}
-
-.page-content {
-  width: 100%;
-  flex-shrink: 0;
-  /* 允許頁面內容滾動 */
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-}
-
-/* 全域樣式調整 */
-:deep(body) {
-  /* 防止整個頁面的橡皮筋效果 */
-  overscroll-behavior: none;
-}
-
-/* 確保在移動端有適當的最小高度 */
-@media (max-height: 600px) {
-  .app-container {
-    min-height: 100vh;
-  }
-}
-</style>
