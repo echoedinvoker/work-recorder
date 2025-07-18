@@ -1,32 +1,34 @@
 <template>
-  <div class="max-w-md mx-auto mt-8 p-6 text-center">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
-    
-    <!-- 頁面指示器 -->
-    <PageIndicator 
-      :pages="pages" 
-      :current-page-index="currentPageIndex"
-      @go-to-page="goToPage"
-    />
+  <div class="min-h-screen">
+    <div class="max-w-md mx-auto pt-8 pb-8 px-6 text-center">
+      <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
+      
+      <!-- 頁面指示器 -->
+      <PageIndicator 
+        :pages="pages" 
+        :current-page-index="currentPageIndex"
+        @go-to-page="goToPage"
+      />
 
-    <!-- 滑動容器 -->
-    <div 
-      class="overflow-hidden"
-      @touchstart="handleTouchStart"
-      @touchmove="handleTouchMove"
-      @touchend="handleTouchEnd"
-    >
+      <!-- 滑動容器 -->
       <div 
-        class="flex transition-transform duration-300 ease-out"
-        :style="{ transform: `translateX(-${currentPageIndex * 100}%)` }"
+        class="overflow-x-hidden"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
       >
-        <!-- 動態渲染頁面 -->
         <div 
-          v-for="(page, index) in pages" 
-          :key="index"
-          class="w-full flex-shrink-0"
+          class="flex transition-transform duration-300 ease-out"
+          :style="{ transform: `translateX(-${currentPageIndex * 100}%)` }"
         >
-          <component :is="pageComponents[page.component as keyof typeof pageComponents]" />
+          <!-- 動態渲染頁面 -->
+          <div 
+            v-for="(page, index) in pages" 
+            :key="index"
+            class="w-full flex-shrink-0 min-h-fit"
+          >
+            <component :is="pageComponents[page.component as keyof typeof pageComponents]" />
+          </div>
         </div>
       </div>
     </div>
