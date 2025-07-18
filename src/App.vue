@@ -30,9 +30,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 頁面標題 -->
-    <p class="mt-4 text-gray-600">{{ pages[currentPageIndex].name }}</p>
   </div>
 </template>
 
