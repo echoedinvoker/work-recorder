@@ -1,6 +1,6 @@
 <template>
-  <!-- 調整容器高度計算方式 -->
-  <div class="min-h-screen flex flex-col max-w-4xl mx-auto p-6" :style="containerStyle">
+  <!-- 設定頁面容器的最大高度並啟用滾動 -->
+  <div class="h-screen flex flex-col max-w-4xl mx-auto p-6">
     <!-- 模式切換按鈕 - 固定在頂部 -->
     <div class="flex justify-center space-x-4 mb-6 flex-shrink-0">
       <button
@@ -28,7 +28,7 @@
     </div>
 
     <!-- 可滾動的內容區域 -->
-    <div class="flex-1 overflow-y-auto space-y-6" ref="scrollContainer">
+    <div class="flex-1 overflow-y-auto space-y-6">
       <!-- 新增 Todo 表單 -->
       <div v-if="currentView === 'add'" class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">新增週期性任務</h2>
@@ -40,8 +40,6 @@
               placeholder="任務標題"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
-              @focus="handleInputFocus"
-              @blur="handleInputBlur"
             />
           </div>
           <div>
@@ -50,8 +48,6 @@
               placeholder="任務描述（可選）"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows="3"
-              @focus="handleInputFocus"
-              @blur="handleInputBlur"
             ></textarea>
           </div>
           <div class="flex gap-4">
@@ -95,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import TodoItem from '../TodoItem.vue'
 
 // 類型定義
@@ -221,92 +217,15 @@ const checkExpiredTodos = () => {
 // 定時器
 let intervalId: number | null = null
 
-// 新增：處理鍵盤和滾動
-const scrollContainer = ref<HTMLElement>()
-const isKeyboardVisible = ref(false)
-
-// 動態計算容器樣式
-const containerStyle = computed(() => {
-  if (isKeyboardVisible.value) {
-    // 鍵盤顯示時使用視窗高度
-    const viewportHeight = window.visualViewport?.height || window.innerHeight
-    return {
-      height: `${viewportHeight - 100}px` // 減去一些邊距
-    }
-  }
-  return {}
-})
-
-// 處理輸入框焦點事件
-const handleInputFocus = () => {
-  isKeyboardVisible.value = true
-  // 延遲滾動到輸入框位置
-  setTimeout(() => {
-    const activeElement = document.activeElement as HTMLElement
-    if (activeElement && scrollContainer.value) {
-      activeElement.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
-      })
-    }
-  }, 300)
-}
-
-const handleInputBlur = () => {
-  // 延遲重置，避免快速切換輸入框時的閃爍
-  setTimeout(() => {
-    if (!document.activeElement || 
-        !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-      isKeyboardVisible.value = false
-      // 重置滾動位置
-      if (scrollContainer.value) {
-        scrollContainer.value.scrollTop = 0
-      }
-    }
-  }, 100)
-}
-
-// 監聽視窗變化
-const handleViewportChange = () => {
-  const initialHeight = window.screen.height
-  const currentHeight = window.visualViewport?.height || window.innerHeight
-  const heightDifference = initialHeight - currentHeight
-  
-  // 如果高度差超過 150px，認為是鍵盤彈出
-  if (heightDifference > 150) {
-    isKeyboardVisible.value = true
-  } else {
-    isKeyboardVisible.value = false
-    // 鍵盤收起時重置滾動位置
-    if (scrollContainer.value) {
-      scrollContainer.value.scrollTop = 0
-    }
-  }
-}
-
 onMounted(() => {
   loadTodos()
   checkExpiredTodos()
   intervalId = setInterval(checkExpiredTodos, 60000)
-  
-  // 監聽視窗變化
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', handleViewportChange)
-  } else {
-    window.addEventListener('resize', handleViewportChange)
-  }
 })
 
 onUnmounted(() => {
   if (intervalId) {
     clearInterval(intervalId)
-  }
-  
-  // 清理事件監聽器
-  if (window.visualViewport) {
-    window.visualViewport.removeEventListener('resize', handleViewportChange)
-  } else {
-    window.removeEventListener('resize', handleViewportChange)
   }
 })
 </script>
