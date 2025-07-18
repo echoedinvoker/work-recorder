@@ -267,8 +267,9 @@ onUnmounted(() => {
 .second-page-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  max-height: 100%;
+  height: 100vh; /* 使用 viewport height */
+  max-height: 100vh;
+  overflow: hidden; /* 防止整個容器滾動 */
 }
 
 .mode-switcher {
@@ -304,7 +305,11 @@ onUnmounted(() => {
 .content-area {
   flex: 1;
   overflow-y: auto;
-  min-height: 0; /* 重要：允許 flex 子元素縮小 */
+  overflow-x: hidden;
+  min-height: 0;
+  /* 移動端滾動優化 */
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+  overscroll-behavior: contain; /* 防止滾動穿透 */
 }
 
 .form-container {
@@ -375,12 +380,14 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: 100%; /* 佔滿可用空間 */
 }
 
 .list-title {
   font-size: 1.5rem;
   font-weight: bold;
   color: #1f2937;
+  flex-shrink: 0; /* 標題不縮小 */
 }
 
 .empty-state {
@@ -393,9 +400,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: 24rem; /* 限制列表高度 */
+  flex: 1; /* 佔滿剩餘空間 */
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 0.5rem;
+  /* 移動端滾動優化 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* 滾動條樣式 */
@@ -415,5 +426,18 @@ onUnmounted(() => {
 
 .todo-list::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* 移動端專用樣式 */
+@media (max-width: 768px) {
+  .content-area {
+    /* 確保在移動端有足夠的滾動空間 */
+    height: calc(100vh - 120px); /* 減去頂部按鈕的高度 */
+  }
+  
+  .todo-list {
+    /* 移除固定高度限制 */
+    max-height: none;
+  }
 }
 </style>
