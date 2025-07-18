@@ -1,12 +1,15 @@
 <template>
-  <div class="second-page-container" data-scrollable>
+  <!-- 調整容器高度計算方式 -->
+  <div class="min-h-screen flex flex-col max-w-4xl mx-auto p-6" :style="containerStyle">
     <!-- 模式切換按鈕 - 固定在頂部 -->
-    <div class="mode-switcher">
+    <div class="flex justify-center space-x-4 mb-6 flex-shrink-0">
       <button
         @click="currentView = 'add'"
         :class="[
-          'mode-btn',
-          currentView === 'add' ? 'mode-btn-active' : 'mode-btn-inactive'
+          'px-6 py-2 rounded-lg transition-colors',
+          currentView === 'add' 
+            ? 'bg-blue-500 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
         ]"
       >
         新增任務
@@ -14,47 +17,47 @@
       <button
         @click="currentView = 'list'"
         :class="[
-          'mode-btn',
-          currentView === 'list' ? 'mode-btn-active' : 'mode-btn-inactive'
+          'px-6 py-2 rounded-lg transition-colors',
+          currentView === 'list' 
+            ? 'bg-blue-500 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
         ]"
       >
         任務列表
       </button>
     </div>
 
-    <!-- 內容區域 -->
-    <div class="content-area" data-scrollable>
+    <!-- 可滾動的內容區域 -->
+    <div class="flex-1 overflow-y-auto space-y-6" ref="scrollContainer">
       <!-- 新增 Todo 表單 -->
-      <div v-if="currentView === 'add'" class="form-container">
-        <h2 class="form-title">新增週期性任務</h2>
-        <form @submit.prevent="addTodo" class="todo-form">
-          <div class="input-group">
+      <div v-if="currentView === 'add'" class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">新增週期性任務</h2>
+        <form @submit.prevent="addTodo" class="space-y-4">
+          <div>
             <input
-              ref="titleInput"
               v-model="newTodo.title"
               type="text"
               placeholder="任務標題"
-              class="form-input"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
               @focus="handleInputFocus"
               @blur="handleInputBlur"
             />
           </div>
-          <div class="input-group">
+          <div>
             <textarea
-              ref="descriptionInput"
               v-model="newTodo.description"
               placeholder="任務描述（可選）"
-              class="form-textarea"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows="3"
               @focus="handleInputFocus"
               @blur="handleInputBlur"
             ></textarea>
           </div>
-          <div class="form-actions">
+          <div class="flex gap-4">
             <select
               v-model="newTodo.period"
-              class="form-select"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="daily">每日</option>
               <option value="weekly">每週</option>
@@ -62,7 +65,7 @@
             </select>
             <button
               type="submit"
-              class="submit-btn"
+              class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
               新增任務
             </button>
@@ -71,12 +74,13 @@
       </div>
 
       <!-- Todo 列表 -->
-      <div v-if="currentView === 'list'" class="list-container">
-        <h2 class="list-title">我的週期性任務</h2>
-        <div v-if="todos.length === 0" class="empty-state">
+      <div v-if="currentView === 'list'" class="space-y-4">
+        <h2 class="text-2xl font-bold text-gray-800">我的週期性任務</h2>
+        <div v-if="todos.length === 0" class="text-center py-8 text-gray-500">
           還沒有任何任務，開始新增第一個吧！
         </div>
-        <div v-else class="todo-list" data-scrollable>
+        <!-- Todo 項目容器 - 可滾動 -->
+        <div v-else class="space-y-4 max-h-96 overflow-y-auto pr-2">
           <TodoItem
             v-for="todo in todos"
             :key="todo.id"
@@ -91,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import TodoItem from '../TodoItem.vue'
 
 // 類型定義
@@ -221,6 +225,18 @@ let intervalId: number | null = null
 const scrollContainer = ref<HTMLElement>()
 const isKeyboardVisible = ref(false)
 
+// 動態計算容器樣式
+const containerStyle = computed(() => {
+  if (isKeyboardVisible.value) {
+    // 鍵盤顯示時使用視窗高度
+    const viewportHeight = window.visualViewport?.height || window.innerHeight
+    return {
+      height: `${viewportHeight - 100}px` // 減去一些邊距
+    }
+  }
+  return {}
+})
+
 // 處理輸入框焦點事件
 const handleInputFocus = () => {
   isKeyboardVisible.value = true
@@ -250,170 +266,48 @@ const handleInputBlur = () => {
   }, 100)
 }
 
+// 監聽視窗變化
+const handleViewportChange = () => {
+  const initialHeight = window.screen.height
+  const currentHeight = window.visualViewport?.height || window.innerHeight
+  const heightDifference = initialHeight - currentHeight
+  
+  // 如果高度差超過 150px，認為是鍵盤彈出
+  if (heightDifference > 150) {
+    isKeyboardVisible.value = true
+  } else {
+    isKeyboardVisible.value = false
+    // 鍵盤收起時重置滾動位置
+    if (scrollContainer.value) {
+      scrollContainer.value.scrollTop = 0
+    }
+  }
+}
+
 onMounted(() => {
   loadTodos()
   checkExpiredTodos()
   intervalId = setInterval(checkExpiredTodos, 60000)
+  
+  // 監聽視窗變化
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', handleViewportChange)
+  } else {
+    window.addEventListener('resize', handleViewportChange)
+  }
 })
 
 onUnmounted(() => {
   if (intervalId) {
     clearInterval(intervalId)
   }
+  
+  // 清理事件監聽器
+  if (window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', handleViewportChange)
+  } else {
+    window.removeEventListener('resize', handleViewportChange)
+  }
 })
 </script>
 
-<style scoped>
-.second-page-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: 100%;
-}
-
-.mode-switcher {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-shrink: 0;
-}
-
-.mode-btn {
-  padding: 0.5rem 1.5rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
-}
-
-.mode-btn-active {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.mode-btn-inactive {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-.mode-btn-inactive:hover {
-  background-color: #d1d5db;
-}
-
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0; /* 重要：允許 flex 子元素縮小 */
-}
-
-.form-container {
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-}
-
-.form-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 1rem;
-}
-
-.todo-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-input,
-.form-textarea,
-.form-select {
-  width: 100%;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-}
-
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
-  outline: none;
-  ring: 2px;
-  ring-color: #3b82f6;
-  border-color: transparent;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.submit-btn {
-  padding: 0.5rem 1.5rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.submit-btn:hover {
-  background-color: #2563eb;
-}
-
-.list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.list-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1f2937;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
-}
-
-.todo-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: 24rem; /* 限制列表高度 */
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-/* 滾動條樣式 */
-.todo-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.todo-list::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 2px;
-}
-
-.todo-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 2px;
-}
-
-.todo-list::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-</style>
