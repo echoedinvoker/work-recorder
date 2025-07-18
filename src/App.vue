@@ -11,7 +11,6 @@
 
     <!-- 滑動容器 -->
     <div 
-      class="overflow-hidden"
       @touchstart="handleTouchStart"
       @touchmove="handleTouchMove"
       @touchend="handleTouchEnd"

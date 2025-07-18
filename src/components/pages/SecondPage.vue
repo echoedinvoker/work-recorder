@@ -1,6 +1,6 @@
 <template>
   <!-- 設定頁面容器的最大高度並啟用滾動 -->
-  <div class="h-screen flex flex-col max-w-4xl mx-auto p-6">
+  <div class="flex flex-col max-w-4xl mx-auto p-6">
     <!-- 模式切換按鈕 - 固定在頂部 -->
     <div class="flex justify-center space-x-4 mb-6 flex-shrink-0">
       <button
@@ -28,7 +28,7 @@
     </div>
 
     <!-- 可滾動的內容區域 -->
-    <div class="flex-1 overflow-y-auto space-y-6">
+    <div class="flex-1 space-y-6">
       <!-- 新增 Todo 表單 -->
       <div v-if="currentView === 'add'" class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">新增週期性任務</h2>
@@ -76,7 +76,7 @@
           還沒有任何任務，開始新增第一個吧！
         </div>
         <!-- Todo 項目容器 - 可滾動 -->
-        <div v-else class="space-y-4 max-h-96 overflow-y-auto pr-2">
+        <div v-else class="space-y-4 pr-2">
           <TodoItem
             v-for="todo in todos"
             :key="todo.id"
