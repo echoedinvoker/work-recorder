@@ -10,22 +10,43 @@ export function usePageNavigation(pages: PageConfig[]) {
   
   // 觸控相關變數
   const touchStartX = ref(0)
+  const touchStartY = ref(0)
   const touchEndX = ref(0)
+  const touchEndY = ref(0)
   const minSwipeDistance = 50
+  const isHorizontalSwipe = ref(false)
 
   // 觸控事件處理
   const handleTouchStart = (e: TouchEvent) => {
     touchStartX.value = e.touches[0].clientX
+    touchStartY.value = e.touches[0].clientY
+    isHorizontalSwipe.value = false
   }
 
   const handleTouchMove = (e: TouchEvent) => {
-    // 防止頁面滾動
-    e.preventDefault()
+    const currentX = e.touches[0].clientX
+    const currentY = e.touches[0].clientY
+    
+    const deltaX = Math.abs(currentX - touchStartX.value)
+    const deltaY = Math.abs(currentY - touchStartY.value)
+    
+    // 判斷是否為水平滑動
+    if (deltaX > deltaY && deltaX > 10) {
+      isHorizontalSwipe.value = true
+      // 只有水平滑動時才阻止預設行為
+      e.preventDefault()
+    }
+    // 如果是垂直滑動，不阻止預設行為，讓頁面正常滾動
   }
 
   const handleTouchEnd = (e: TouchEvent) => {
     touchEndX.value = e.changedTouches[0].clientX
-    handleSwipe()
+    touchEndY.value = e.changedTouches[0].clientY
+    
+    // 只有在水平滑動時才處理頁面切換
+    if (isHorizontalSwipe.value) {
+      handleSwipe()
+    }
   }
 
   // 處理滑動邏輯
