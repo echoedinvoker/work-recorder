@@ -1,7 +1,6 @@
 <template>
-  <div
-    class="h-80 bg-white rounded-lg shadow-md p-6 border-l-4" :class="borderColor">
-    <div class="flex flex-col items-start justify-between">
+  <div class="h-80 bg-white rounded-lg shadow-md p-6 border-l-4" :class="borderColor">
+    <div class="h-full flex flex-col gap-3 items-start justify-between">
       <div class="flex-1">
         <!-- 任務標題和描述 -->
         <div class="mb-4">
@@ -12,23 +11,11 @@
             <span class="flex items-center gap-1">
               連續 {{ todo.streak }} 次
               <!-- 火焰顯示區域 -->
-              <span class="flex items-center">
-                <span v-if="todo.streak <= 10" class="text-orange-500">
-                  {{ '🔥'.repeat(todo.streak) }}
-                </span>
-                <span v-else-if="todo.streak <= 50" class="text-orange-500 flex items-center">
-                  {{ '🔥'.repeat(10) }}
-                  <span class="ml-1 text-xs bg-orange-100 text-orange-700 px-1 rounded">
-                    +{{ todo.streak - 10 }}
-                  </span>
-                </span>
-                <span v-else class="text-orange-500 flex items-center">
-                  🔥🔥🔥
-                  <span class="ml-1 text-xs bg-gradient-to-r from-orange-400 to-red-500 text-white px-2 py-1 rounded-full font-bold">
-                    {{ todo.streak }}
-                  </span>
-                </span>
+              <span class="grid grid-cols-5">
+                <span v-if="todo.streak <= 10" v-for="_,ind in Array.from({ length: todo.streak })" :key="ind" class="text-sm"> 🔥 </span>
+                <span v-else v-for="_,i in Array.from({ length: 10 })" :key="i" class="text-sm"> 🔥 </span>
               </span>
+              <span v-if="todo.streak > 10" class="text-sm"> +{{ todo.streak - 10 }} </span>
             </span>
           </div>
         </div>
@@ -77,13 +64,13 @@
       </div>
 
       <!-- 操作按鈕 -->
-      <div class="flex gap-2 ml-4">
+      <div class="grid grid-cols-2 gap-2 self-center">
         <button @click="$emit('complete', todo.id)" :disabled="!canComplete"
-          class="px-4 py-2 rounded-lg font-medium transition-colors" :class="completeButtonClass">
+          class="px-4 py-4 rounded-lg font-medium transition-colors" :class="completeButtonClass">
           {{ completeButtonText }}
         </button>
         <button @click="$emit('delete', todo.id)"
-          class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+          class="px-4 py-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
           刪除
         </button>
       </div>
@@ -219,4 +206,3 @@ const formatDate = (date: Date): string => {
   })
 }
 </script>
-

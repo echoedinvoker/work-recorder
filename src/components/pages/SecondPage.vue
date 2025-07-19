@@ -66,7 +66,7 @@
             />
           
           <!-- 底部導航區域 - 固定在底部 -->
-          <div class="flex justify-between items-center bg-gray-50 rounded-lg p-3 flex-shrink-0">
+          <div class="flex justify-between items-center rounded-lg p-3 flex-shrink-0">
             <button
               @click="previousTodo"
               :disabled="currentTodoIndex === 0"
