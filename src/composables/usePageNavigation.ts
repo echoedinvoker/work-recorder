@@ -1,17 +1,30 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import type { Component } from 'vue'
+import { ref } from 'vue'
+import HomePage from '@/components/pages/HomePage.vue'
+import SecondPage from '@/components/pages/SecondPage.vue'
+import ThirdPage from '@/components/pages/ThirdPage.vue'
 
 export interface PageConfig {
   name: string
-  component: string
+  component: Component
 }
 
-export function usePageNavigation(pages: PageConfig[]) {
-  const currentPageIndex = ref(0)
+// 頁面配置
+const pages: PageConfig[] = [
+  { name: '主頁面', component: HomePage },
+  { name: '頁面 2', component: SecondPage },
+  { name: '頁面 3', component: ThirdPage }
+]
+
+const currentPageIndex = ref(0)
+
+// 觸控相關變數
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+const minSwipeDistance = 50
+
+export function usePageNavigation() {
   
-  // 觸控相關變數
-  const touchStartX = ref(0)
-  const touchEndX = ref(0)
-  const minSwipeDistance = 50
 
   // 觸控事件處理
   const handleTouchStart = (e: TouchEvent) => {
@@ -42,15 +55,6 @@ export function usePageNavigation(pages: PageConfig[]) {
     }
   }
 
-  // 鍵盤導航支援
-  const handleKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowLeft' && currentPageIndex.value > 0) {
-      currentPageIndex.value--
-    } else if (e.key === 'ArrowRight' && currentPageIndex.value < pages.length - 1) {
-      currentPageIndex.value++
-    }
-  }
-
   // 程式化導航
   const goToPage = (index: number) => {
     if (index >= 0 && index < pages.length) {
@@ -70,15 +74,6 @@ export function usePageNavigation(pages: PageConfig[]) {
     }
   }
 
-  // 掛載鍵盤事件
-  onMounted(() => {
-    document.addEventListener('keydown', handleKeydown)
-  })
-
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown)
-  })
-
   return {
     currentPageIndex,
     handleTouchStart,
@@ -86,7 +81,8 @@ export function usePageNavigation(pages: PageConfig[]) {
     handleTouchEnd,
     goToPage,
     nextPage,
-    prevPage
+    prevPage,
+    pages
   }
 }
 

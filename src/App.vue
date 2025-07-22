@@ -10,7 +10,7 @@
       @go-to-page="goToPage"
     />
 
-    <!-- 滑動容器 - 移除 overflow hidden -->
+    <!-- 滑動容器-->
     <div 
       @touchstart="handleTouchStart"
       @touchmove="handleTouchMove"
@@ -26,7 +26,7 @@
           :key="index"
           class="w-full flex-shrink-0"
         >
-          <component :is="pageComponents[page.component as keyof typeof pageComponents]" />
+          <component :is="page.component" />
         </div>
       </div>
     </div>
@@ -34,27 +34,9 @@
 </template>
 
 <script setup lang="ts">
-import { usePageNavigation, type PageConfig } from '@/composables/usePageNavigation'
+import { usePageNavigation } from '@/composables/usePageNavigation'
 import PageIndicator from '@/components/ui/PageIndicator.vue'
 
-// 導入頁面組件
-import HomePage from '@/components/pages/HomePage.vue'
-import SecondPage from '@/components/pages/SecondPage.vue'
-import ThirdPage from '@/components/pages/ThirdPage.vue'
-
-// 頁面配置
-const pages: PageConfig[] = [
-  { name: '主頁面', component: 'HomePage' },
-  { name: '頁面 2', component: 'SecondPage' },
-  { name: '頁面 3', component: 'ThirdPage' }
-]
-
-// 頁面組件映射
-const pageComponents = {
-  HomePage,
-  SecondPage,
-  ThirdPage
-}
 
 // 使用頁面導航 composable
 const {
@@ -62,6 +44,7 @@ const {
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
-  goToPage
-} = usePageNavigation(pages)
+  goToPage,
+  pages
+} = usePageNavigation()
 </script>
