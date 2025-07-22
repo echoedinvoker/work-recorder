@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 import { ref } from 'vue'
 import HomePage from '@/components/pages/HomePage.vue'
-import SecondPage from '@/components/pages/SecondPage.vue'
+import TodoPage from '@/components/pages/TodoPage.vue'
 import ThirdPage from '@/components/pages/ThirdPage.vue'
 
 export interface PageConfig {
@@ -12,7 +12,7 @@ export interface PageConfig {
 // 頁面配置
 const pages: PageConfig[] = [
   { name: '主頁面', component: HomePage },
-  { name: '頁面 2', component: SecondPage },
+  { name: '任務', component: TodoPage },
   { name: '頁面 3', component: ThirdPage }
 ]
 
