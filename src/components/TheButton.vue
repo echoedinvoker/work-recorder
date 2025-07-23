@@ -1,19 +1,17 @@
 <template>
-  <button @click="toggleTimer" :class="[
-    'px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 transform hover:scale-105',
-    isRecording
-      ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
-      : 'bg-green-500 hover:bg-green-600 text-white shadow-lg'
-  ]">
-    {{ isRecording ? '結束工作' : '開始工作' }}
-  </button>
+  <BaseButton 
+    :color="isRecording ? 'red' : 'green'" 
+    :text="isRecording ? '結束工作' : '開始工作'" 
+    @click="toggleTimer" 
+  />
 </template>
 
 <script setup lang="ts">
 import { useRecorder } from '@/composables/useRecorder';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 const {
   toggleTimer,
   isRecording,
-} = useRecorder()
+} = useRecorder();
 </script>

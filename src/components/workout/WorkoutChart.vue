@@ -1,7 +1,6 @@
 <template>
   <div
     class="bg-white rounded-lg shadow-md p-6 cursor-pointer select-none"
-    v-if="!dailyScoreStore.isRecording &&  !dailyScoreStore.isDisplayingResult"
     @click="toggleChartPeriod"
   >
     <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -33,10 +32,11 @@
 
 <script setup lang="ts">
 import { useChart } from '@/composables/useChart';
-import { useDailyScoreStore } from '@/stores/dailyScore';
+import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
 import ChartContainer from '@/components/ui/ChartContainer.vue';
 
-const dailyScoreStore = useDailyScoreStore()
+const dailyWorkoutStore = useDailyWorkoutStore();
+
 const {
   chartHeight,
   currentPeriod,
@@ -46,6 +46,6 @@ const {
   yAxisMax,
   avgScore,
   maxScore
-} = useChart(dailyScoreStore);
+} = useChart(dailyWorkoutStore);
 </script>
 

@@ -1,6 +1,8 @@
 <template>
   <div class="flex justify-center mb-4 flex-shrink-0">
-    <BaseButton color="blue" :text="formStatus ? text[0] : text[1]" @click="toggleForm" />
+    <BaseButton
+      :color="formStatus ? 'red' : 'green'"
+      :text="formStatus ? text[0] : text[1]" @click="toggleForm" />
   </div>
   <!-- 內容區域 - 可滾動 -->
   <div class="flex-1 flex flex-col min-h-0">

@@ -1,18 +1,25 @@
 <template>
   <div class="grid grid-cols-2 gap-2 self-center">
-    <button @click="completeTodo(todo.id)" :disabled="!canComplete"
-      class="px-4 py-4 rounded-lg font-medium transition-colors" :class="completeButtonClass">
-      {{ completeButtonText }}
-    </button>
-    <button @click="deleteTodo(todo.id)"
-      class="px-4 py-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-      刪除
-    </button>
+    <BaseButton 
+      @click="completeTodo(todo.id)" 
+      :disabled="!canComplete"
+      :color="completeButtonColor"
+      :text="completeButtonText"
+      class="py-4"
+    />
+    <BaseButton 
+      @click="deleteTodo(todo.id)"
+      color="red"
+      text="刪除"
+      class="py-4"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useTodo } from '@/composables/useTodo';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 const {
   currentTodo: todo,
@@ -21,6 +28,19 @@ const {
   completeButtonText,
   completeButtonClass,
   canComplete,
-} = useTodo()
-  
+} = useTodo();
+
+// 根據 completeButtonClass 計算對應的顏色
+const completeButtonColor = computed(() => {
+  if (completeButtonClass.value.includes('bg-green')) {
+    return 'green';
+  } else if (completeButtonClass.value.includes('bg-yellow')) {
+    return 'yellow';
+  } else if (completeButtonClass.value.includes('bg-gray')) {
+    return 'gray';
+  } else {
+    return 'blue'; // 預設顏色
+  }
+});
 </script>
+

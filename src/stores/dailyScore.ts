@@ -1,25 +1,21 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 
 const generateMockData = () => {
   const mockData: Record<string, number> = {}
   const today = new Date()
-  
+
   // 生成過去 7 天的假資料
   for (let i = 6; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
-    const dateKey = date.toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: '2-digit', 
-      day: '2-digit',
-      timeZone: 'Asia/Taipei'
-    }).replace(/\//g, '-')
-    
+    const dateKey = formatDateToKey(date)
+
     // 隨機分數 0-30
     mockData[dateKey] = Math.floor(Math.random() * 31) // 假資料分數範圍 0-30
   }
-  
+
   return mockData
 }
 
@@ -38,29 +34,19 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
   const dailyScores = ref<Record<string, number>>(
     useMockData ? generateMockData() : {}
   )
-  
-  // 獲取今日日期字串 (YYYY-MM-DD)
-  const getTodayKey = () => {
-    return new Date().toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: '2-digit', 
-      day: '2-digit',
-      timeZone: 'Asia/Taipei'
-    }).replace(/\//g, '-')
-  }
-  
+
   // 今日總分數
   const todayScore = computed(() => {
     const today = getTodayKey()
     return dailyScores.value[today] || 0
   })
-  
+
   // 添加分數到今日
   const addScore = (score: number) => {
     const today = getTodayKey()
     dailyScores.value[today] = (dailyScores.value[today] || 0) + score
   }
-  
+
   // 重置今日分數 (用於測試或重置)
   const resetTodayScore = () => {
     const today = getTodayKey()
@@ -68,45 +54,42 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
   }
 
   const getScoreByDate = (date: Date) => {
-    const dateKey = date.toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: '2-digit', 
-      day: '2-digit',
-      timeZone: 'Asia/Taipei'
-    }).replace(/\//g, '-')
+    const dateKey = formatDateToKey(date)
     return dailyScores.value[dateKey] || 0
   }
-  
-  return { 
+
+  return {
     isRecording,
     isDisplayingResult,
     startTime,
     endTime,
-    dailyScores, 
-    todayScore, 
-    addScore, 
+    dailyScores,
+    todayScore,
+    addScore,
     resetTodayScore,
     useMockData,
     getScoreByDate
   }
-}, {
-  persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
-    serializer: {
-      serialize: (state) => {
-        return JSON.stringify({
-          ...state,
-          startTime: state.startTime?.toISOString() || null,
-          endTime: state.endTime?.toISOString() || null
-        })
-      },
-      deserialize: (value) => {
-        const parsed = JSON.parse(value)
-        return {
-          ...parsed,
-          startTime: parsed.startTime ? new Date(parsed.startTime) : null,
-          endTime: parsed.endTime ? new Date(parsed.endTime) : null
+},
+  {
+    persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
+      serializer: {
+        serialize: (state) => {
+          return JSON.stringify({
+            ...state,
+            startTime: state.startTime?.toISOString() || null,
+            endTime: state.endTime?.toISOString() || null
+          })
+        },
+        deserialize: (value) => {
+          const parsed = JSON.parse(value)
+          return {
+            ...parsed,
+            startTime: parsed.startTime ? new Date(parsed.startTime) : null,
+            endTime: parsed.endTime ? new Date(parsed.endTime) : null
+          }
         }
       }
     }
   }
-})
+)

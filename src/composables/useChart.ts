@@ -1,7 +1,11 @@
-import { useDailyScoreStore } from "@/stores/dailyScore"
 import { ref, computed } from "vue"
 
 type ChartPeriod = 'day' | 'week' | 'month'
+
+// 定義資料提供者介面
+export interface ScoreProvider {
+  getScoreByDate: (date: Date) => number
+}
 
 const chartHeight = 192
 const periodTitles: Record<ChartPeriod, string> = {
@@ -11,15 +15,15 @@ const periodTitles: Record<ChartPeriod, string> = {
 }
 const dayNames = ['日', '一', '二', '三', '四', '五', '六'] // to format day labels
 
-const currentPeriod = ref<ChartPeriod>('day')
-
-export function useChart() {
-  const dailyScoreStore = useDailyScoreStore()
+// 將 currentPeriod 移到函數內部，避免全局共享狀態
+export function useChart(scoreProvider: ScoreProvider) {
+  const currentPeriod = ref<ChartPeriod>('day')
 
   // Computed properties
   const chartTitle = computed(() => {
     return periodTitles[currentPeriod.value]
   })
+  
   const chartData = computed(() => {
     const data = []
     const today = new Date()
@@ -28,7 +32,8 @@ export function useChart() {
       for (let i = 6; i >= 0; i--) {
         const date = new Date(today)
         date.setDate(today.getDate() - i)
-        const score = dailyScoreStore.getScoreByDate(date)
+        // 使用傳入的 scoreProvider 而非硬編碼的 dailyScoreStore
+        const score = scoreProvider.getScoreByDate(date)
         const label = i === 0 ? '今天' : i === 1 ? '昨天' : `週${dayNames[date.getDay()]}`
         const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`
 
@@ -44,7 +49,8 @@ export function useChart() {
       for (let i = 0; i <= 6; i++) {
         let score = 0
         do {
-          score += dailyScoreStore.getScoreByDate(date)
+          // 使用傳入的 scoreProvider
+          score += scoreProvider.getScoreByDate(date)
           date.setDate(date.getDate() - 1)
         } while (date.getDay() !== 6)
 
@@ -66,7 +72,8 @@ export function useChart() {
         let tmpMonth = date.getMonth()
         do {
           tmpMonth = date.getMonth()
-          score += dailyScoreStore.getScoreByDate(date)
+          // 使用傳入的 scoreProvider
+          score += scoreProvider.getScoreByDate(date)
           date.setDate(date.getDate() - 1)
         } while (date.getMonth() === tmpMonth)
 
@@ -84,6 +91,7 @@ export function useChart() {
 
     return data
   })
+  
   const yAxisMax = computed(() => {
     const maxDataScore = Math.max(...chartData.value.map(item => item.score), 0)
 
@@ -98,6 +106,7 @@ export function useChart() {
     const calculatedMax = Math.max(maxDataScore * 1.2, minMax)
     return Math.ceil(calculatedMax / 5) * 5
   })
+  
   const tototalScore = computed(() => {
     return chartData.value.reduce((sum, item) => sum + item.score, 0)
   })
@@ -106,6 +115,7 @@ export function useChart() {
     const totalScore = chartData.value.reduce((sum, item) => sum + item.score, 0)
     return totalScore ? (totalScore / 7).toFixed(1) : '0.0'
   })
+  
   const maxScore = computed(() => {
     return Math.max(...chartData.value.map(item => item.score), 0)
   })
@@ -140,3 +150,4 @@ export function useChart() {
     toggleChartPeriod
   }
 }
+

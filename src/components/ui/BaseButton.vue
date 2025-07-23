@@ -2,8 +2,12 @@
   <button
     :type="type as 'submit' | 'button' | 'reset'"
     :class="[
-      'text-nowrap px-4 py-2 text-white rounded-lg transition-colors text-sm',
-      `bg-${color}-500 hover:bg-${color}-600`
+      'px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 text-white shadow-lg',
+      {
+        'bg-red-500 hover:bg-red-600': color === 'red',
+        'bg-green-500 hover:bg-green-600': color === 'green',
+        'bg-blue-500 hover:bg-blue-600': color === 'blue'
+      }
     ]"
     @click="$emit('click', $event)"
   >
