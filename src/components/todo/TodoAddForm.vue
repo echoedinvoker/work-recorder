@@ -1,36 +1,33 @@
 <template>
-  <h2 class="text-xl font-bold text-gray-800 mb-3">新增週期性任務</h2>
-  <form @submit.prevent="handleAddTodo" class="space-y-3">
+  <TheForm title="新增週期性任務" :handleSubmit="handleAddTodo">
     <div>
-      <input v-model="newTodo.title" type="text" placeholder="任務標題"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-        required />
+      <FormInput type="text" v-model="newTodo.title" placeholder="任務標題" :required="true" />
     </div>
     <div>
-      <textarea v-model="newTodo.description" placeholder="任務描述（可選）"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-        rows="2"></textarea>
+      <FormInput type="textarea" v-model="newTodo.description" placeholder="任務描述（可選）" :rows="2" />
     </div>
     <div class="flex gap-3">
-      <select v-model="newTodo.period"
-        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-        <option value="daily">每日</option>
-        <option value="weekly">每週</option>
-        <option value="monthly">每月</option>
-      </select>
-      <button type="submit"
-        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm">
-        新增任務
-      </button>
+      <FormInput type="select" v-model="newTodo.period" :options="periodOptions" />
+      <BaseButton type="submit" color="green" text="新增任務" />
     </div>
-  </form>
+  </TheForm>
 </template>
 
 <script setup lang="ts">
 import { useTodo } from '@/composables/useTodo';
+import TheForm from '../ui/TheForm.vue';
+import FormInput from '../ui/FormInput.vue'; // 引入新的 FormInput 組件
+import BaseButton from '../ui/BaseButton.vue';
 
 const {
   handleAddTodo,
   newTodo
 } = useTodo();
+
+// 定義下拉選單選項
+const periodOptions = [
+  { value: 'daily', label: '每日' },
+  { value: 'weekly', label: '每週' },
+  { value: 'monthly', label: '每月' }
+];
 </script>

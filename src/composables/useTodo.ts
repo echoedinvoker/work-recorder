@@ -1,4 +1,5 @@
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { useToggleButton } from './useToggleButton'
 
 interface Todo {
   id: string
@@ -20,7 +21,6 @@ interface NewTodo {
 // 響應式數據
 const todos = ref<Todo[]>([])
 const currentTodoIndex = ref(0) // 當前顯示的 todo 索引
-const showAddForm = ref(false) // 控制新增表單顯示
 const newTodo = reactive<NewTodo>({
   title: '',
   description: '',
@@ -28,6 +28,7 @@ const newTodo = reactive<NewTodo>({
 })
 
 export function useTodo() {
+  const { toggleForm } = useToggleButton('todo');
   const currentTodo = computed(() => todos.value[currentTodoIndex.value])
   const isLastTodo = computed(() => currentTodoIndex.value === todos.value.length - 1)
   const isFirstTodo = computed(() => currentTodoIndex.value === 0)
@@ -54,7 +55,7 @@ export function useTodo() {
       isActive: false
     }
     todos.value.push(newTodoItem)
-    showAddForm.value = false
+    toggleForm()
     resetNewTodo()
     currentTodoIndex.value = todos.value.length - 1
     saveTodos()
@@ -239,7 +240,6 @@ export function useTodo() {
     todos,
     currentTodo,
     currentTodoIndex,
-    showAddForm,
     newTodo,
     isLastTodo,
     isFirstTodo,

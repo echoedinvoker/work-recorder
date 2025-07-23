@@ -1,14 +1,18 @@
 <template>
-  <div class="space-y-6">
-    <div class="text-gray-500">
-      <h2 class="text-xl font-semibold mb-4">頁面 3</h2>
-      <p>等待您的創意</p>
-      <!-- 在這裡添加第三頁的內容 -->
-    </div>
-  </div>
+  <ToggleButton
+    formkey="todo"
+    :text="['查看動作', '新增動作']"
+  >
+    <template #form>
+      <WorkoutAddForm />
+    </template>
+
+
+  </ToggleButton>
 </template>
 
 <script setup lang="ts">
-// 第三頁的邏輯
+import ToggleButton from '@/components/ui/ToggleButton.vue';
+import WorkoutAddForm from '@/components/workout/WorkoutAddForm.vue';
 </script>
 

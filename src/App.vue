@@ -17,8 +17,8 @@
       @touchend="handleTouchEnd"
     >
       <div 
-        class="flex transition-transform duration-300 ease-out"
-        :style="{ transform: `translateX(-${currentPageIndex * 100}%)` }"
+        class="flex transition-transform duration-300 ease-out gap-12"
+        :style="{ transform: `translateX(-${currentPageIndex * 115}%)` }"
       >
         <!-- 動態渲染頁面 -->
         <div 
