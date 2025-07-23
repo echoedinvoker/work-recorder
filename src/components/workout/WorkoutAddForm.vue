@@ -13,10 +13,6 @@
       <BaseButton type="button" color="gray" text="清除"
         @click="() => { inputWorkout = ''; selectWorkout = ''; inputNumber = undefined; inputWeight = undefined; }" />
       <BaseButton type="submit" color="green" text="新增紀錄" />
-      <BaseButton type="button" color="red" text="重置"
-      @click="workoutStore.resetStore" />
-      />
-
     </div>
   </TheForm>
 </template>
