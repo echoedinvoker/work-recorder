@@ -1,7 +1,7 @@
 <template>
   <TheForm title="新增動作" :handleSubmit="handleSubmit">
-    <FormInput type="select" v-model="selectWorkout" :options="workoutOptions"
-      v-if="workoutOptions.length > 0 && !inputWorkout" />
+    <FormInput type="select" v-model="selectWorkout" :options="workoutStore.workoutOptions"
+      v-if="workoutStore.workoutOptions.length > 1 && !inputWorkout" />
     <template v-if="!selectWorkout">
       <FormInput v-model="inputWorkout" type="text" placeholder="動作名稱" />
     </template>
@@ -13,6 +13,10 @@
       <BaseButton type="button" color="gray" text="清除"
         @click="() => { inputWorkout = ''; selectWorkout = ''; inputNumber = undefined; inputWeight = undefined; }" />
       <BaseButton type="submit" color="green" text="新增紀錄" />
+      <BaseButton type="button" color="red" text="重置"
+      @click="workoutStore.resetStore" />
+      />
+
     </div>
   </TheForm>
 </template>
@@ -53,14 +57,4 @@ const handleSubmit = () => {
     inputWeight.value = undefined;
   }
 };
-
-// 定義下拉選單選項
-const workoutOptions = [
-  { value: '', label: '選擇動作' },
-  { value: 'deadlift', label: '硬舉' },
-  { value: 'squat', label: '深蹲' },
-  { value: 'bench_press', label: '臥推' },
-  { value: 'overhead_press', label: '肩推' },
-  { value: 'pull_up', label: '引體向上' }
-];
 </script>

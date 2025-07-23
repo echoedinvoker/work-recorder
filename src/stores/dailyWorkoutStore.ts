@@ -115,7 +115,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
         // 如果該活動有權重，則計算加權分數
         if (activityWeights.value[activity] !== undefined) {
           // 將活動值乘以權重係數，再乘以100使分數更直觀
-          dayScore += value * activityWeights.value[activity] * 100;
+          dayScore += value * activityWeights.value[activity];
         }
       });
 
@@ -126,6 +126,30 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     return scores;
   });
 
+  const workoutOptions = computed(() => {
+    // 創建一個 Set 來收集所有不重複的運動類型
+    const workoutTypes = new Set<string>();
+
+    // 遍歷所有日期的運動記錄，收集所有運動類型
+    Object.values(dailyWorkouts.value).forEach(dayRecord => {
+      Object.keys(dayRecord).forEach(workout => {
+        workoutTypes.add(workout);
+      });
+    });
+
+    // 將 Set 轉換為所需的陣列格式，並添加預設選項
+    const options = [
+      { value: '', label: '選擇動作' },
+      // 將每個運動類型轉換為選項物件，並將首字母大寫
+      ...Array.from(workoutTypes).map(workout => ({
+        value: workout,
+        label: workout.charAt(0).toUpperCase() + workout.slice(1)
+      }))
+    ];
+
+    return options;
+  });
+
   const getScoreByDate = (date: Date) => {
     const dateKey = formatDateToKey(date)
     return dailyScore.value[dateKey] || 0
@@ -133,7 +157,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
   const addWorkout = (workout: string, count: number, weight: number, date: Date = new Date()) => {
     const dateKey = formatDateToKey(date);
-    
+
     // 如果該日期還沒有記錄，先創建一個空物件
     if (!dailyWorkouts.value[dateKey]) {
       dailyWorkouts.value[dateKey] = {};
@@ -142,16 +166,29 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     if (!dailyWorkouts.value[dateKey][workout]) {
       dailyWorkouts.value[dateKey][workout] = 0; // 初始化運動記錄為 0
     }
-    
+
     dailyWorkouts.value[dateKey][workout] += count * weight;
   }
+
+  const resetStore = () => {
+    // 重置 dailyWorkouts 為空物件
+    dailyWorkouts.value = {};
+
+    // 清除 localStorage 中的相關資料
+    if (!useMockData) {
+      const storageKey = 'dailyWorkout'; // Pinia 持久化存儲的默認鍵名
+      localStorage.removeItem(storageKey);
+    }
+  };
 
   return {
     dailyWorkouts,
     activityWeights,
     dailyScore,
+    workoutOptions,
     getScoreByDate,
-    addWorkout
+    addWorkout,
+    resetStore
   };
 },
   {
