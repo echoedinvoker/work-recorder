@@ -110,14 +110,25 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     Object.entries(dailyWorkouts.value).forEach(([dateKey, activities]) => {
       let dayScore = 0;
 
-      // 遍歷該天的每個活動，並根據權重計算分數
-      Object.entries(activities).forEach(([activity, value]) => {
-        // 如果該活動有權重，則計算加權分數
-        if (activityWeights.value[activity] !== undefined) {
-          // 將活動值乘以權重係數，再乘以100使分數更直觀
-          dayScore += value * activityWeights.value[activity];
-        }
-      });
+      // 計算當天活動的總權重
+      const dailyActivities = Object.keys(activities);
+      const totalDailyWeight = dailyActivities.reduce((sum, activity) => {
+        return sum + (activityWeights.value[activity] || 0);
+      }, 0);
+
+      // 只有當總權重大於0時才進行計算
+      if (totalDailyWeight > 0) {
+        // 遍歷該天的每個活動，並根據當天的權重計算分數
+        Object.entries(activities).forEach(([activity, value]) => {
+          // 如果該活動有權重，則計算加權分數
+          if (activityWeights.value[activity] !== undefined) {
+            // 計算當天的權重比例
+            const dailyActivityWeight = activityWeights.value[activity] / totalDailyWeight;
+            // 將活動值乘以當天的權重係數
+            dayScore += value * dailyActivityWeight;
+          }
+        });
+      }
 
       // 四捨五入到整數
       scores[dateKey] = Math.round(dayScore);
