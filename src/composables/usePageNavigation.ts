@@ -1,8 +1,9 @@
 import type { Component } from 'vue'
 import { ref } from 'vue'
-import HomePage from '@/components/pages/HomePage.vue'
+import StudyPage from '@/components/pages/StudyPage.vue'
 import TodoPage from '@/components/pages/TodoPage.vue'
-import ThirdPage from '@/components/pages/ThirdPage.vue'
+import WorkoutPage from '@/components/pages/WorkoutPage.vue'
+import SwimmingPage from '@/components/pages/SwimmingPage.vue'
 
 export interface PageConfig {
   name: string
@@ -11,9 +12,10 @@ export interface PageConfig {
 
 // 頁面配置
 const pages: PageConfig[] = [
-  { name: '主頁面', component: HomePage },
-  { name: '任務', component: TodoPage },
-  { name: '頁面 3', component: ThirdPage }
+  { name: '學習紀錄', component: StudyPage },
+  { name: '任務紀錄', component: TodoPage },
+  { name: '重訓紀錄', component: WorkoutPage },
+  { name: '游泳紀錄', component: SwimmingPage },
 ]
 
 const currentPageIndex = ref(0)

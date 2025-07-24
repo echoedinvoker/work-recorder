@@ -1,7 +1,7 @@
 <template>
   <BaseButton 
     :color="isRecording ? 'red' : 'green'" 
-    :text="isRecording ? '結束工作' : '開始工作'" 
+    :text="isRecording ? '結束學習' : '開始學習'" 
     @click="toggleTimer" 
   />
 </template>

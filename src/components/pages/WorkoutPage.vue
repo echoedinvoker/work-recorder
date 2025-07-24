@@ -1,7 +1,7 @@
 <template>
   <ToggleButton
     formkey="workout"
-    :text="['查看動作', '新增動作']"
+    :text="['查看重訓紀錄', '新增重訓紀錄']"
   >
     <template #form>
       <WorkoutAddForm />

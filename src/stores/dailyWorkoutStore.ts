@@ -1,7 +1,9 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
+import { formatDateToKey } from '../utils/dateUtils'
 import { computed } from "vue";
+
+const UNIT = '重量(公斤)'
 
 const generateMockData = () => {
   const mockData: Record<string, Record<string, number>> = {};
@@ -178,7 +180,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       dailyWorkouts.value[dateKey][workout] = 0; // 初始化運動記錄為 0
     }
 
-    dailyWorkouts.value[dateKey][workout] += count * weight;
+    dailyWorkouts.value[dateKey][workout] += Number(count) * Number(weight);
   }
 
   const resetStore = () => {
@@ -199,7 +201,8 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     workoutOptions,
     getScoreByDate,
     addWorkout,
-    resetStore
+    resetStore,
+    UNIT
   };
 },
   {

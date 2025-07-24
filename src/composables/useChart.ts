@@ -4,15 +4,11 @@ type ChartPeriod = 'day' | 'week' | 'month'
 
 // 定義資料提供者介面
 export interface ScoreProvider {
-  getScoreByDate: (date: Date) => number
+  getScoreByDate: (date: Date) => number,
+  UNIT: string
 }
 
 const chartHeight = 192
-const periodTitles: Record<ChartPeriod, string> = {
-  day: '近七日分數趨勢',
-  week: '近七週分數趨勢',
-  month: '近七月分數趨勢'
-}
 const dayNames = ['日', '一', '二', '三', '四', '五', '六'] // to format day labels
 
 // 將 currentPeriod 移到函數內部，避免全局共享狀態
@@ -21,6 +17,11 @@ export function useChart(scoreProvider: ScoreProvider) {
 
   // Computed properties
   const chartTitle = computed(() => {
+    const periodTitles = {
+      day: `進七日${scoreProvider.UNIT}趨勢`,
+      week: `近七週${scoreProvider.UNIT}趨勢`,
+      month: `近七月${scoreProvider.UNIT}趨勢`
+    }
     return periodTitles[currentPeriod.value]
   })
   
@@ -132,6 +133,9 @@ export function useChart(scoreProvider: ScoreProvider) {
   }
 
   return {
+    // unit
+    UNIT: scoreProvider.UNIT,
+
     // Constants
     chartHeight,
 

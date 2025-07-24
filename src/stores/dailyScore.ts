@@ -2,6 +2,8 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 
+const UNIT = '分數'
+
 const generateMockData = () => {
   const mockData: Record<string, number> = {}
   const today = new Date()
@@ -44,7 +46,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
   // 添加分數到今日
   const addScore = (score: number) => {
     const today = getTodayKey()
-    dailyScores.value[today] = (dailyScores.value[today] || 0) + score
+    dailyScores.value[today] = (dailyScores.value[today] || 0) + Number(score)
   }
 
   // 重置今日分數 (用於測試或重置)
@@ -68,7 +70,8 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     addScore,
     resetTodayScore,
     useMockData,
-    getScoreByDate
+    getScoreByDate,
+    UNIT
   }
 },
   {
