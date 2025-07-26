@@ -1,5 +1,5 @@
 <template>
-  <div class="h-96 bg-white rounded-lg shadow-md p-4 max-h-[70vh] overflow-y-auto todo-list-container">
+  <div class="h-96 bg-white rounded-lg shadow-md p-4 max-h-[70vh] overflow-y-auto todo-list-container" @touchmove.stop>
     <div v-if="sortedTodos.length === 0" class="text-gray-500 text-center py-4">
       沒有任何任務
     </div>
