@@ -84,9 +84,11 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       }
     });
 
-    // 3. 正規化處理，使權重總和為 1
+    // 3. 計算所有活動的總平均值
     const totalAverage = Object.values(averages).reduce((sum, val) => sum + val, 0);
+    const averagePerActivity = totalAverage / activityTypes.size;
 
+    // 4. 計算每個活動的調整係數 (adjustment factor)
     const weights: Record<string, number> = {};
 
     // 如果總和為 0，平均分配權重
@@ -96,9 +98,14 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
         weights[activity] = equalWeight;
       });
     } else {
-      // 正規化每個活動的權重
+      // 計算調整係數：平均時間 / 原始時間
       activityTypes.forEach(activity => {
-        weights[activity] = averages[activity] / totalAverage;
+        if (averages[activity] === 0) {
+          weights[activity] = 0; // 避免除以零
+        } else {
+          // 調整係數 = 平均每個活動的時間 / 該活動的平均時間
+          weights[activity] = averagePerActivity / averages[activity];
+        }
       });
     }
 
@@ -124,10 +131,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
         Object.entries(activities).forEach(([activity, value]) => {
           // 如果該活動有權重，則計算加權分數
           if (activityWeights.value[activity] !== undefined) {
-            // 計算當天的權重比例
-            const dailyActivityWeight = activityWeights.value[activity] / totalDailyWeight;
-            // 將活動值乘以當天的權重係數
-            dayScore += value * dailyActivityWeight;
+            dayScore += value * activityWeights.value[activity];
           }
         });
       }
