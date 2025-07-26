@@ -1,7 +1,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useToggleButton } from './useToggleButton'
 
-interface Todo {
+export interface Todo {
   id: string
   title: string
   description: string
@@ -267,6 +267,6 @@ export function useTodo() {
     progressColorClass,
     timeTextColor,
     formatTimeRemaining,
-    formatDate
+    formatDate,
   }
 }
