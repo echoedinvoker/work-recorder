@@ -38,7 +38,7 @@ const {
 } = useTodo();
 
 // 控制視圖顯示 TodoItem 或 TodoList
-const showTodoList = ref(false);
+const showTodoList = ref(true);
 
 // 切換視圖
 const toggleView = () => {
