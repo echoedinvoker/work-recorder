@@ -22,6 +22,7 @@
       </div>
     </div>
   </div>
+  {{ currentTodoIndex }}
 </template>
 
 <script setup lang="ts">
@@ -99,7 +100,9 @@ const formatTimeRemaining = (todo: Todo) => {
 
 // 選擇 todo 並切換到該 todo
 const selectTodo = (id: string) => {
+  console.log(`選擇任務 ID: ${id}`);
   const index = todos.value.findIndex(t => t.id === id);
+  console.log(`找到任務索引: ${index}`);
   if (index !== -1) {
     currentTodoIndex.value = index;
   }

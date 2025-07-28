@@ -29,10 +29,12 @@ import { useTodo } from '@/composables/useTodo';
 import TodoItem from '@/components/todo/TodoItem.vue';
 import TodoList from '@/components/todo/TodoList.vue';
 import TodoSingleFooter from '@/components/todo/TodoSingleFooter.vue';
+import { watch } from 'vue';
 
 const {
   todos,
   currentTodo,
+  currentTodoIndex,
   completeTodo,
   deleteTodo,
 } = useTodo();
@@ -44,5 +46,13 @@ const showTodoList = ref(true);
 const toggleView = () => {
   showTodoList.value = !showTodoList.value;
 };
+
+watch(currentTodoIndex, (newIndex) => {
+  if (newIndex === -1) {
+    showTodoList.value = true;
+  } else {
+    showTodoList.value = false;
+  }
+});
 </script>
 
