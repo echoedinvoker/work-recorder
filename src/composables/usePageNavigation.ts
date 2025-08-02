@@ -4,6 +4,7 @@ import StudyPage from '@/components/pages/StudyPage.vue'
 import TodoPage from '@/components/pages/TodoPage.vue'
 import WorkoutPage from '@/components/pages/WorkoutPage.vue'
 import SwimmingPage from '@/components/pages/SwimmingPage.vue'
+import MeditationPage from '@/components/pages/MeditationPage.vue';
 
 export interface PageConfig {
   name: string
@@ -16,6 +17,10 @@ const pages: PageConfig[] = [
   { name: '任務紀錄', component: TodoPage },
   { name: '重訓紀錄', component: WorkoutPage },
   { name: '游泳紀錄', component: SwimmingPage },
+  {
+    name: '冥想',
+    component: MeditationPage
+  }
 ]
 
 const currentPageIndex = ref(0)

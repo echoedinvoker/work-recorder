@@ -34,7 +34,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'text',
-    validator: (value: string) => ['text', 'textarea', 'select', 'number', 'email', 'password'].includes(value)
+    validator: (value: string) => ['text', 'textarea', 'select', 'number', 'email', 'password', 'date'].includes(value)
   },
   // v-model 綁定值
   modelValue: {
