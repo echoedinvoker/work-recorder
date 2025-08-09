@@ -38,8 +38,6 @@ import { usePageNavigation } from '@/composables/usePageNavigation'
 import PageIndicator from '@/components/ui/PageIndicator.vue'
 import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
 
-const { dailyWorkouts } = useDailyWorkoutStore()
-
 // 使用頁面導航 composable
 const {
   currentPageIndex,
