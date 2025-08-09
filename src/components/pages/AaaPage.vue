@@ -1,7 +1,7 @@
 <template>
   <ToggleButton
     formkey="aaa"
-    :text="['查看練習紀錄', '新增練習紀錄']"
+    :text="['查看發聲練習紀錄', '新增發聲練習紀錄']"
   >
     <template #form>
       <AaaAddForm />
