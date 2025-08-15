@@ -79,7 +79,7 @@ export function useRecorder() {
   // 計算分數：第一個分數需要5分鐘，之後每30分鐘一分
   const score = computed(() => {
     const minutes = workDurationMinutes.value
-    if (minutes < 5) return 0 // 五分以內不計分
+    if (minutes < 15) return 0 // 15分以內不計分
 
     // 第一個分數：5分鐘
     if (minutes < 30) return 1

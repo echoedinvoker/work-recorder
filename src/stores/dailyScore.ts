@@ -55,6 +55,11 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     dailyScores.value[today] = 0
   }
 
+  // 清空所有歷史紀錄
+  const clearAllHistory = () => {
+    dailyScores.value = {}
+  }
+
   const getScoreByDate = (date: Date) => {
     const dateKey = formatDateToKey(date)
     return dailyScores.value[dateKey] || 0
@@ -69,6 +74,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     todayScore,
     addScore,
     resetTodayScore,
+    clearAllHistory,
     useMockData,
     getScoreByDate,
     UNIT

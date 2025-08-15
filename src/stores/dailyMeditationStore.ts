@@ -16,7 +16,7 @@ const UNIT = '時間(分鐘)';
 export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
   // 存儲冥想記錄
   const meditationRecords = ref<MeditationRecord[]>([]);
-  
+
   // 狀態管理
   const isRecording = ref(false);
   const isDisplayingResult = ref(false);
@@ -30,9 +30,9 @@ export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
       id,
       ...record
     });
-    
+
     // 按日期排序
-    meditationRecords.value.sort((a, b) => 
+    meditationRecords.value.sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   };
@@ -49,7 +49,7 @@ export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
   const addMeditationTime = (minutes: number) => {
     const today = getTodayKey();
     const existingRecord = meditationRecords.value.find(r => r.date === today);
-    
+
     if (existingRecord) {
       existingRecord.duration += minutes;
     } else {
@@ -68,6 +68,15 @@ export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
     return record ? record.duration : 0;
   };
 
+  const clearAllHistory = () => {
+    meditationRecords.value = [];
+    // 重置狀態
+    isRecording.value = false;
+    isDisplayingResult.value = false;
+    startTime.value = null;
+    endTime.value = null;
+  };
+
   return {
     meditationRecords,
     isRecording,
@@ -78,6 +87,7 @@ export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
     deleteMeditationRecord,
     addMeditationTime,
     getScoreByDate,
+    clearAllHistory,
     UNIT
   };
 }, {
