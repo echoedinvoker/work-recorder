@@ -35,10 +35,16 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     return dailySwimmingDistance.value[dateKey] || 0;
   }
 
+  // 新增：清空所有歷史紀錄
+  const clearAllHistory = () => {
+    dailySwimmingDistance.value = {}
+  }
+
   return {
     dailySwimmingDistance,
     addDistance,
     getScoreByDate,
+    clearAllHistory, // 導出清空功能
     UNIT
   };
 },
@@ -64,3 +70,4 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     }
   }
 )
+
