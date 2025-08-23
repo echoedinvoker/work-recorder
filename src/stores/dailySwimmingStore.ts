@@ -25,9 +25,17 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const dailySwimmingDistance = ref<Record<string, number>>(useMockData ? generateMockData() : {});
 
-  const addDistance = (distance: number) => {
+  const BASE_DISTANCE = 1500
+  const BASE_DURATION = 60
+
+  const addDistance = (distance: number, duration: number) => {
+    const baseSpeed = BASE_DISTANCE / BASE_DURATION
+    const actualSpeed = distance / duration
+    const speedRatio = actualSpeed / baseSpeed
+    const adjustedDistance = distance * speedRatio
+
     const today = getTodayKey()
-    dailySwimmingDistance.value[today] = (dailySwimmingDistance.value[today] || 0) + Number(distance)
+    dailySwimmingDistance.value[today] = (dailySwimmingDistance.value[today] || 0) + Number(adjustedDistance)
   }
 
   const getScoreByDate = (date: Date) => {
@@ -35,7 +43,6 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     return dailySwimmingDistance.value[dateKey] || 0;
   }
 
-  // 新增：清空所有歷史紀錄
   const clearAllHistory = () => {
     dailySwimmingDistance.value = {}
   }
@@ -44,7 +51,7 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     dailySwimmingDistance,
     addDistance,
     getScoreByDate,
-    clearAllHistory, // 導出清空功能
+    clearAllHistory,
     UNIT
   };
 },
