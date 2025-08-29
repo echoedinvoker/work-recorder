@@ -4,10 +4,10 @@ import StudyPage from '@/components/pages/StudyPage.vue'
 import TodoPage from '@/components/pages/TodoPage.vue'
 import WorkoutPage from '@/components/pages/WorkoutPage.vue'
 import SwimmingPage from '@/components/pages/SwimmingPage.vue'
-import MeditationPage from '@/components/pages/MeditationPage.vue';
-import AaaPage from '@/components/pages/AaaPage.vue'
-import LipTremoloPage from '@/components/pages/LipTremoloPage.vue'
 import NoSugarPage from '@/components/pages/NoSugarPage.vue'
+import SingPracticePage from '@/components/pages/SingPracticePage.vue'
+import EarlySleepPage from '@/components/pages/EarlySleepPage.vue'
+import NoDIYPage from '@/components/pages/NoDIYPage.vue'
 
 export interface PageConfig {
   name: string
@@ -17,16 +17,12 @@ export interface PageConfig {
 // 頁面配置
 const pages: PageConfig[] = [
   { name: '學習紀錄', component: StudyPage },
-  { name: '任務紀錄', component: TodoPage },
   { name: '重訓紀錄', component: WorkoutPage },
   { name: '游泳紀錄', component: SwimmingPage },
-  {
-    name: '冥想',
-    component: MeditationPage
-  },
-  { name: '發聲訓練', component: AaaPage },
-  { name: '顫唇練習', component: LipTremoloPage },
-  { name: '戒糖紀錄', component: NoSugarPage }
+  { name: '戒糖紀錄', component: NoSugarPage },
+  { name: '歌唱練習紀錄', component: SingPracticePage },
+  { name: '早睡紀錄', component: EarlySleepPage },
+  { name: 'NO DIY', component: NoDIYPage }
 ]
 
 const currentPageIndex = ref(0)
