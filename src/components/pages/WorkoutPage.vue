@@ -7,6 +7,8 @@
       <WorkoutAddForm />
     </template>
 
+    <WorkoutProgressBar :percentage="scorePercentage" />
+
     <WorkoutChart />
 
   </ToggleButton>
@@ -16,5 +18,10 @@
 import ToggleButton from '@/components/ui/ToggleButton.vue';
 import WorkoutAddForm from '@/components/workout/WorkoutAddForm.vue';
 import WorkoutChart from '@/components/workout/WorkoutChart.vue';
-</script>
+import WorkoutProgressBar from '@/components/workout/WorkoutProgressBar.vue';
+import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
+import { computed } from 'vue';
 
+const dailyWorkoutStore = useDailyWorkoutStore();
+const scorePercentage = computed(() => dailyWorkoutStore.scorePercentage);
+</script>
