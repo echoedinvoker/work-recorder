@@ -151,9 +151,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     // 按日期排序的鍵值
     const sortedDates = Object.keys(scores.value).sort();
 
-    // 找出所有日期中的最高分數
-    const highestScore = Math.max(...Object.values(scores.value));
-
     // 初始累積分數為0
     let cumulativeScore = 0;
 
@@ -164,10 +161,9 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
         // 第一天從0分開始
         cumulativeScore = 0;
       } else {
-        // // 獲取前一天的原始分數
-        // const previousDateKey = sortedDates[index - 1];
-        // const previousScore = scores.value[previousDateKey];
-        const previousScore = highestScore;
+        // 獲取前一天的原始分數
+        const previousDateKey = sortedDates[index - 1];
+        const previousScore = scores.value[previousDateKey];
 
         // 根據與前一日分數的比較來增減分數
         if (currentScore > previousScore) {
