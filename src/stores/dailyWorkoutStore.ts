@@ -112,7 +112,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     return weights;
   });
 
-  const scores = computed(() => {
+  const dailyScore = computed(() => {
     const scores: Record<string, number> = {};
 
     // 遍歷每一天的記錄
@@ -140,64 +140,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       scores[dateKey] = Math.round(dayScore);
     });
 
-    return scores
-  })
-
-  const dailyScore = computed(() => {
-
-    // 將原始分數轉換為累積分數
-    const accumulatedScores: Record<string, number> = {};
-
-    // 按日期排序的鍵值
-    const sortedDates = Object.keys(scores.value).sort();
-
-    // 初始累積分數為0
-    let cumulativeScore = 0;
-
-    sortedDates.forEach((dateKey, index) => {
-      const currentScore = scores.value[dateKey];
-
-      if (index === 0) {
-        // 第一天從0分開始
-        cumulativeScore = 0;
-      } else {
-        // 獲取前一天的原始分數
-        const previousDateKey = sortedDates[index - 1];
-        const previousScore = scores.value[previousDateKey];
-
-        // 根據與前一日分數的比較來增減分數
-        if (currentScore > previousScore) {
-          // 大於前一日分數，+10
-          cumulativeScore += 10;
-        } else if (currentScore >= previousScore * 0.9) {
-          // >90% 前一日分數，-5
-          if (cumulativeScore < 5) {
-            cumulativeScore = 0
-          } else {
-            cumulativeScore -= 5;
-          }
-        } else if (currentScore >= previousScore * 0.8) {
-          // >80% 前一日分數，-10
-          if (cumulativeScore < 10) {
-            cumulativeScore = 0
-          } else {
-            cumulativeScore -= 10;
-          }
-        } else {
-          // <80% 前一日分數，-15
-          if (cumulativeScore < 15) {
-            cumulativeScore = 0
-          } else {
-            cumulativeScore -= 15;
-          }
-        }
-      }
-
-      // 記錄當天的累積分數
-      accumulatedScores[dateKey] = cumulativeScore;
-    });
-
-    return accumulatedScores;
+    return scores;
   });
 
   const workoutOptions = computed(() => {
@@ -255,38 +198,10 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     }
   };
 
-  const scorePercentage = computed(() => {
-    // 獲取所有日期並按順序排序
-    const sortedDates = Object.keys(scores.value).sort();
-
-    // 如果沒有足夠的數據（至少需要兩天的數據）
-    if (sortedDates.length < 2) {
-      return null;
-    }
-
-    // 獲取最後兩天的日期（今天和昨天）
-    const today = sortedDates[sortedDates.length - 1];
-    const yesterday = sortedDates[sortedDates.length - 2];
-
-    // 獲取今天和昨天的分數
-    const todayScore = scores.value[today];
-    const yesterdayScore = scores.value[yesterday];
-
-    // 避免除以零的情況
-    if (yesterdayScore === 0) {
-      return todayScore > 0 ? Infinity : 100; // 如果昨天是0，今天有分數則返回無限大，否則返回100%
-    }
-
-    // 計算百分比並四捨五入到整數
-    return Math.round((todayScore / yesterdayScore) * 100);
-  });
-
   return {
     dailyWorkouts,
     activityWeights,
-    scores,
     dailyScore,
-    scorePercentage,
     workoutOptions,
     getScoreByDate,
     addWorkout,
