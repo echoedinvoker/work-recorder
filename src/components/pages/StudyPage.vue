@@ -16,6 +16,8 @@
     <ScoreDisplay />
     <ScoreChart />
 
+    <pre>{{ scoreStore.dailyScores }}</pre>
+
     <!-- 確認對話框 -->
     <ConfirmDialog
       :is-open="showConfirmDialog"
