@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
+import { computed } from "vue";
 
 const UNIT = '里程數(公尺)'
 
@@ -25,6 +26,50 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const dailySwimmingDistance = ref<Record<string, number>>(useMockData ? generateMockData() : {});
 
+  const accDailySwimmingDistance = computed(() => {
+    const scores: { [key: string]: number } = {}
+    Object.entries(dailySwimmingDistance.value).reduce((acc, cur, ind, arr) => {
+      const slicedArray = arr.slice(0, ind);
+      const values = slicedArray.map(v => v[1])
+      const maxValue = slicedArray.length === 0 ? 0 : Math.max(...values)
+      if (slicedArray.length === 0) {
+        if (cur[1] > 0) {
+          const value = acc + 10
+          scores[cur[0]] = value
+          return value
+        } else {
+          scores[cur[0]] = 0
+          return 0
+        }
+      } else if (cur[1] > maxValue) {
+        const value = acc + 10
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.9) {
+        const value = acc + 5
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.8) {
+        const value = acc
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.7) {
+        const value = acc >= 5 ? acc - 5 : 0
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.6) {
+        const value = acc >= 10 ? acc - 10 : 0
+        scores[cur[0]] = value
+        return value
+      } else {
+        const value = acc >= 15 ? acc - 15 : 0
+        scores[cur[0]] = value
+        return value
+      }
+    }, 0)
+    return scores
+  })
+
   const BASE_DISTANCE = 1500
   const BASE_DURATION = 60
 
@@ -40,7 +85,7 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
 
   const getScoreByDate = (date: Date) => {
     const dateKey = formatDateToKey(date)
-    return dailySwimmingDistance.value[dateKey] || 0;
+    return accDailySwimmingDistance.value[dateKey] || 0;
   }
 
   const clearAllHistory = () => {
@@ -50,6 +95,7 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   return {
     dailySwimmingDistance,
     addDistance,
+    accDailySwimmingDistance,
     getScoreByDate,
     clearAllHistory,
     UNIT

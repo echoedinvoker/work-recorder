@@ -37,6 +37,50 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     useMockData ? generateMockData() : {}
   )
 
+  const accDailyScore = computed(() => {
+    const scores: { [key: string]: number } = {}
+    Object.entries(dailyScores.value).reduce((acc, cur, ind, arr) => {
+      const slicedArray = arr.slice(0, ind);
+      const values = slicedArray.map(v => v[1])
+      const maxValue = slicedArray.length === 0 ? 0 : Math.max(...values)
+      if (slicedArray.length === 0) {
+        if (cur[1] > 0) {
+          const value = acc + 10
+          scores[cur[0]] = value
+          return value
+        } else {
+          scores[cur[0]] = 0
+          return 0
+        }
+      } else if (cur[1] > maxValue) {
+        const value = acc + 10
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.9) {
+        const value = acc + 5
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.8) {
+        const value = acc
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.7) {
+        const value = acc >= 5 ? acc - 5 : 0
+        scores[cur[0]] = value
+        return value
+      } else if (cur[1] > maxValue * 0.6) {
+        const value = acc >= 10 ? acc - 10 : 0
+        scores[cur[0]] = value
+        return value
+      } else {
+        const value = acc >= 15 ? acc - 15 : 0
+        scores[cur[0]] = value
+        return value
+      }
+    }, 0)
+    return scores
+  })
+
   // 今日總分數
   const todayScore = computed(() => {
     const today = getTodayKey()
@@ -62,7 +106,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
 
   const getScoreByDate = (date: Date) => {
     const dateKey = formatDateToKey(date)
-    return dailyScores.value[dateKey] || 0
+    return accDailyScore.value[dateKey] || 0
   }
 
   return {
@@ -71,6 +115,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     startTime,
     endTime,
     dailyScores,
+    accDailyScore,
     todayScore,
     addScore,
     resetTodayScore,
