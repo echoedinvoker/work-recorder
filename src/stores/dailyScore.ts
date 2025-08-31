@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { defineStore } from 'pinia'
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 
@@ -108,6 +108,13 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     const dateKey = formatDateToKey(date)
     return accDailyScore.value[dateKey] || 0
   }
+
+  onMounted(() => {
+    const today = getTodayKey()
+    if (dailyScores.value[today] === undefined) {
+      dailyScores.value[today] = 0
+    }
+  })
 
   return {
     isRecording,
