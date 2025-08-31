@@ -9,6 +9,9 @@
 
     <WorkoutChart />
 
+    <pre>{{ dailyScore }}</pre>
+    <pre>{{ accDailyScore }}</pre>
+
   </ToggleButton>
 </template>
 
@@ -16,5 +19,8 @@
 import ToggleButton from '@/components/ui/ToggleButton.vue';
 import WorkoutAddForm from '@/components/workout/WorkoutAddForm.vue';
 import WorkoutChart from '@/components/workout/WorkoutChart.vue';
+import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
+
+const { dailyScore, accDailyScore } = useDailyWorkoutStore()
 </script>
 
