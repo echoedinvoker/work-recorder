@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 import { computed } from "vue";
 
@@ -91,6 +91,13 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const clearAllHistory = () => {
     dailySwimmingDistance.value = {}
   }
+
+  onMounted(() => {
+    const todayKey = getTodayKey()
+    if (dailySwimmingDistance.value[todayKey] === undefined) {
+      dailySwimmingDistance.value[todayKey] = 0
+    }
+  })
 
   return {
     dailySwimmingDistance,
