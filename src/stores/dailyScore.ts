@@ -37,6 +37,17 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     useMockData ? generateMockData() : {}
   )
 
+  const maxScoreBefore = computed(() => {
+    const beforeScores = Object.values(dailyScores.value).slice(0, -1)
+    return Math.max(...beforeScores)
+  })
+
+  const todayProgress = computed(() => {
+    const todayKey = getTodayKey()
+    const todayScore = dailyScores.value[todayKey]
+    return (todayScore/maxScoreBefore.value) * 100
+  })
+
   const accDailyScore = computed(() => {
     const scores: { [key: string]: number } = {}
     Object.entries(dailyScores.value).reduce((acc, cur, ind, arr) => {
@@ -129,6 +140,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     clearAllHistory,
     useMockData,
     getScoreByDate,
+    todayProgress,
     UNIT
   }
 },

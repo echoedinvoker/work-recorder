@@ -143,6 +143,17 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     return scores;
   });
 
+  const maxScoreBefore = computed(() => {
+    const beforeScores = Object.values(dailyScore.value).slice(0, -1)
+    return Math.max(...beforeScores)
+  })
+
+  const todayProgress = computed(() => {
+    const todayKey = formatDateToKey(new Date());
+    const todayScore = dailyScore.value[todayKey]
+    return (todayScore/maxScoreBefore.value) * 100
+  })
+
   const accDailyScore = computed(() => {
     const scores: { [key: string]: number } = {}
     Object.entries(dailyScore.value).reduce((acc, cur, ind, arr) => {
@@ -258,6 +269,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     getScoreByDate,
     addWorkout,
     resetStore,
+    todayProgress,
     UNIT
   };
 },

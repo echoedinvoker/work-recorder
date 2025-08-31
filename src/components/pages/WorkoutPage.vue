@@ -7,6 +7,7 @@
       <WorkoutAddForm />
     </template>
 
+    <ProgressBar :value="todayProgress" />
     <WorkoutChart />
 
   </ToggleButton>
@@ -16,5 +17,9 @@
 import ToggleButton from '@/components/ui/ToggleButton.vue';
 import WorkoutAddForm from '@/components/workout/WorkoutAddForm.vue';
 import WorkoutChart from '@/components/workout/WorkoutChart.vue';
+import ProgressBar from '@/components/ui/ProgressBar.vue'
+import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
+
+const { todayProgress } = useDailyWorkoutStore()
 </script>
 
