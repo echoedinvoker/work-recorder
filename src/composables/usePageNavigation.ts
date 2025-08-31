@@ -8,6 +8,7 @@ import NoSugarPage from '@/components/pages/NoSugarPage.vue'
 import SingPracticePage from '@/components/pages/SingPracticePage.vue'
 import EarlySleepPage from '@/components/pages/EarlySleepPage.vue'
 import NoDIYPage from '@/components/pages/NoDIYPage.vue'
+import FaceSportPage from '@/components/pages/FaceSportPage.vue'
 
 export interface PageConfig {
   name: string
@@ -22,6 +23,7 @@ const pages: PageConfig[] = [
   { name: '戒糖紀錄', component: NoSugarPage },
   { name: '歌唱練習紀錄', component: SingPracticePage },
   { name: '早睡紀錄', component: EarlySleepPage },
+  { name: '臉部運動紀錄', component: FaceSportPage },
   { name: 'NO DIY', component: NoDIYPage }
 ]
 
