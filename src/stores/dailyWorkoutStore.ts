@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { formatDateToKey } from '../utils/dateUtils'
 import { computed } from "vue";
 
@@ -241,6 +241,13 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       localStorage.removeItem(storageKey);
     }
   };
+
+  onMounted(() => {
+    const todayKey = formatDateToKey(new Date())
+    if (dailyWorkouts.value[todayKey] === undefined) {
+      dailyWorkouts.value[todayKey] = {}
+    }
+  })
 
   return {
     dailyWorkouts,
