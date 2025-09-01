@@ -9,6 +9,7 @@
       <span class="text-sm text-gray-500 ml-2">(點擊切換)</span>
     </h3>
     
+
     <!-- 使用抽離出來的圖表容器組件 -->
     <ChartContainer
       :chartData="chartData"
@@ -17,8 +18,10 @@
       :showCumulativeLabel="currentPeriod !== 'day'"
     />
     
+    <ProgressBar :value="todayProgress" v-if="todayProgress" />
+
     <!-- 統計資訊 -->
-    <div class="flex justify-between text-sm text-gray-600 pt-4 border-t">
+    <div class="flex justify-between text-sm text-gray-600 pt-4">
       <div>
         <span class="text-gray-500">平均分數:</span>
         <span class="font-medium ml-1">{{ avgScore }}分</span>
@@ -35,6 +38,7 @@
 import { useChart } from '@/composables/useChart';
 import { useDailyScoreStore } from '@/stores/dailyScore';
 import ChartContainer from '@/components/ui/ChartContainer.vue';
+import ProgressBar from '@/components/ui/ProgressBar.vue'
 
 const dailyScoreStore = useDailyScoreStore()
 const {
@@ -45,7 +49,8 @@ const {
   chartData,
   yAxisMax,
   avgScore,
-  maxScore
+  maxScore,
+  todayProgress
 } = useChart(dailyScoreStore);
 </script>
 

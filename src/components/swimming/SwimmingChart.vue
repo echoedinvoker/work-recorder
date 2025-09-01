@@ -15,9 +15,11 @@
       :chartHeight="chartHeight"
       :showCumulativeLabel="currentPeriod !== 'day'"
     />
+
+    <ProgressBar :value="todayProgress" v-if="todayProgress" />
     
     <!-- 統計資訊 -->
-    <div class="flex justify-between text-sm text-gray-600 pt-4 border-t">
+    <div class="flex justify-between text-sm text-gray-600 pt-4">
       <div>
         <span class="text-gray-500">平均里程數:</span>
         <span class="font-medium ml-1">{{ avgScore }}公尺</span>
@@ -32,8 +34,9 @@
 
 <script setup lang="ts">
 import { useChart } from '@/composables/useChart';
-import ChartContainer from '@/components/ui/ChartContainer.vue';
 import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
+import ChartContainer from '@/components/ui/ChartContainer.vue';
+import ProgressBar from '@/components/ui/ProgressBar.vue'
 
 const store = useDailySwimmingStore()
 
@@ -46,7 +49,8 @@ const {
   chartData,
   yAxisMax,
   avgScore,
-  maxScore
+  maxScore,
+  todayProgress
 } = useChart(store);
 </script>
 

@@ -6,7 +6,7 @@
         :style="{ width: `${value}%` }"
       ></div>
     </div>
-    <span class="text-left min-w-[60px] text-sm">{{ formattedValue }}%</span>
+    <span class="text-left min-w-[60px] text-md font-semibold text-gray-600">{{ formattedValue }}%</span>
   </div>
 </template>
 

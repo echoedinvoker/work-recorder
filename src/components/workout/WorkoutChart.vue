@@ -16,8 +16,10 @@
       :showCumulativeLabel="currentPeriod !== 'day'"
     />
     
+    <ProgressBar :value="todayProgress" v-if="todayProgress" />
+
     <!-- 統計資訊 -->
-    <div class="flex justify-between text-sm text-gray-600 pt-4 border-t">
+    <div class="flex justify-between text-sm text-gray-600 pt-4">
       <div>
         <span class="text-gray-500">平均重量:</span>
         <span class="font-medium ml-1">{{ avgScore }}公斤</span>
@@ -34,6 +36,7 @@
 import { useChart } from '@/composables/useChart';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
 import ChartContainer from '@/components/ui/ChartContainer.vue';
+import ProgressBar from '@/components/ui/ProgressBar.vue'
 
 const dailyWorkoutStore = useDailyWorkoutStore();
 
@@ -45,7 +48,8 @@ const {
   chartData,
   yAxisMax,
   avgScore,
-  maxScore
+  maxScore,
+  todayProgress
 } = useChart(dailyWorkoutStore);
 </script>
 

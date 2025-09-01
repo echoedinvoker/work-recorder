@@ -14,7 +14,6 @@
     <ResultDisplay />
     <RecordingDisplay />
     <ScoreDisplay />
-    <ProgressBar :value="scoreStore.todayProgress" />
     <ScoreChart />
 
     <!-- 確認對話框 -->
@@ -36,7 +35,6 @@ import RecordingDisplay from '@/components/RecordingDisplay.vue'
 import ScoreDisplay from '@/components/ScoreDisplay.vue'
 import ScoreChart from '@/components/ScoreChart.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
-import ProgressBar from '@/components/ui/ProgressBar.vue'
 import { useDailyScoreStore } from '@/stores/dailyScore'
 
 const scoreStore = useDailyScoreStore()

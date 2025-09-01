@@ -26,6 +26,17 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const dailySwimmingDistance = ref<Record<string, number>>(useMockData ? generateMockData() : {});
 
+  const maxScoreBefore = computed(() => {
+    const beforeScores = Object.values(dailySwimmingDistance.value).slice(0, -1)
+    return Math.max(...beforeScores)
+  })
+
+  const todayProgress = computed(() => {
+    const todayKey = getTodayKey()
+    const todayScore = dailySwimmingDistance.value[todayKey]
+    return (todayScore/maxScoreBefore.value) * 100
+  })
+
   const accDailySwimmingDistance = computed(() => {
     const scores: { [key: string]: number } = {}
     Object.entries(dailySwimmingDistance.value).reduce((acc, cur, ind, arr) => {
@@ -105,6 +116,7 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     accDailySwimmingDistance,
     getScoreByDate,
     clearAllHistory,
+    todayProgress,
     UNIT
   };
 },

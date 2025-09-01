@@ -6,6 +6,7 @@ type ChartPeriod = 'day' | 'week' | 'month'
 export interface ScoreProvider {
   getScoreByDate: (date: Date) => number,
   UNIT: string
+  todayProgress?: number,
 }
 
 const chartHeight = 192
@@ -141,6 +142,7 @@ export function useChart(scoreProvider: ScoreProvider) {
 
     // States
     currentPeriod,
+    todayProgress: scoreProvider.todayProgress,
 
     // Computed properties
     chartTitle,
