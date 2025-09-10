@@ -52,6 +52,17 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
     return score;
   };
 
+  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
+  const checkAndInitTodayRecord = () => {
+    const today = getTodayKey();
+    if (dailyNoSugarResults.value[today] === undefined) {
+      dailyNoSugarResults.value[today] = false;
+    }
+  };
+
+  // 在store初始化時檢查今天的記錄
+  checkAndInitTodayRecord();
+
   // 記錄當天戒糖結果
   const recordResult = (success: boolean) => {
     const today = getTodayKey();
@@ -80,7 +91,8 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
   // 清除所有歷史記錄
   const clearAllHistory = () => {
     dailyNoSugarResults.value = {};
-    // 不需要重置 totalScore，因為它是計算屬性
+    // 初始化今天的記錄
+    checkAndInitTodayRecord();
   };
 
   // 計算特定日期的累計分數
@@ -131,6 +143,7 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
     clearAllHistory,
     getScoreByDate,
     getScoreHistory,
+    checkAndInitTodayRecord, // 導出這個方法以便在需要時手動調用
     UNIT
   };
 },

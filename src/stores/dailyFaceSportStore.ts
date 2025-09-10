@@ -52,6 +52,16 @@ export const useDailyFaceSportStore = defineStore("dailyFaceSport", () => {
     return score;
   };
 
+  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
+  const checkAndInitTodayRecord = () => {
+    const today = getTodayKey();
+    if (dailyFaceSportResults.value[today] === undefined) {
+      dailyFaceSportResults.value[today] = false;
+    }
+  };
+
+  checkAndInitTodayRecord();
+
   // 記錄當天唱歌練習結果
   const recordResult = (success: boolean) => {
     const today = getTodayKey();

@@ -52,6 +52,16 @@ export const useDailyEarlySleepStore = defineStore("dailyEarlySleep", () => {
     return score;
   };
 
+  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
+  const checkAndInitTodayRecord = () => {
+    const today = getTodayKey();
+    if (dailyEarlySleepResults.value[today] === undefined) {
+      dailyEarlySleepResults.value[today] = false;
+    }
+  };
+
+  checkAndInitTodayRecord();
+
   // 記錄當天早睡結果
   const recordResult = (success: boolean) => {
     const today = getTodayKey();

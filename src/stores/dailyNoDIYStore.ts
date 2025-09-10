@@ -52,6 +52,16 @@ export const useDailyNoDIYStore = defineStore("dailyNoDIY", () => {
     return score;
   };
 
+  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
+  const checkAndInitTodayRecord = () => {
+    const today = getTodayKey();
+    if (dailyNoDIYResults.value[today] === undefined) {
+      dailyNoDIYResults.value[today] = false;
+    }
+  };
+
+  checkAndInitTodayRecord();
+
   // 記錄當天不自己動手結果
   const recordResult = (success: boolean) => {
     const today = getTodayKey();

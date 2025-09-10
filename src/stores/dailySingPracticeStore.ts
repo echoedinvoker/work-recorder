@@ -52,6 +52,16 @@ export const useDailySingPracticeStore = defineStore("dailySingPractice", () => 
     return score;
   };
 
+  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
+  const checkAndInitTodayRecord = () => {
+    const today = getTodayKey();
+    if (dailySingPracticeResults.value[today] === undefined) {
+      dailySingPracticeResults.value[today] = false;
+    }
+  };
+
+  checkAndInitTodayRecord();
+
   // 記錄當天唱歌練習結果
   const recordResult = (success: boolean) => {
     const today = getTodayKey();
