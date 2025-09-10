@@ -51,6 +51,12 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   const dailyWorkouts = ref<Record<string, Record<string, number>>>(useMockData ? generateMockData() : {});
 
+  // 保存最後一次添加運動前的進度
+  const lastProgressBeforeAdd = ref(0);
+
+  // 保存最後一次添加運動的增量
+  const lastWorkoutIncrement = ref(0);
+
   // 計算每個活動的權重
   const activityWeights = computed(() => {
     // 1. 收集所有活動類型
@@ -151,7 +157,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   const todayProgress = computed(() => {
     const todayKey = formatDateToKey(new Date());
     const todayScore = dailyScore.value[todayKey]
-    return (todayScore/maxScoreBefore.value) * 100
+    return (todayScore / maxScoreBefore.value) * 100
   })
 
   const accDailyScore = computed(() => {
@@ -228,6 +234,9 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   }
 
   const addWorkout = (workout: string, count: number, weight: number, date: Date = new Date()) => {
+    // 保存添加前的進度
+    lastProgressBeforeAdd.value = todayProgress.value || 0;
+
     const dateKey = formatDateToKey(date);
 
     // 如果該日期還沒有記錄，先創建一個空物件
@@ -240,7 +249,19 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     }
 
     dailyWorkouts.value[dateKey][workout] += Number(count) * Number(weight);
+
+    // 計算添加後的進度
+    const currentProgress = todayProgress.value || 0;
+
+    // 計算本次添加的增量
+    lastWorkoutIncrement.value = currentProgress - lastProgressBeforeAdd.value;
   }
+
+  // 計算最後一次添加運動的增量
+  const todayProgressIncrease = computed(() => {
+    // 返回最後一次添加運動的增量
+    return lastWorkoutIncrement.value > 0 ? lastWorkoutIncrement.value : 0;
+  });
 
   const resetStore = () => {
     // 重置 dailyWorkouts 為空物件
@@ -270,6 +291,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     addWorkout,
     resetStore,
     todayProgress,
+    todayProgressIncrease,
     UNIT
   };
 },

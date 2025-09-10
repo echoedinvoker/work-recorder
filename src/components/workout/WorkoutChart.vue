@@ -16,7 +16,11 @@
       :showCumulativeLabel="currentPeriod !== 'day'"
     />
     
-    <ProgressBar :value="todayProgress" v-if="todayProgress" />
+    <ProgressBar 
+      :value="todayProgress" 
+      :increase="todayProgressIncrease" 
+      v-if="todayProgress" 
+    />
 
     <!-- 統計資訊 -->
     <div class="flex justify-between text-sm text-gray-600 pt-4">
@@ -49,7 +53,8 @@ const {
   yAxisMax,
   avgScore,
   maxScore,
-  todayProgress
+  todayProgress,
+  todayProgressIncrease
 } = useChart(dailyWorkoutStore);
 </script>
 
