@@ -2,7 +2,7 @@
   <div class="flex flex-col space-y-4">
     <div class="flex justify-center">
       <BaseButton 
-        :color="!todayNoSugarStatus ? 'green' : 'red'" 
+        :color="todayNoSugarStatus ? 'green' : 'red'" 
         :text="buttonText"
         @click="toggleNoSugarStatus"
       />
@@ -25,7 +25,7 @@ const todayNoSugarStatus = computed(() => {
 
 // 根據當前狀態決定按鈕文字
 const buttonText = computed(() => {
-  return !todayNoSugarStatus.value ? '今日戒糖成功 ✓' : '今日戒糖失敗 ✗';
+  return todayNoSugarStatus.value ? '今日戒糖成功 ✓' : '今日戒糖失敗 ✗';
 });
 
 // 切換今天的戒糖狀態

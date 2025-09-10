@@ -2,7 +2,7 @@
   <div class="flex flex-col space-y-4">
     <div class="flex justify-center">
       <BaseButton 
-        :color="!todayStatus ? 'green' : 'red'" 
+        :color="todayStatus ? 'green' : 'red'" 
         :text="buttonText"
         @click="toggleStatus" 
       />
@@ -25,7 +25,7 @@ const todayStatus = computed(() => {
 
 // 根據當前狀態決定按鈕文字
 const buttonText = computed(() => {
-  return !todayStatus.value ? '今日成功早睡 ✓' : '今日早睡失敗 ✗';
+  return todayStatus.value ? '今日成功早睡 ✓' : '今日早睡失敗 ✗';
 });
 
 // 切換今天的狀態
