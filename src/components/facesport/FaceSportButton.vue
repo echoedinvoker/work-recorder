@@ -4,12 +4,12 @@
     <div class="flex space-x-4">
       <BaseButton 
         color="green" 
-        text="今日完成 運動" 
+        text="成功" 
         @click="recordSuccess" 
       />
       <BaseButton 
         color="red" 
-        text="今日未能 運動" 
+        text="失敗" 
         @click="recordFailure" 
       />
     </div>

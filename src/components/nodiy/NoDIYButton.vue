@@ -4,12 +4,12 @@
     <div class="mx-auto flex space-x-4">
       <BaseButton 
         color="green" 
-        text="今日成功" 
+        text="成功" 
         @click="recordSuccess" 
       />
       <BaseButton 
         color="red" 
-        text="今日破功" 
+        text="失敗" 
         @click="recordFailure" 
       />
     </div>
