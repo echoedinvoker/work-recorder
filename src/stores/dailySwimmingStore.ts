@@ -25,6 +25,8 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const dailySwimmingDistance = ref<Record<string, number>>(useMockData ? generateMockData() : {});
+  const lastProgressBeforeAdd = ref(0);
+  const lastSwimmingIncrement = ref(0);
 
   const maxScoreBefore = computed(() => {
     const beforeScores = Object.values(dailySwimmingDistance.value).slice(0, -1)
@@ -34,7 +36,7 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const todayProgress = computed(() => {
     const todayKey = getTodayKey()
     const todayScore = dailySwimmingDistance.value[todayKey]
-    return (todayScore/maxScoreBefore.value) * 100
+    return (todayScore / maxScoreBefore.value) * 100
   })
 
   const accDailySwimmingDistance = computed(() => {
@@ -85,6 +87,9 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const BASE_DURATION = 60
 
   const addDistance = (distance: number, duration: number) => {
+    // 保存添加前的進度
+    lastProgressBeforeAdd.value = todayProgress.value || 0;
+
     const baseSpeed = BASE_DISTANCE / BASE_DURATION
     const actualSpeed = distance / duration
     const speedRatio = actualSpeed / baseSpeed
@@ -92,7 +97,19 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
 
     const today = getTodayKey()
     dailySwimmingDistance.value[today] = (dailySwimmingDistance.value[today] || 0) + Number(adjustedDistance)
+
+    // 計算添加後的進度
+    const currentProgress = todayProgress.value || 0;
+
+    // 計算本次添加的增量
+    lastSwimmingIncrement.value = currentProgress - lastProgressBeforeAdd.value;
   }
+
+  // 計算最後一次添加游泳的增量
+  const todayProgressIncrease = computed(() => {
+    // 返回最後一次添加游泳的增量
+    return lastSwimmingIncrement.value > 0 ? lastSwimmingIncrement.value : 0;
+  });
 
   const getScoreByDate = (date: Date) => {
     const dateKey = formatDateToKey(date)
@@ -117,6 +134,7 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     getScoreByDate,
     clearAllHistory,
     todayProgress,
+    todayProgressIncrease,
     UNIT
   };
 },

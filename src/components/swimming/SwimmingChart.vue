@@ -1,23 +1,16 @@
 <template>
-  <div
-    class="bg-white rounded-lg shadow-md p-6 cursor-pointer select-none"
-    @click="toggleChartPeriod"
-  >
+  <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer select-none" @click="toggleChartPeriod">
     <h3 class="text-lg font-semibold text-gray-800 mb-4">
       {{ chartTitle }}
       <span class="text-sm text-gray-500 ml-2">(點擊切換)</span>
     </h3>
-    
-    <!-- 使用抽離出來的圖表容器組件 -->
-    <ChartContainer
-      :chartData="chartData"
-      :yAxisMax="yAxisMax"
-      :chartHeight="chartHeight"
-      :showCumulativeLabel="currentPeriod !== 'day'"
-    />
 
-    <ProgressBar :value="todayProgress" v-if="todayProgress" />
-    
+    <!-- 使用抽離出來的圖表容器組件 -->
+    <ChartContainer :chartData="chartData" :yAxisMax="yAxisMax" :chartHeight="chartHeight"
+      :showCumulativeLabel="currentPeriod !== 'day'" />
+
+    <ProgressBar :value="todayProgress" :increase="todayProgressIncrease" v-if="todayProgress" />
+
     <!-- 統計資訊 -->
     <div class="flex justify-between text-sm text-gray-600 pt-4">
       <div>
@@ -50,7 +43,7 @@ const {
   yAxisMax,
   avgScore,
   maxScore,
-  todayProgress
+  todayProgress,
+  todayProgressIncrease
 } = useChart(store);
 </script>
-

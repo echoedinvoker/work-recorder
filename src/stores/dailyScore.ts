@@ -25,12 +25,13 @@ const generateMockData = () => {
 const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 export const useDailyScoreStore = defineStore('dailyScore', () => {
-
   // 狀態管理
   const isRecording = ref(false)
   const isDisplayingResult = ref(false)
   const startTime = ref<Date | null>(null)
   const endTime = ref<Date | null>(null)
+  const lastProgressBeforeAdd = ref(0);
+  const lastScoreIncrement = ref(0);
 
   // 初始化資料 - 根據環境變數決定使用真實或假資料
   const dailyScores = ref<Record<string, number>>(
@@ -100,9 +101,23 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
 
   // 添加分數到今日
   const addScore = (score: number) => {
+    // 保存添加前的進度
+    lastProgressBeforeAdd.value = todayProgress.value || 0;
+
     const today = getTodayKey()
     dailyScores.value[today] = (dailyScores.value[today] || 0) + Number(score)
+
+    // 計算添加後的進度
+    const currentProgress = todayProgress.value || 0;
+    
+    // 計算本次添加的增量
+    lastScoreIncrement.value = currentProgress - lastProgressBeforeAdd.value;
   }
+
+  const todayProgressIncrease = computed(() => {
+    // 返回最後一次添加分數的增量
+    return lastScoreIncrement.value > 0 ? lastScoreIncrement.value : 0;
+  });
 
   // 重置今日分數 (用於測試或重置)
   const resetTodayScore = () => {
@@ -141,6 +156,7 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     useMockData,
     getScoreByDate,
     todayProgress,
+    todayProgressIncrease,
     UNIT
   }
 },
