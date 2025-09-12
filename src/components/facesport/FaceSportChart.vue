@@ -15,18 +15,6 @@
       :chartHeight="chartHeight"
       :showCumulativeLabel="currentPeriod !== 'day'"
     />
-    
-    <!-- 統計資訊 -->
-    <div class="flex justify-between text-sm text-gray-600 pt-4 border-t">
-      <div>
-        <span class="text-gray-500">平均完成率:</span>
-        <span class="font-medium ml-1">{{ avgScore }}次</span>
-      </div>
-      <div>
-        <span class="text-gray-500">最高{{ currentPeriod === 'day' ? '完成' : '累積' }}:</span>
-        <span class="font-medium ml-1">{{ maxScore }}次</span>
-      </div>
-    </div>
   </div>
 </template>
 

@@ -1,50 +1,104 @@
 <template>
-  <!-- 完全移除高度限制，讓內容自然流動 -->
   <div class="max-w-md mx-auto p-6 text-center">
     <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
     
-    <!-- 頁面指示器 -->
-    <PageIndicator 
-      :pages="pages" 
-      :current-page-index="currentPageIndex"
-      @go-to-page="goToPage"
-    />
+    <!-- 導航菜單 -->
+    <nav class="mb-8">
+      <ul class="flex flex-wrap justify-center gap-2">
+        <li v-for="route in routes" :key="route.name">
+          <router-link 
+            :to="{ name: route.name }" 
+            class="px-3 py-1 rounded-full text-sm transition-all"
+            :class="[
+              // 使用 border 來區分當前頁面
+              $route.name === route.name 
+                ? 'border-2 border-blue-500 font-bold' 
+                : 'border-2 border-transparent',
+              // 使用背景色來顯示分數是正數還是負數
+              getScoreForRoute(route.name) > 0 
+                ? 'bg-green-100 text-green-800' 
+                : getScoreForRoute(route.name) < 0 
+                  ? 'bg-red-100 text-red-800' 
+                  : 'bg-gray-200 text-gray-700'
+            ]"
+          >
+            {{ route.meta?.title || route.name }}
+          </router-link>
+        </li>
+      </ul>
+    </nav>
 
-    <!-- 滑動容器-->
-    <div 
-      @touchstart="handleTouchStart"
-      @touchmove="handleTouchMove"
-      @touchend="handleTouchEnd"
-    >
-      <div 
-        class="flex transition-transform duration-300 ease-out gap-12"
-        :style="{ transform: `translateX(-${currentPageIndex * 115}%)` }"
-      >
-        <!-- 動態渲染頁面 -->
-        <div 
-          v-for="(page, index) in pages" 
-          :key="index"
-          class="w-full flex-shrink-0"
-        >
-          <component :is="page.component" />
-        </div>
-      </div>
-    </div>
+    <!-- 路由視圖 -->
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script setup lang="ts">
-import { usePageNavigation } from '@/composables/usePageNavigation'
-import PageIndicator from '@/components/ui/PageIndicator.vue'
+import { useRouter } from 'vue-router';
+import { useDailyScoreStore } from './stores/dailyScore';
+import { useDailyNoSugarStore } from './stores/dailyNoSugarStore';
 import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
+import { useDailyFaceSportStore } from './stores/dailyFaceSportStore';
+import { useDailySwimmingStore } from './stores/dailySwimmingStore';
+import { useDailyNoDIYStore } from './stores/dailyNoDIYStore';
+import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
+import { useDailySingPracticeStore } from './stores/dailySingPracticeStore';
+// 根據需要導入其他 store
 
-// 使用頁面導航 composable
-const {
-  currentPageIndex,
-  handleTouchStart,
-  handleTouchMove,
-  handleTouchEnd,
-  goToPage,
-  pages
-} = usePageNavigation()
+const router = useRouter();
+const routes = router.options.routes.filter(route => route.name !== 'NotFound');
+
+const dailyScoreStore = useDailyScoreStore();
+const noSugarStore = useDailyNoSugarStore();
+const workoutStore = useDailyWorkoutStore();
+const faceSportStore = useDailyFaceSportStore();
+const swimmingStore = useDailySwimmingStore();
+const noDIYStore = useDailyNoDIYStore();
+const earlySleepStore = useDailyEarlySleepStore();
+const singPracticeStore = useDailySingPracticeStore();
+
+const today = new Date();
+const yesterday = new Date().setDate(today.getDate() - 1);
+
+// 根據路由名稱獲取對應的分數
+const getScoreForRoute = (routeName: string) => {
+  // 根據不同的路由名稱返回對應 store 的分數
+  switch (routeName) {
+    case 'study':
+      return dailyScoreStore.getScoreByDate(new Date()) - (dailyScoreStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'noSugar':
+      return noSugarStore.getScoreByDate(new Date()) - (noSugarStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'workout':
+      return workoutStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'faceSport':
+      return faceSportStore.getScoreByDate(new Date()) - (faceSportStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'swimming':
+      return swimmingStore.getScoreByDate(new Date()) - (swimmingStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'noDIY':
+      return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'earlySleep':
+      return earlySleepStore.getScoreByDate(new Date()) - (earlySleepStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'singPractice':
+      return singPracticeStore.getScoreByDate(new Date()) - (singPracticeStore.getScoreByDate(new Date(yesterday)) || 0);
+    default:
+      return 0; // 默認返回 0
+  }
+};
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
+
