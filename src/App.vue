@@ -14,7 +14,7 @@
               'bg-gray-200 text-gray-700 hover:bg-gray-300': $route.name !== route.name
             }"
           >
-            {{ route.meta.title }}
+            {{ route.meta?.title }} <!-- 使用可選鏈操作符 -->
           </router-link>
         </li>
       </ul>
