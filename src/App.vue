@@ -1,10 +1,8 @@
 <template>
   <div class="max-w-md mx-auto p-6 text-center">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
-    
     <!-- 導航菜單 -->
     <nav class="mb-8">
-      <ul class="flex flex-wrap justify-center gap-2">
+      <ul class="flex flex-wrap justify-center gap-2 space-y-2">
         <li v-for="route in routes" :key="String(route.name)">
           <router-link 
             :to="{ name: route.name }" 
