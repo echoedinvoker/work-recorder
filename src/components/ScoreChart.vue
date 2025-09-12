@@ -19,9 +19,9 @@
     />
     
     <ProgressBar
-      :value="todayProgress"
+      :value="todayProgress || 0"
       :increase="todayProgressIncrease" 
-      v-if="todayProgress" />
+    />
   </div>
 </template>
 

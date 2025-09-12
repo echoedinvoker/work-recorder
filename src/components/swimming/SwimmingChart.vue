@@ -9,7 +9,7 @@
     <ChartContainer :chartData="chartData" :yAxisMax="yAxisMax" :chartHeight="chartHeight"
       :showCumulativeLabel="currentPeriod !== 'day'" />
 
-    <ProgressBar :value="todayProgress" :increase="todayProgressIncrease" v-if="todayProgress" />
+    <ProgressBar :value="todayProgress || 0" :increase="todayProgressIncrease" />
   </div>
 </template>
 
