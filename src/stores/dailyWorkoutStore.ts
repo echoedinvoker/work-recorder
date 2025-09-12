@@ -54,7 +54,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   const lastProgressBeforeAdd = ref(0);
   const lastWorkoutIncrement = ref(0);
   const scoreMap = new Map<number, number>([
-    [1.0, 10], [0.9, 5], [0.8, 0], [0.7, -5], [0.6, -10], [0.0, -15]
+    [1.0, 12], [0.9, 8], [0.8, 4], [0.7, -1]
   ]);
 
   const activityWeights = computed(() => {

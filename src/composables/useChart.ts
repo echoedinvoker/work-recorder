@@ -26,7 +26,7 @@ export function useChart(scoreProvider: ScoreProvider) {
     }
     return periodTitles[currentPeriod.value]
   })
-  
+
   const chartData = computed(() => {
     const data = []
     const today = new Date()
@@ -81,7 +81,7 @@ export function useChart(scoreProvider: ScoreProvider) {
         } while (date.getMonth() === tmpMonth)
 
         const label = i === 0 ? '本月' : `${i}月前`
-        const dateLabel = `${(date.getMonth() + 2)%12}月`
+        const dateLabel = `${(date.getMonth() + 2) % 12}月`
 
         data.unshift({
           date,
@@ -94,7 +94,7 @@ export function useChart(scoreProvider: ScoreProvider) {
 
     return data
   })
-  
+
   const yAxisMax = computed(() => {
     const maxDataScore = Math.max(...chartData.value.map(item => item.score), 0)
 
@@ -109,7 +109,7 @@ export function useChart(scoreProvider: ScoreProvider) {
     const calculatedMax = Math.max(maxDataScore * 1.2, minMax)
     return Math.ceil(calculatedMax / 5) * 5
   })
-  
+
   const tototalScore = computed(() => {
     return chartData.value.reduce((sum, item) => sum + item.score, 0)
   })
@@ -118,9 +118,13 @@ export function useChart(scoreProvider: ScoreProvider) {
     const totalScore = chartData.value.reduce((sum, item) => sum + item.score, 0)
     return totalScore ? (totalScore / 7).toFixed(1) : '0.0'
   })
-  
+
   const maxScore = computed(() => {
     return Math.max(...chartData.value.map(item => item.score), 0)
+  })
+
+  const currentScore = computed(() => {
+    return chartData.value.length > 0 ? chartData.value[chartData.value.length - 1].score : 0
   })
 
   // Actions
@@ -153,6 +157,7 @@ export function useChart(scoreProvider: ScoreProvider) {
     tototalScore,
     avgScore,
     maxScore,
+    currentScore,
 
     // Actions
     toggleChartPeriod

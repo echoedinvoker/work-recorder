@@ -29,7 +29,7 @@ export const useDailyJumpStore = defineStore("dailyJump", () => {
   const lastProgressBeforeAdd = ref(0);
   const lastJumpIncrement = ref(0);
   const scoreMap = new Map<number, number>([
-    [1.0, 10], [0.9, 5], [0.8, 0], [0.7, -5], [0.6, -10], [0.0, -15]
+    [1.0, 6], [0.9, 4], [0.8, 2], [0.7, -3]
   ]);
 
   const maxScoreBefore = computed(() => {

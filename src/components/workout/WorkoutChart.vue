@@ -17,22 +17,9 @@
     />
     
     <ProgressBar 
-      :value="todayProgress" 
+      :value="todayProgress || 0"
       :increase="todayProgressIncrease" 
-      v-if="todayProgress" 
     />
-
-    <!-- 統計資訊 -->
-    <div class="flex justify-between text-sm text-gray-600 pt-4">
-      <div>
-        <span class="text-gray-500">平均重量:</span>
-        <span class="font-medium ml-1">{{ avgScore }}公斤</span>
-      </div>
-      <div>
-        <span class="text-gray-500">最高{{ currentPeriod === 'day' ? '重量' : '累積' }}:</span>
-        <span class="font-medium ml-1">{{ maxScore }}公斤</span>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -51,8 +38,6 @@ const {
   chartTitle,
   chartData,
   yAxisMax,
-  avgScore,
-  maxScore,
   todayProgress,
   todayProgressIncrease
 } = useChart(dailyWorkoutStore);
