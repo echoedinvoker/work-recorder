@@ -93,14 +93,14 @@ export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
 }, {
   persist: {
     serializer: {
-      serialize: (state) => {
+      serialize: (state: any) => {
         return JSON.stringify({
           ...state,
           startTime: state.startTime?.toISOString() || null,
           endTime: state.endTime?.toISOString() || null
         });
       },
-      deserialize: (value) => {
+      deserialize: (value: any) => {
         const parsed = JSON.parse(value);
         return {
           ...parsed,
@@ -110,5 +110,5 @@ export const useDailyMeditationStore = defineStore('dailyMeditation', () => {
       }
     }
   }
-});
+} as any);
 

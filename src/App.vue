@@ -5,7 +5,7 @@
     <!-- 導航菜單 -->
     <nav class="mb-8">
       <ul class="flex flex-wrap justify-center gap-2">
-        <li v-for="route in routes" :key="route.name">
+        <li v-for="route in routes" :key="String(route.name)">
           <router-link 
             :to="{ name: route.name }" 
             class="px-3 py-1 rounded-full text-sm transition-all"
@@ -15,9 +15,9 @@
                 ? 'border-2 border-blue-500 font-bold' 
                 : 'border-2 border-transparent',
               // 使用背景色來顯示分數是正數還是負數
-              getScoreForRoute(route.name) > 0 
+              route.name && getScoreForRoute(String(route.name)) > 0 
                 ? 'bg-green-100 text-green-800' 
-                : getScoreForRoute(route.name) < 0 
+                : route.name && getScoreForRoute(String(route.name)) < 0 
                   ? 'bg-red-100 text-red-800' 
                   : 'bg-gray-200 text-gray-700'
             ]"

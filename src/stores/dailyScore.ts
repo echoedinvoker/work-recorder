@@ -163,14 +163,14 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
   {
     persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
       serializer: {
-        serialize: (state) => {
+        serialize: (state: any) => {
           return JSON.stringify({
             ...state,
             startTime: state.startTime?.toISOString() || null,
             endTime: state.endTime?.toISOString() || null
           })
         },
-        deserialize: (value) => {
+        deserialize: (value: any) => {
           const parsed = JSON.parse(value)
           return {
             ...parsed,
@@ -180,5 +180,5 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
         }
       }
     }
-  }
+  } as any
 )
