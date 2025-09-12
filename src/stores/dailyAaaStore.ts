@@ -48,14 +48,14 @@ export const useAaaCountStore = defineStore("AaaCount", () => {
   {
     persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
       serializer: {
-        serialize: (state: any) => {
+        serialize: (state) => {
           return JSON.stringify({
             ...state,
             startTime: state.startTime?.toISOString() || null,
             endTime: state.endTime?.toISOString() || null
           })
         },
-        deserialize: (value: any) => {
+        deserialize: (value) => {
           const parsed = JSON.parse(value)
           return {
             ...parsed,
@@ -65,6 +65,6 @@ export const useAaaCountStore = defineStore("AaaCount", () => {
         }
       }
     }
-  } as any
+  }
 )
 
