@@ -14,12 +14,12 @@
     <!-- 統計資訊 -->
     <div class="flex justify-between text-sm text-gray-600 pt-4">
       <div>
-        <span class="text-gray-500">平均里程數:</span>
-        <span class="font-medium ml-1">{{ avgScore }}公尺</span>
+        <span class="text-gray-500">平均分數:</span>
+        <span class="font-medium ml-1">{{ avgScore }}分數</span>
       </div>
       <div>
-        <span class="text-gray-500">最高{{ currentPeriod === 'day' ? '里程數' : '累積' }}:</span>
-        <span class="font-medium ml-1">{{ maxScore }}公尺</span>
+        <span class="text-gray-500">最高{{ currentPeriod === 'day' ? '分數' : '累積' }}:</span>
+        <span class="font-medium ml-1">{{ maxScore }}分</span>
       </div>
     </div>
   </div>
@@ -27,11 +27,11 @@
 
 <script setup lang="ts">
 import { useChart } from '@/composables/useChart';
-import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
+import { useDailyJumpStore } from '@/stores/dailyJumpStore';
 import ChartContainer from '@/components/ui/ChartContainer.vue';
 import ProgressBar from '@/components/ui/ProgressBar.vue'
 
-const store = useDailySwimmingStore()
+const store = useDailyJumpStore()
 
 
 const {

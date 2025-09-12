@@ -1,14 +1,7 @@
 import type { Component } from 'vue'
 import { ref } from 'vue'
-import StudyPage from '@/components/pages/StudyPage.vue'
-import TodoPage from '@/components/pages/TodoPage.vue'
 import WorkoutPage from '@/components/pages/WorkoutPage.vue'
-import SwimmingPage from '@/components/pages/SwimmingPage.vue'
-import NoSugarPage from '@/components/pages/NoSugarPage.vue'
-import SingPracticePage from '@/components/pages/SingPracticePage.vue'
-import EarlySleepPage from '@/components/pages/EarlySleepPage.vue'
-import NoDIYPage from '@/components/pages/NoDIYPage.vue'
-import FaceSportPage from '@/components/pages/FaceSportPage.vue'
+import JumpPage from '@/components/pages/JumpPage.vue'
 
 export interface PageConfig {
   name: string
@@ -17,14 +10,8 @@ export interface PageConfig {
 
 // 頁面配置
 const pages: PageConfig[] = [
-  { name: '學習紀錄', component: StudyPage },
   { name: '重訓紀錄', component: WorkoutPage },
-  { name: '游泳紀錄', component: SwimmingPage },
-  { name: '戒糖紀錄', component: NoSugarPage },
-  { name: '歌唱練習紀錄', component: SingPracticePage },
-  { name: '早睡紀錄', component: EarlySleepPage },
-  { name: '臉部運動紀錄', component: FaceSportPage },
-  { name: 'NO DIY', component: NoDIYPage }
+  { name: '跳繩紀錄', component: JumpPage },
 ]
 
 const currentPageIndex = ref(0)
