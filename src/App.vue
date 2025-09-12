@@ -1,50 +1,72 @@
 <template>
-  <!-- 完全移除高度限制，讓內容自然流動 -->
   <div class="max-w-md mx-auto p-6 text-center">
     <h1 class="text-3xl font-bold text-gray-800 mb-8">工作時間記錄器</h1>
     
-    <!-- 頁面指示器 -->
-    <PageIndicator 
-      :pages="pages" 
-      :current-page-index="currentPageIndex"
-      @go-to-page="goToPage"
-    />
+    <!-- 頁面導航 -->
+    <nav class="mb-6">
+      <ul class="flex flex-wrap justify-center gap-2">
+        <li v-for="route in routes" :key="route.name">
+          <router-link 
+            :to="{ name: route.name }" 
+            class="px-3 py-1 rounded-full text-sm"
+            :class="{ 
+              'bg-blue-500 text-white': $route.name === route.name,
+              'bg-gray-200 text-gray-700 hover:bg-gray-300': $route.name !== route.name
+            }"
+          >
+            {{ route.meta.title }}
+          </router-link>
+        </li>
+      </ul>
+    </nav>
 
-    <!-- 滑動容器-->
-    <div 
-      @touchstart="handleTouchStart"
-      @touchmove="handleTouchMove"
-      @touchend="handleTouchEnd"
-    >
-      <div 
-        class="flex transition-transform duration-300 ease-out gap-12"
-        :style="{ transform: `translateX(-${currentPageIndex * 115}%)` }"
-      >
-        <!-- 動態渲染頁面 -->
-        <div 
-          v-for="(page, index) in pages" 
-          :key="index"
-          class="w-full flex-shrink-0"
-        >
-          <component :is="page.component" />
-        </div>
-      </div>
-    </div>
+    <!-- 路由視圖 -->
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script setup lang="ts">
-import { usePageNavigation } from '@/composables/usePageNavigation'
-import PageIndicator from '@/components/ui/PageIndicator.vue'
-import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
-// 使用頁面導航 composable
-const {
-  currentPageIndex,
-  handleTouchStart,
-  handleTouchMove,
-  handleTouchEnd,
-  goToPage,
-  pages
-} = usePageNavigation()
+const router = useRouter()
+
+// 獲取所有路由配置
+const routes = computed(() => {
+  return router.options.routes.filter(route => route.meta?.title)
+})
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
+```
+
+3. 修改 main.ts 以引入路由：
+
+```typescript
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import router from './router'
+import './assets/main.css'
+
+const app = createApp(App)
+
+app.use(createPinia())
+app.use(router)
+
+app.mount('#app')
+

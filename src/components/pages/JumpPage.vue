@@ -1,15 +1,14 @@
 <template>
-  <div class="space-y-6">
-    <ToggleButton
-      formkey="jump"
-      :text="['查看跳繩紀錄', '新增跳繩紀錄']"
-    >
-      <template #form>
-        <JumpAddForm />
-      </template>
+  <div class="page-container">
+    <div class="space-y-6">
+      <ToggleButton formkey="jump" :text="['查看跳繩紀錄', '新增跳繩紀錄']">
+        <template #form>
+          <JumpAddForm />
+        </template>
 
-      <JumpChart />
-    </ToggleButton>
+        <JumpChart />
+      </ToggleButton>
+    </div>
   </div>
 </template>
 
@@ -18,4 +17,3 @@ import ToggleButton from '@/components/ui/ToggleButton.vue';
 import JumpAddForm from '@/components/jump/JumpAddForm.vue';
 import JumpChart from '@/components/jump/JumpChart.vue';
 </script>
-
