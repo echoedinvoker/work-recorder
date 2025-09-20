@@ -15,8 +15,8 @@ const generateMockData = () => {
     date.setDate(date.getDate() - i)
     const dateKey = formatDateToKey(date)
 
-    // 隨機分數 0-30
-    mockData[dateKey] = Math.floor(Math.random() * 9) // 假資料分數範圍 0-30
+    // 隨機分數 0-8
+    mockData[dateKey] = Math.floor(Math.random() * 9)
   }
 
   return mockData
@@ -25,7 +25,7 @@ const generateMockData = () => {
 // 檢查是否使用假資料
 const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
-export const useDailyScoreStore = defineStore('dailyScore', () => {
+export const useDailyWorkStore = defineStore('dailyWork', () => {
   // 狀態管理
   const isRecording = ref(false)
   const isDisplayingResult = ref(false)
@@ -161,3 +161,4 @@ export const useDailyScoreStore = defineStore('dailyScore', () => {
     }
   }
 )
+

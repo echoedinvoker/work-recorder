@@ -7,6 +7,7 @@ import SingPracticePage from '@/components/pages/SingPracticePage.vue'
 import EarlySleepPage from '@/components/pages/EarlySleepPage.vue'
 import FaceSportPage from '@/components/pages/FaceSportPage.vue'
 import NoDIYPage from '@/components/pages/NoDIYPage.vue'
+import WorkPage from '@/components/pages/WorkPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,6 +17,12 @@ const router = createRouter({
       name: 'study',
       component: StudyPage,
       meta: { title: '學習紀錄' }
+    },
+    {
+      path: '/work',
+      name: 'work',
+      component: WorkPage,
+      meta: { title: '工作紀錄' }
     },
     {
       path: '/workout',
