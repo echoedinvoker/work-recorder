@@ -45,6 +45,7 @@ import { useDailySwimmingStore } from './stores/dailySwimmingStore';
 import { useDailyNoDIYStore } from './stores/dailyNoDIYStore';
 import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
 import { useDailySingPracticeStore } from './stores/dailySingPracticeStore';
+import { useDailyHungryStore } from './stores/dailyHungryStore';
 // 根據需要導入其他 store
 
 const router = useRouter();
@@ -58,6 +59,7 @@ const swimmingStore = useDailySwimmingStore();
 const noDIYStore = useDailyNoDIYStore();
 const earlySleepStore = useDailyEarlySleepStore();
 const singPracticeStore = useDailySingPracticeStore();
+const hungryStore = useDailyHungryStore();
 
 const today = new Date();
 const yesterday = new Date().setDate(today.getDate() - 1);
@@ -80,6 +82,8 @@ const getScoreForRoute = (routeName: string) => {
       return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'earlySleep':
       return earlySleepStore.scoreDifference;
+    case 'hungry':
+      return hungryStore.scoreDifference;
     case 'singPractice':
       return singPracticeStore.getScoreByDate(new Date()) - (singPracticeStore.getScoreByDate(new Date(yesterday)) || 0);
     default:

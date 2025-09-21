@@ -16,4 +16,3 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 
 const store = useDailyEarlySleepStore();
 </script>
-

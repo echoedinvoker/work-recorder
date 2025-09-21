@@ -8,6 +8,7 @@ import EarlySleepPage from '@/components/pages/EarlySleepPage.vue'
 import FaceSportPage from '@/components/pages/FaceSportPage.vue'
 import NoDIYPage from '@/components/pages/NoDIYPage.vue'
 import WorkPage from '@/components/pages/WorkPage.vue'
+import HungryPage from '@/components/pages/HungryPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +66,12 @@ const router = createRouter({
       name: 'noDIY',
       component: NoDIYPage,
       meta: { title: 'NO DIY' }
+    },
+    {
+      path: '/hungry',
+      name: 'hungry',
+      component: HungryPage,
+      meta: { title: '飢餓紀錄' }
     },
     {
       path: '/:pathMatch(.*)*',
