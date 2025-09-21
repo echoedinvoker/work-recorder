@@ -79,7 +79,7 @@ const getScoreForRoute = (routeName: string) => {
     case 'noDIY':
       return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'earlySleep':
-      return earlySleepStore.getScoreByDate(new Date()) - (earlySleepStore.getScoreByDate(new Date(yesterday)) || 0);
+      return earlySleepStore.scoreDifference;
     case 'singPractice':
       return singPracticeStore.getScoreByDate(new Date()) - (singPracticeStore.getScoreByDate(new Date(yesterday)) || 0);
     default:

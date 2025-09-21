@@ -2,36 +2,18 @@
   <div class="flex flex-col space-y-4">
     <div class="flex justify-center">
       <BaseButton 
-        :color="todayStatus ? 'green' : 'red'" 
-        :text="buttonText"
-        @click="toggleStatus" 
+        :color="store.isTodayRecorded ? 'gray' : 'green'" 
+        :text="store.isTodayRecorded ? '取消紀錄' : '紀錄時間'"
+        @click="store.recordResult" 
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import { useDailyEarlySleepStore } from '@/stores/dailyEarlySleepStore';
 import BaseButton from '@/components/ui/BaseButton.vue';
-import { getTodayKey } from '@/utils/dateUtils';
 
 const store = useDailyEarlySleepStore();
-
-// 獲取今天的狀態
-const todayStatus = computed(() => {
-  return store.dailyEarlySleepResults[getTodayKey()];
-});
-
-// 根據當前狀態決定按鈕文字
-const buttonText = computed(() => {
-  return todayStatus.value ? '今日成功早睡 ✓' : '今日早睡失敗 ✗';
-});
-
-// 切換今天的狀態
-const toggleStatus = () => {
-  // 切換狀態 (true -> false 或 false -> true)
-  store.recordResult(!todayStatus.value);
-};
 </script>
 

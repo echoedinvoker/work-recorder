@@ -4,13 +4,8 @@ import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 
 const UNIT = '分數'
 
-// 早睡成功/失敗的分數變化
-const SUCCESS_SCORE = 10
-const FAILURE_SCORE = -15
-const MIN_SCORE = 0
-
 const generateMockData = () => {
-  const mockData: Record<string, boolean> = {}
+  const mockData: Record<string, string> = {}
   const today = new Date()
 
   for (let i = 13; i >= 0; i--) {
@@ -18,8 +13,10 @@ const generateMockData = () => {
     date.setDate(date.getDate() - i)
     const dateKey = formatDateToKey(date)
 
-    // 隨機成功或失敗
-    mockData[dateKey] = Math.random() > 0.3
+    // 隨機生成時間字符串 (21:00 - 23:59)
+    const hour = Math.floor(Math.random() * 3) + 21
+    const minute = Math.floor(Math.random() * 60)
+    mockData[dateKey] = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
   }
 
   return mockData
@@ -29,118 +26,91 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 export const useDailyEarlySleepStore = defineStore("dailyEarlySleep", () => {
   // 記錄每天是否成功早睡 (true = 成功, false = 失敗)
-  const dailyEarlySleepResults = ref<Record<string, boolean>>(useMockData ? generateMockData() : {});
-  
-  // 計算當前總分 - 從所有結果計算
-  const totalScore = computed(() => {
-    return calculateTotalScore(dailyEarlySleepResults.value);
+  const dailyEarlySleepResults = ref<Record<string, string>>(useMockData ? generateMockData() : {});
+
+  const isTodayRecorded = computed(() => {
+    const today = getTodayKey();
+    return !!dailyEarlySleepResults.value[today];
   });
 
-  // 計算總分的輔助函數
-  const calculateTotalScore = (results: Record<string, boolean>) => {
-    let score = 0;
-    // 按日期排序，確保按時間順序計算
-    const sortedDates = Object.keys(results).sort();
-    
-    for (const date of sortedDates) {
-      const success = results[date];
-      score += success ? SUCCESS_SCORE : FAILURE_SCORE;
-      // 確保分數不低於最小值
-      score = Math.max(MIN_SCORE, score);
-    }
-    
-    return score;
-  };
-
-  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
-  const checkAndInitTodayRecord = () => {
+  const recordResult = () => {
     const today = getTodayKey();
-    if (dailyEarlySleepResults.value[today] === undefined) {
-      dailyEarlySleepResults.value[today] = false;
+    if (dailyEarlySleepResults.value[today]) {
+      delete dailyEarlySleepResults.value[today];
+    } else {
+      const now = new Date();
+      const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      dailyEarlySleepResults.value[today] = currentTime;
     }
   };
 
-  checkAndInitTodayRecord();
+  const earliestDateKey = computed(() => {
+    const dateKeys = Object.keys(dailyEarlySleepResults.value)
+    if (dateKeys.length === 0) {
+      return getTodayKey()
+    }
+    return dateKeys.sort()[0]
+  })
 
-  // 記錄當天早睡結果
-  const recordResult = (success: boolean) => {
-    const today = getTodayKey();
-    dailyEarlySleepResults.value[today] = success;
-    // 不需要手動更新分數，因為它是計算屬性
-  };
+  const accDailyScore = computed(() => {
+    const scores: { [key: string]: number } = {}
+    let currentScore = 0
+    let currentDate = new Date(earliestDateKey.value)
+    while (formatDateToKey(currentDate) <= getTodayKey()) {
+      const dateKey = formatDateToKey(currentDate)
+      if (dailyEarlySleepResults.value[dateKey]) {
+        // 9點前睡覺 +2分, 10點前 +1分, 11點前 -1分, 11點後 -2分
+        const sleepTime = dailyEarlySleepResults.value[dateKey];
+        const [hours, minutes] = sleepTime.split(':').map(Number);
 
-  // 獲取特定日期的早睡結果
-  const getResultByDate = (date: Date) => {
+        if (hours < 21) {
+          // 9點前睡覺 +2分
+          currentScore += 2;
+        } else if (hours < 22) {
+          // 10點前睡覺 +1分
+          currentScore += 1;
+        } else if (hours < 23) {
+          // 11點前睡覺 -1分
+          currentScore = Math.max(0, currentScore - 1);
+        } else {
+          // 11點後睡覺 -2分
+          currentScore = Math.max(0, currentScore - 2);
+        }
+      } else {
+        currentScore = Math.max(0, currentScore - 3)
+      }
+      scores[dateKey] = currentScore
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    return scores
+  });
+
+  const scoreDifference = computed(() => {
+    const scoreEntries = Object.entries(accDailyScore.value);
+
+    // 按日期排序
+    scoreEntries.sort((a, b) => a[0].localeCompare(b[0]));
+
+    // 取得最後兩個分數
+    const latestScore = scoreEntries[scoreEntries.length - 1][1];
+    const previousScore = scoreEntries.length < 2 ? 0 : scoreEntries[scoreEntries.length - 2][1];
+
+    // 計算差距
+    return latestScore - previousScore;
+  });
+
+  const getScoreByDate = (date: Date): number => {
     const dateKey = formatDateToKey(date);
-    return dailyEarlySleepResults.value[dateKey];
-  };
-
-  // 計算特定日期的分數貢獻
-  const getScoreContributionByDate = (date: Date) => {
-    const result = getResultByDate(date);
-    if (result === undefined) return 0;
-    return result ? SUCCESS_SCORE : FAILURE_SCORE;
-  };
-
-  // 獲取當前總分
-  const getCurrentScore = () => {
-    return totalScore.value;
-  };
-
-  // 清除所有歷史記錄
-  const clearAllHistory = () => {
-    dailyEarlySleepResults.value = {};
-    // 不需要重置 totalScore，因為它是計算屬性
-  };
-
-  // 計算特定日期的累計分數
-  const getScoreByDate = (targetDate: Date) => {
-    let cumulativeScore = 0;
-    const targetDateKey = formatDateToKey(targetDate);
-    
-    // 獲取所有日期並排序
-    const dates = Object.keys(dailyEarlySleepResults.value).sort();
-    
-    // 計算目標日期（含）之前的所有分數
-    for (const dateKey of dates) {
-      // 如果日期大於目標日期，則跳過
-      if (dateKey > targetDateKey) continue;
-      
-      // 累加分數
-      const success = dailyEarlySleepResults.value[dateKey];
-      cumulativeScore += success ? SUCCESS_SCORE : FAILURE_SCORE;
-      // 確保分數不低於最小值
-      cumulativeScore = Math.max(MIN_SCORE, cumulativeScore);
-    }
-    
-    return cumulativeScore;
-  };
-
-  // 獲取一段時間內的每日累計分數
-  const getScoreHistory = (startDate: Date, endDate: Date) => {
-    const history: Record<string, number> = {};
-    const currentDate = new Date(startDate);
-    
-    while (currentDate <= endDate) {
-      const dateKey = formatDateToKey(currentDate);
-      history[dateKey] = getScoreByDate(currentDate);
-      
-      // 移至下一天
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return history;
+    return accDailyScore.value[dateKey] || 0;
   };
 
   return {
     dailyEarlySleepResults,
     recordResult,
-    getResultByDate,
-    getScoreContributionByDate,
-    getCurrentScore,
-    clearAllHistory,
+    isTodayRecorded,
+    accDailyScore,
+    scoreDifference,
     getScoreByDate,
-    getScoreHistory,
     UNIT
   };
 },
