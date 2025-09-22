@@ -71,7 +71,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     while (formatDateToKey(currentDate) <= getTodayKey()) {
       const dateKey = formatDateToKey(currentDate)
 
-      console.log('Calculating score for date:', dateKey);
       if (dailyWorkouts.value[dateKey]) {
 
         // collect weights of activities

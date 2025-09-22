@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 import { computed } from "vue";
 
-const UNIT = '里程數(公尺)'
+const UNIT = '分數'
 
 const generateMockData = () => {
   const mockData: Record<string, number> = {}
@@ -25,116 +25,82 @@ const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   const dailySwimmingDistance = ref<Record<string, number>>(useMockData ? generateMockData() : {});
-  const lastProgressBeforeAdd = ref(0);
-  const lastSwimmingIncrement = ref(0);
 
-  const maxScoreBefore = computed(() => {
-    const beforeScores = Object.values(dailySwimmingDistance.value).slice(0, -1)
-    return Math.max(...beforeScores)
+  const earliestDateKey = computed(() => {
+    const dateKeys = Object.keys(dailySwimmingDistance.value)
+    if (dateKeys.length === 0) {
+      return getTodayKey()
+    }
+    return dateKeys.sort()[0]
   })
 
-  const todayProgress = computed(() => {
-    const todayKey = getTodayKey()
-    const todayScore = dailySwimmingDistance.value[todayKey]
-    return (todayScore / maxScoreBefore.value) * 100
-  })
-
-  const accDailySwimmingDistance = computed(() => {
+  const accDailyScore = computed(() => {
     const scores: { [key: string]: number } = {}
-    Object.entries(dailySwimmingDistance.value).reduce((acc, cur, ind, arr) => {
-      const slicedArray = arr.slice(0, ind);
-      const values = slicedArray.map(v => v[1])
-      const maxValue = slicedArray.length === 0 ? 0 : Math.max(...values)
-      if (slicedArray.length === 0) {
-        if (cur[1] > 0) {
-          const value = acc + 10
-          scores[cur[0]] = value
-          return value
+    const collectedWeightedDistances: number[] = []
+    let currentScore = 0
+    let currentDate = new Date(earliestDateKey.value)
+    while (formatDateToKey(currentDate) <= getTodayKey()) {
+      const dateKey = formatDateToKey(currentDate)
+      if (dailySwimmingDistance.value[dateKey]) {
+        if (collectedWeightedDistances.length === 0 && dailySwimmingDistance.value[dateKey] >= 1000) {
+          currentScore += 3
         } else {
-          scores[cur[0]] = 0
-          return 0
+          const maxWeightedDistance = Math.max(...collectedWeightedDistances)
+          const ratio = dailySwimmingDistance.value[dateKey] / maxWeightedDistance
+          if (ratio >= 1) {
+            currentScore += 3
+          } else if (ratio >= 0.9) {
+            currentScore += 2
+          } else if (ratio >= 0.8) {
+            currentScore += 1
+          } else if (ratio >= 0.7) {
+            currentScore += 0
+          } else if (ratio >= 0.6) {
+            currentScore = Math.max(0, currentScore - 1)
+          } else {
+            currentScore = Math.max(0, currentScore - 2)
+          }
         }
-      } else if (cur[1] > maxValue) {
-        const value = acc + 10
-        scores[cur[0]] = value
-        return value
-      } else if (cur[1] > maxValue * 0.9) {
-        const value = acc + 5
-        scores[cur[0]] = value
-        return value
-      } else if (cur[1] > maxValue * 0.8) {
-        const value = acc
-        scores[cur[0]] = value
-        return value
-      } else if (cur[1] > maxValue * 0.7) {
-        const value = acc >= 5 ? acc - 5 : 0
-        scores[cur[0]] = value
-        return value
-      } else if (cur[1] > maxValue * 0.6) {
-        const value = acc >= 10 ? acc - 10 : 0
-        scores[cur[0]] = value
-        return value
+        collectedWeightedDistances.push(dailySwimmingDistance.value[dateKey])
       } else {
-        const value = acc >= 15 ? acc - 15 : 0
-        scores[cur[0]] = value
-        return value
+        currentScore = Math.max(0, currentScore - 2)
       }
-    }, 0)
+      scores[dateKey] = currentScore
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
     return scores
   })
 
-  const BASE_DISTANCE = 1500
-  const BASE_DURATION = 60
+  const scoreDifference = computed(() => {
+    const scoreEntries = Object.entries(accDailyScore.value);
 
-  const addDistance = (distance: number, duration: number) => {
-    // 保存添加前的進度
-    lastProgressBeforeAdd.value = todayProgress.value || 0;
+    // 按日期排序
+    scoreEntries.sort((a, b) => a[0].localeCompare(b[0]));
 
-    const baseSpeed = BASE_DISTANCE / BASE_DURATION
-    const actualSpeed = distance / duration
-    const speedRatio = actualSpeed / baseSpeed
-    const adjustedDistance = distance * speedRatio
+    // 取得最後兩個分數
+    const latestScore = scoreEntries[scoreEntries.length - 1][1];
+    const previousScore = scoreEntries.length < 2 ? 0 : scoreEntries[scoreEntries.length - 2][1];
 
-    const today = getTodayKey()
-    dailySwimmingDistance.value[today] = (dailySwimmingDistance.value[today] || 0) + Number(adjustedDistance)
-
-    // 計算添加後的進度
-    const currentProgress = todayProgress.value || 0;
-
-    // 計算本次添加的增量
-    lastSwimmingIncrement.value = currentProgress - lastProgressBeforeAdd.value;
-  }
-
-  // 計算最後一次添加游泳的增量
-  const todayProgressIncrease = computed(() => {
-    // 返回最後一次添加游泳的增量
-    return lastSwimmingIncrement.value > 0 ? lastSwimmingIncrement.value : 0;
+    // 計算差距
+    return latestScore - previousScore;
   });
+
+  const addDistance = (weightedDistance: number) => {
+    const today = getTodayKey()
+    dailySwimmingDistance.value[today] = weightedDistance
+  }
 
   const getScoreByDate = (date: Date) => {
     const dateKey = formatDateToKey(date)
-    return accDailySwimmingDistance.value[dateKey] || 0;
+    return accDailyScore.value[dateKey] || 0
   }
-
-  const clearAllHistory = () => {
-    dailySwimmingDistance.value = {}
-  }
-
-  onMounted(() => {
-    const todayKey = getTodayKey()
-    if (dailySwimmingDistance.value[todayKey] === undefined) {
-      dailySwimmingDistance.value[todayKey] = 0
-    }
-  })
 
   return {
     dailySwimmingDistance,
+    accDailyScore,
+    scoreDifference,
     addDistance,
-    accDailySwimmingDistance,
     getScoreByDate,
-    clearAllHistory,
-    todayProgress,
-    todayProgressIncrease,
     UNIT
   };
 },

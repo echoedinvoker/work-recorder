@@ -1,21 +1,15 @@
 <template>
   <div class="space-y-6">
-    <ToggleButton
-      formkey="swimming"
-      :text="['查看游泳紀錄', '新增游泳紀錄']"
-    >
-      <template #form>
-        <SwimmingAddForm />
-      </template>
-
-      <SwimmingChart />
-    </ToggleButton>
+    <!-- 游泳計時按鈕 -->
+    <SwimmingButton />
+    <SwimmingChart v-if="!isRecording" />
   </div>
 </template>
 
 <script setup lang="ts">
-import ToggleButton from '@/components/ui/ToggleButton.vue';
-import SwimmingAddForm from '@/components/swimming/SwimmingAddForm.vue';
+import { useSwimmingRecorder } from '@/composables/useSwimmingRecorder';
 import SwimmingChart from '../swimming/SwimmingChart.vue';
+import SwimmingButton from '@/components/swimming/SwimmingButton.vue';
+const { isRecording } = useSwimmingRecorder();
 </script>
 
