@@ -46,12 +46,14 @@ import { useDailyNoDIYStore } from './stores/dailyNoDIYStore';
 import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
 import { useDailySingPracticeStore } from './stores/dailySingPracticeStore';
 import { useDailyHungryStore } from './stores/dailyHungryStore';
+import { useDailyWorkStore } from './stores/dailyWorkStore';
 // 根據需要導入其他 store
 
 const router = useRouter();
 const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 
 const dailyScoreStore = useDailyScoreStore();
+const workStore = useDailyWorkStore();
 const noSugarStore = useDailyNoSugarStore();
 const workoutStore = useDailyWorkoutStore();
 const faceSportStore = useDailyFaceSportStore();
@@ -70,6 +72,8 @@ const getScoreForRoute = (routeName: string) => {
   switch (routeName) {
     case 'study':
       return dailyScoreStore.getScoreByDate(new Date()) - (dailyScoreStore.getScoreByDate(new Date(yesterday)) || 0);
+    case 'work':
+      return workStore.getScoreByDate(new Date()) - (workStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'noSugar':
       return noSugarStore.getScoreByDate(new Date()) - (noSugarStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'workout':
@@ -77,7 +81,7 @@ const getScoreForRoute = (routeName: string) => {
     case 'faceSport':
       return faceSportStore.getScoreByDate(new Date()) - (faceSportStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'swimming':
-      return swimmingStore.getScoreByDate(new Date()) - (swimmingStore.getScoreByDate(new Date(yesterday)) || 0);
+      return swimmingStore.scoreDifference;
     case 'noDIY':
       return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'earlySleep':

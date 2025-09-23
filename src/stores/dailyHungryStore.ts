@@ -93,4 +93,27 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
     getScoreByDate,
     UNIT
   }
-})
+},
+  {
+    persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
+      serializer: {
+        serialize: (state) => {
+          return JSON.stringify({
+            ...state,
+            startTime: state.startTime?.toISOString() || null,
+            endTime: state.endTime?.toISOString() || null
+          })
+        },
+        deserialize: (value) => {
+          const parsed = JSON.parse(value)
+          return {
+            ...parsed,
+            startTime: parsed.startTime ? new Date(parsed.startTime) : null,
+            endTime: parsed.endTime ? new Date(parsed.endTime) : null
+          }
+        }
+      }
+    }
+  }
+
+)
