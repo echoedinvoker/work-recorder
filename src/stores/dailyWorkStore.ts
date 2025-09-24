@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 
 const UNIT = '分數'
-const TARGET = 5
+const TARGET = 6 
+const SECONDARY_TARGET = 4 // 次要目標分數
 
 const generateMockData = () => {
   const mockData: Record<string, number> = {}
@@ -59,9 +60,9 @@ export const useDailyWorkStore = defineStore('dailyWork', () => {
     let currentDate = new Date(earliestDateKey.value)
     while (formatDateToKey(currentDate) <= getTodayKey()) {
       const dateKey = formatDateToKey(currentDate)
-      if (dailyScores.value[dateKey] === undefined || dailyScores.value[dateKey] < 3) {
+      if (dailyScores.value[dateKey] === undefined || dailyScores.value[dateKey] < SECONDARY_TARGET) {
         currentScore = Math.max(0, currentScore - 1)
-      } else if (dailyScores.value[dateKey] < 5) {
+      } else if (dailyScores.value[dateKey] < TARGET) {
         currentScore += 1
       } else {
         currentScore += 2
