@@ -1,5 +1,10 @@
 <template>
-  <div class="max-w-md mx-auto p-6 text-center">
+  <div 
+    class="max-w-md mx-auto p-6 text-center"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
+  >
     <!-- 導航菜單 -->
     <nav class="mb-8">
       <ul class="flex flex-wrap justify-center gap-2 space-y-2">
@@ -39,6 +44,16 @@
       </ul>
     </nav>
 
+    <!-- 滑動指示器 -->
+    <div class="flex justify-center mb-4 space-x-1">
+      <div 
+        v-for="(route, index) in navigableRoutes" 
+        :key="String(route.name)"
+        class="w-2 h-2 rounded-full transition-all duration-300"
+        :class="currentRouteIndex === index ? 'bg-blue-500' : 'bg-gray-300'"
+      ></div>
+    </div>
+
     <!-- 確認對話框 -->
     <div v-if="showConfirmDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
@@ -63,7 +78,7 @@
 
     <!-- 路由視圖 -->
     <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
+      <transition :name="transitionName" mode="out-in">
         <component :is="Component" />
       </transition>
     </router-view>
@@ -71,8 +86,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useDailyScoreStore } from './stores/dailyScore';
 import { useDailyNoSugarStore } from './stores/dailyNoSugarStore';
 import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
@@ -83,13 +98,28 @@ import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
 import { useDailySingPracticeStore } from './stores/dailySingPracticeStore';
 import { useDailyHungryStore } from './stores/dailyHungryStore';
 import { useDailyWorkStore } from './stores/dailyWorkStore';
-// 根據需要導入其他 store
 
 const router = useRouter();
+const route = useRoute();
 const routes = router.options.routes.filter(route => route.name !== 'NotFound');
+
+// 可導航的路由（排除 NotFound）
+const navigableRoutes = computed(() => routes);
+
+// 當前路由索引
+const currentRouteIndex = computed(() => {
+  return navigableRoutes.value.findIndex(r => r.name === route.name);
+});
+
+// 觸控相關變數
+const touchStartX = ref(0);
+const touchEndX = ref(0);
+const minSwipeDistance = 50;
+const transitionName = ref('slide-left');
 
 const showConfirmDialog = ref(false);
 
+// Store 實例
 const dailyScoreStore = useDailyScoreStore();
 const workStore = useDailyWorkStore();
 const noSugarStore = useDailyNoSugarStore();
@@ -104,18 +134,44 @@ const hungryStore = useDailyHungryStore();
 const today = new Date();
 const yesterday = new Date().setDate(today.getDate() - 1);
 
+// 觸控事件處理
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.touches[0].clientX;
+};
+
+const handleTouchMove = (e: TouchEvent) => {
+  // 可選：防止頁面滾動（如果需要的話）
+  // e.preventDefault();
+};
+
+const handleTouchEnd = (e: TouchEvent) => {
+  touchEndX.value = e.changedTouches[0].clientX;
+  handleSwipe();
+};
+
+// 處理滑動邏輯
+const handleSwipe = () => {
+  const swipeDistance = touchStartX.value - touchEndX.value;
+  const currentIndex = currentRouteIndex.value;
+  
+  // 向左滑動（下一頁）
+  if (swipeDistance > minSwipeDistance && currentIndex < navigableRoutes.value.length - 1) {
+    transitionName.value = 'slide-left';
+    const nextRoute = navigableRoutes.value[currentIndex + 1];
+    router.push({ name: nextRoute.name });
+  }
+  // 向右滑動（上一頁）
+  else if (swipeDistance < -minSwipeDistance && currentIndex > 0) {
+    transitionName.value = 'slide-right';
+    const prevRoute = navigableRoutes.value[currentIndex - 1];
+    router.push({ name: prevRoute.name });
+  }
+};
+
 const clearAllData = () => {
   try {
-    // 清除所有 localStorage
     localStorage.clear();
-    
-    // 重置所有 store 狀態（如果 store 有重置方法的話）
-    // 這裡可以根據您的 store 實現來調用相應的重置方法
-    
-    // 關閉確認對話框
     showConfirmDialog.value = false;
-    
-    // 重新載入頁面以確保所有狀態都被重置
     window.location.reload();
   } catch (error) {
     console.error('清除資料時發生錯誤:', error);
@@ -125,7 +181,6 @@ const clearAllData = () => {
 
 // 根據路由名稱獲取對應的分數
 const getScoreForRoute = (routeName: string) => {
-  // 根據不同的路由名稱返回對應 store 的分數
   switch (routeName) {
     case 'study':
       return dailyScoreStore.getScoreByDate(new Date()) - (dailyScoreStore.getScoreByDate(new Date(yesterday)) || 0);
@@ -148,12 +203,13 @@ const getScoreForRoute = (routeName: string) => {
     case 'singPractice':
       return singPracticeStore.getScoreByDate(new Date()) - (singPracticeStore.getScoreByDate(new Date(yesterday)) || 0);
     default:
-      return 0; // 默認返回 0
+      return 0;
   }
 };
 </script>
 
 <style>
+/* 原有的 fade 動畫 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -162,6 +218,30 @@ const getScoreForRoute = (routeName: string) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 新增的滑動動畫 */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+
+.slide-left-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-right-enter-from {
+  transform: translateX(-100%);
+}
+
+.slide-right-leave-to {
+  transform: translateX(100%);
 }
 </style>
 
