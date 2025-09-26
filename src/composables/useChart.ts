@@ -123,6 +123,14 @@ export function useChart(scoreProvider: ScoreProvider) {
     return Math.max(...chartData.value.map(item => item.score), 0)
   })
 
+  const todayProgress = computed(() => {
+    return scoreProvider.todayProgress ?? 0
+  })
+
+  const todayProgressIncrease = computed(() => {
+    return scoreProvider.todayProgressIncrease ?? 0
+  })
+
   // Actions
   const toggleChartPeriod = () => {
     if (currentPeriod.value === 'day') {
@@ -143,8 +151,8 @@ export function useChart(scoreProvider: ScoreProvider) {
 
     // States
     currentPeriod,
-    todayProgress: scoreProvider.todayProgress,
-    todayProgressIncrease: scoreProvider.todayProgressIncrease,
+    todayProgress,
+    todayProgressIncrease,
 
     // Computed properties
     chartTitle,

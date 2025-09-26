@@ -39,7 +39,7 @@
 import { useRouter } from 'vue-router';
 import { useDailyScoreStore } from './stores/dailyScore';
 import { useDailyNoSugarStore } from './stores/dailyNoSugarStore';
-import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
+// import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
 import { useDailyFaceSportStore } from './stores/dailyFaceSportStore';
 import { useDailySwimmingStore } from './stores/dailySwimmingStore';
 import { useDailyNoDIYStore } from './stores/dailyNoDIYStore';
@@ -55,7 +55,7 @@ const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 const dailyScoreStore = useDailyScoreStore();
 const workStore = useDailyWorkStore();
 const noSugarStore = useDailyNoSugarStore();
-const workoutStore = useDailyWorkoutStore();
+// const workoutStore = useDailyWorkoutStore();
 const faceSportStore = useDailyFaceSportStore();
 const swimmingStore = useDailySwimmingStore();
 const noDIYStore = useDailyNoDIYStore();
@@ -76,8 +76,8 @@ const getScoreForRoute = (routeName: string) => {
       return workStore.getScoreByDate(new Date()) - (workStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'noSugar':
       return noSugarStore.getScoreByDate(new Date()) - (noSugarStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'workout':
-      return workoutStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
+    // case 'workout':
+    //   return workoutStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'faceSport':
       return faceSportStore.getScoreByDate(new Date()) - (faceSportStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'swimming':

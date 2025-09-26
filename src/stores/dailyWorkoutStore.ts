@@ -5,387 +5,343 @@ import { computed } from "vue";
 
 const UNIT = '重量(公斤)'
 
-const generateMockData = () => {
-  const mockData: Record<string, Record<string, number>> = {};
-  const today = new Date();
-
-  // 活動類型列表
-  const activityTypes = ['running', 'cycling', 'swimming'];
-
-  // 生成過去 14 天的假資料
-  for (let i = 13; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    const dateKey = formatDateToKey(date);
-
-    // 為每天隨機選擇要記錄的活動類型
-    mockData[dateKey] = {};
-
-    // 隨機決定今天要記錄哪些活動
-    activityTypes.forEach(activity => {
-      // 有 70% 的機率會記錄此活動
-      if (Math.random() > 0.3) {
-        // 根據活動類型設定不同的隨機範圍
-        switch (activity) {
-          case 'running':
-            mockData[dateKey][activity] = Math.floor(Math.random() * 10); // 0-10
-            break;
-          case 'cycling':
-            mockData[dateKey][activity] = Math.floor(Math.random() * 5); // 0-5
-            break;
-          case 'swimming':
-            mockData[dateKey][activity] = Math.floor(Math.random() * 3); // 0-3
-            break;
-        }
-      }
-      // 如果沒有通過機率檢查，則不記錄此活動
-    });
-
-  }
-
-  return mockData;
+interface WorkoutRecord {
+  [date: string]: {
+    [activity: string]: {
+      count: number;
+      weight: number;
+    }[];
+  };
 }
 
-const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
-
 export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
-  const dailyWorkouts = ref<Record<string, Record<string, number>>>(useMockData ? generateMockData() : {});
-  const lastProgressBeforeAdd = ref(0);
-  const lastWorkoutIncrement = ref(0);
+  const records = ref<WorkoutRecord>({});
+  const weightedRecords = ref<{ [date: string]: number }>({});
+  const scores = ref<{ [date: string]: number }>({});
+  const ratios = ref<{ [date: string]: number }>({});
+  const ratioIncrements = ref<{ [date: string]: number }>({});
 
-  const earliestDateKey = computed(() => {
-    const dateKeys = Object.keys(dailyWorkouts.value)
-    if (dateKeys.length === 0) {
-      return getTodayKey()
-    }
+  const firstDateKey = computed<string>(() => {
+    const dateKeys = Object.keys(records.value)
+    if (dateKeys.length === 0) return getTodayKey()
     return dateKeys.sort()[0]
   })
+  const pastRecords = computed<WorkoutRecord>(() => {
+    const todayKey = getTodayKey()
+    const filteredRecords: WorkoutRecord = {}
 
-  const accDailyScore = computed(() => {
-    const scores: { [key: string]: number } = {}
-    const weightedWeights: { [key: string]: number } = {}
-    let currentScore = 0
-    let currentDate = new Date(earliestDateKey.value)
-    const currentActivities: { [key: string]: number[] } = {}
+    Object.keys(records.value).forEach(dateKey => {
+      if (dateKey !== todayKey) {
+        filteredRecords[dateKey] = records.value[dateKey]
+      }
+    })
 
-    while (formatDateToKey(currentDate) <= getTodayKey()) {
-      const dateKey = formatDateToKey(currentDate)
+    return filteredRecords
+  })
+  const averageWeightByActivity = computed<{ [activity: string]: number }>(() => {
+    const activityWeights: { [activity: string]: number[] } = {}
 
-      if (dailyWorkouts.value[dateKey]) {
-
-        // collect weights of activities
-        Object.entries(dailyWorkouts.value[dateKey]).forEach(([activity, value]) => {
-          if (!value) return
-          currentActivities[activity] = [...(currentActivities[activity] || []), value]
+    Object.values(pastRecords.value).forEach(dayRecord => {
+      Object.entries(dayRecord).forEach(([activity, sets]) => {
+        if (!activityWeights[activity]) {
+          activityWeights[activity] = []
+        }
+        sets.forEach(set => {
+          for (let i = 0; i < set.count; i++) {
+            activityWeights[activity].push(set.weight)
+          }
         })
+      })
+    })
 
-        const averageWeights: { [activityName: string]: number } = {};
+    const averageWeights: { [activity: string]: number } = {}
 
-        // 計算每個活動的平均重量（取最後10次記錄）
-        Object.keys(currentActivities).forEach((activity) => {
-          const activityRecords = currentActivities[activity];
-          // 取最後10次記錄，如果不足10次則取所有記錄
-          const recentRecords = activityRecords.length > 10
-            ? activityRecords.slice(-10)
-            : activityRecords;
+    Object.entries(activityWeights).forEach(([activity, weights]) => {
+      const totalWeight = weights.reduce((a, b) => a + b, 0)
+      const averageWeight = weights.length ? Math.round(totalWeight / weights.length) : 0
+      averageWeights[activity] = averageWeight
+    })
 
-          // 計算平均值
-          if (recentRecords.length > 0) {
-            const sum = recentRecords.reduce((acc, weight) => acc + weight, 0);
-            averageWeights[activity] = sum / recentRecords.length;
-          } else {
-            averageWeights[activity] = 0; // 如果沒有記錄，設為0
-          }
-        });
-
-        // 計算當天各活動的權重
-        const todayActivities = Object.keys(dailyWorkouts.value[dateKey]);
-        const activityWeightsForDay: { [key: string]: number } = {};
-
-        if (todayActivities.length > 0) {
-          // 計算所有活動的平均權重總和
-          const totalAverageWeight = todayActivities.reduce((sum, activity) => {
-            return sum + (averageWeights[activity] || 0);
-          }, 0);
-
-          // 計算權重乘數，使得所有活動的權重平均為1
-          const weightMultiplier = todayActivities.length / (totalAverageWeight || 1); // 避免除以零
-
-          // 為每個活動計算權重
-          todayActivities.forEach(activity => {
-            // 反轉權重計算邏輯：使用倒數關係
-            // 如果平均重量為0，則給予一個預設權重
-            if (averageWeights[activity] === 0) {
-              activityWeightsForDay[activity] = weightMultiplier; // 給予平均權重
-            } else {
-              // 使用倒數關係：1/平均重量，然後再乘以調整因子
-              const inverseWeight = 1 / averageWeights[activity];
-
-              // 計算所有活動的倒數總和，用於標準化
-              const totalInverseWeight = todayActivities.reduce((sum, act) => {
-                return sum + (averageWeights[act] ? 1 / averageWeights[act] : weightMultiplier);
-              }, 0);
-
-              // 標準化權重，使得所有權重的平均值為1
-              activityWeightsForDay[activity] = (inverseWeight / totalInverseWeight) * todayActivities.length;
-            }
-          });
-
-        } else {
-          scores[dateKey] = Math.max(0, currentScore - 5);
-        }
-
-        // 計算當天的加權後總重量
-        todayActivities.forEach(activity => {
-          // 獲取當天該活動的原始值
-          const activityValue = dailyWorkouts.value[dateKey][activity] || 0;
-          // 使用計算出的權重乘以原始值
-          const weightedValue = activityValue * (activityWeightsForDay[activity] || 0);
-          // 累加到當天總分
-          weightedWeights[dateKey] = (weightedWeights[dateKey] || 0) + weightedValue;
-        });
-
-        // 計算當天分數
-        // 找出之前所有日期的加權後總重量的最大值
-        const previousDates = Object.keys(weightedWeights).filter(date => date < dateKey);
-        const maxPreviousWeight = previousDates.length > 0
-          ? Math.max(...previousDates.map(date => weightedWeights[date] || 0))
-          : 0;
-
-        const todayWeightedWeight = weightedWeights[dateKey] || 0;
-
-        // 根據今天的加權總重量與之前最大值的比較來計算分數
-        if (todayWeightedWeight > maxPreviousWeight) {
-          currentScore += 5;
-        } else if (todayWeightedWeight > maxPreviousWeight * 0.9) {
-          currentScore += 3;
-        } else if (todayWeightedWeight > maxPreviousWeight * 0.8) {
-          currentScore += 1;
-        } else if (todayWeightedWeight > maxPreviousWeight * 0.7) {
-          currentScore -= 1;
-        } else {
-          currentScore -= 3;
-        }
-
-        scores[dateKey] = currentScore;
-
-      } else {
-        currentScore = Math.max(0, currentScore - 5)
-        scores[dateKey] = currentScore
-      }
-
-      currentDate.setDate(currentDate.getDate() + 1)
-    }
-    return scores
+    return averageWeights
   })
+  const activityWeights = computed<{ [activity: string]: number }>(() => {
+    const averages = averageWeightByActivity.value
+    const activities = Object.keys(averages)
 
+    if (activities.length === 0) return {}
 
-  // 計算每個活動的權重
-  const activityWeights = computed(() => {
-    // 1. 收集所有活動類型
-    const activityTypes = new Set<string>();
-    Object.values(dailyWorkouts.value).forEach(dayRecord => {
+    // 找出最大平均重量
+    const maxWeight = Math.max(...Object.values(averages))
+
+    // 使用反比例計算權重：權重 = 最大重量 / 當前重量
+    const weights: { [activity: string]: number } = {}
+
+    activities.forEach(activity => {
+      const avgWeight = averages[activity]
+      // 避免除以零，如果重量為0則給予最大權重
+      weights[activity] = avgWeight > 0 ? maxWeight / avgWeight : maxWeight
+    })
+
+    return weights
+  })
+  const activityList = computed<string[]>(() => {
+    const activitiesSet = new Set<string>()
+    Object.values(records.value).forEach(dayRecord => {
       Object.keys(dayRecord).forEach(activity => {
-        activityTypes.add(activity);
-      });
-    });
+        activitiesSet.add(activity)
+      })
+    })
+    return Array.from(activitiesSet)
+  })
+  const todayActivityList = computed<string[]>(() => {
+    const todayKey = getTodayKey()
+    return records.value[todayKey] ? Object.keys(records.value[todayKey]) : []
+  })
+  const normalizedTodayActivityWeights = computed<{ [activity: string]: number }>(() => {
+    const todayActivities = todayActivityList.value
+    const weights = activityWeights.value
+    let noWeightedActivities = 0
 
-    // 2. 計算每個活動的平均值
-    const averages: Record<string, number> = {};
+    if (todayActivities.length === 0) return {}
 
-    activityTypes.forEach(activity => {
-      // 收集特定活動的所有記錄
-      const records: number[] = [];
-      Object.values(dailyWorkouts.value).forEach(dayRecord => {
-        if (dayRecord[activity] !== undefined) {
-          records.push(dayRecord[activity]);
-        }
-      });
-
-      // 取最近十次記錄或所有記錄
-      const recentRecords = records.length > 10 ? records.slice(-10) : records;
-
-      // 計算平均值
-      if (recentRecords.length > 0) {
-        averages[activity] = recentRecords.reduce((sum, val) => sum + val, 0) / recentRecords.length;
+    const todayWeights: { [activity: string]: number } = {}
+    todayActivities.forEach(activity => {
+      if (weights[activity]) {
+        todayWeights[activity] = weights[activity]
       } else {
-        averages[activity] = 0; // 如果沒有記錄，設為 0
+        noWeightedActivities += 1
       }
-    });
+    })
 
-    // 3. 計算所有活動的總平均值
-    const totalAverage = Object.values(averages).reduce((sum, val) => sum + val, 0);
-    const averagePerActivity = totalAverage / activityTypes.size;
+    const totalWeight = Object.values(todayWeights).reduce((sum, weight) => sum + weight, 0)
 
-    // 4. 計算每個活動的調整係數 (adjustment factor)
-    const weights: Record<string, number> = {};
+    const normalizedWeights: { [activity: string]: number } = {}
+    const targetTotal = todayActivities.length - noWeightedActivities
 
-    // 如果總和為 0，平均分配權重
-    if (totalAverage === 0) {
-      const equalWeight = 1 / activityTypes.size;
-      activityTypes.forEach(activity => {
-        weights[activity] = equalWeight;
-      });
-    } else {
-      // 計算調整係數：平均時間 / 原始時間
-      activityTypes.forEach(activity => {
-        if (averages[activity] === 0) {
-          weights[activity] = 0; // 避免除以零
-        } else {
-          // 調整係數 = 平均每個活動的時間 / 該活動的平均時間
-          weights[activity] = averagePerActivity / averages[activity];
+    todayActivities.forEach(activity => {
+      normalizedWeights[activity] = (todayWeights[activity] / totalWeight) * targetTotal
+    })
+
+    todayActivities.forEach(activity => {
+      if (!normalizedWeights[activity]) {
+        normalizedWeights[activity] = 1
+      }
+    })
+
+    return normalizedWeights
+  })
+  const pastWeightedRecords = computed<{ [date: string]: number }>(() => {
+    const todayKey = getTodayKey()
+    const filteredWeights: { [date: string]: number } = {}
+
+    Object.keys(weightedRecords.value).forEach(dateKey => {
+      if (dateKey !== todayKey) {
+        filteredWeights[dateKey] = weightedRecords.value[dateKey]
+      }
+    })
+
+    return filteredWeights
+  })
+  const maxPastWeightedRecord = computed<number>(() => {
+    const pastWeights = Object.values(pastWeightedRecords.value)
+    if (pastWeights.length === 0) return 0
+    return Math.max(...pastWeights)
+  })
+  const todayRatio = computed<number>(() => {
+    const todayKey = getTodayKey()
+    return ratios.value[todayKey] || 0
+  })
+  const todayRatioIncrement = computed<number>(() => {
+    const todayKey = getTodayKey()
+    return ratioIncrements.value[todayKey] || 0
+  })
+
+  const addOneSet = (activity: string, count: number, weight: number) => {
+    const todayKey = getTodayKey()
+    if (!records.value[todayKey]) {
+      records.value[todayKey] = {}
+    }
+    if (!records.value[todayKey][activity]) {
+      records.value[todayKey][activity] = []
+    }
+    records.value[todayKey][activity].push({ count, weight })
+
+    weightedRecords.value[todayKey] =
+      (weightedRecords.value[todayKey] || 0) +
+      count * weight * normalizedTodayActivityWeights.value[activity]
+
+    if (maxPastWeightedRecord.value === 0) {
+      scores.value[todayKey] = 10
+      return
+    }
+
+    const lastScoreDateKey = Object.keys(scores.value).filter(key => key !== todayKey).sort().pop()
+    // filling scores from lastScoreDateKey to todayKey - 1
+    if (lastScoreDateKey) {
+      let startScore = scores.value[lastScoreDateKey]
+      for (let date = new Date(lastScoreDateKey); formatDateToKey(date) < todayKey; date.setDate(date.getDate() + 1)) {
+        const dateKey = formatDateToKey(date)
+        if (!scores.value[dateKey]) {
+          scores.value[dateKey] = Math.max(0, startScore - 5) // 每天遞減5分
         }
-      });
-    }
-
-    return weights;
-  });
-
-  const dailyScore = computed(() => {
-    const scores: Record<string, number> = {};
-
-    // 遍歷每一天的記錄
-    Object.entries(dailyWorkouts.value).forEach(([dateKey, activities]) => {
-      let dayScore = 0;
-
-      // 計算當天活動的總權重
-      const dailyActivities = Object.keys(activities);
-      const totalDailyWeight = dailyActivities.reduce((sum, activity) => {
-        return sum + (activityWeights.value[activity] || 0);
-      }, 0);
-
-      // 只有當總權重大於0時才進行計算
-      if (totalDailyWeight > 0) {
-        // 遍歷該天的每個活動，並根據當天的權重計算分數
-        Object.entries(activities).forEach(([activity, value]) => {
-          // 如果該活動有權重，則計算加權分數
-          if (activityWeights.value[activity] !== undefined) {
-            dayScore += value * activityWeights.value[activity];
-          }
-        });
       }
+    }
 
-      // 四捨五入到整數
-      scores[dateKey] = Math.round(dayScore);
-    });
+    const ratio = weightedRecords.value[todayKey] / maxPastWeightedRecord.value
+    ratioIncrements.value[todayKey] = ratio - (ratios.value[todayKey] || 0)
+    ratios.value[todayKey] = ratio
+    const lastDateKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
 
-    return scores;
-  });
+    if (ratio >= 1) {
+      scores.value[todayKey] = scores.value[lastDateKey] ? scores.value[lastDateKey] + 10 : 10
+    } else if (ratio >= 0.8) {
+      scores.value[todayKey] = scores.value[lastDateKey] ? scores.value[lastDateKey] + 5 : 5
+    } else if (ratio >= 0.6) {
+      scores.value[todayKey] = scores.value[lastDateKey] ? scores.value[lastDateKey] + 2 : 2
+    } else {
+      scores.value[todayKey] = scores.value[lastDateKey] ? Math.max(0, scores.value[lastDateKey] - 5) : 0
+    }
+  }
 
-  const maxScoreBefore = computed(() => {
-    const beforeScores = Object.values(dailyScore.value).slice(0, -1)
-    return Math.max(...beforeScores)
-  })
-
-  const todayProgress = computed(() => {
-    const todayKey = formatDateToKey(new Date());
-    const todayScore = dailyScore.value[todayKey]
-    return (todayScore / maxScoreBefore.value) * 100
-  })
-
-  const workoutOptions = computed(() => {
-    // 創建一個 Set 來收集所有不重複的運動類型
-    const workoutTypes = new Set<string>();
-
-    // 遍歷所有日期的運動記錄，收集所有運動類型
-    Object.values(dailyWorkouts.value).forEach(dayRecord => {
-      Object.keys(dayRecord).forEach(workout => {
-        workoutTypes.add(workout);
-      });
-    });
-
-    // 將 Set 轉換為所需的陣列格式，並添加預設選項
-    const options = [
-      { value: '', label: '選擇動作' },
-      // 將每個運動類型轉換為選項物件，並將首字母大寫
-      ...Array.from(workoutTypes).map(workout => ({
-        value: workout,
-        label: workout.charAt(0).toUpperCase() + workout.slice(1)
-      }))
-    ];
-
-    return options;
-  });
-
-  const getScoreByDate = (date: Date) => {
+  const getScoreByDate = (date: Date): number => {
     const dateKey = formatDateToKey(date)
-    return accDailyScore.value[dateKey] || 0
+    return scores.value[dateKey] || 0
   }
 
-  const addWorkout = (workout: string, count: number, weight: number, date: Date = new Date()) => {
-    // 保存添加前的進度
-    lastProgressBeforeAdd.value = todayProgress.value || 0;
+  // 添加今日進度相關的計算屬性
+  const todayProgress = computed<number>(() => {
+    return todayRatio.value * 100 // 將比例轉換為百分比
+  })
 
-    const dateKey = formatDateToKey(date);
+  const todayProgressIncrease = computed<number>(() => {
+    return todayRatioIncrement.value * 100 // 將比例增量轉換為百分比
+  })
 
-    // 如果該日期還沒有記錄，先創建一個空物件
-    if (!dailyWorkouts.value[dateKey]) {
-      dailyWorkouts.value[dateKey] = {};
-    }
-
-    if (!dailyWorkouts.value[dateKey][workout]) {
-      dailyWorkouts.value[dateKey][workout] = 0; // 初始化運動記錄為 0
-    }
-
-    dailyWorkouts.value[dateKey][workout] += Number(count) * Number(weight);
-
-    // 計算添加後的進度
-    const currentProgress = todayProgress.value || 0;
-
-    // 計算本次添加的增量
-    lastWorkoutIncrement.value = currentProgress - lastProgressBeforeAdd.value;
-  }
-
-  // 計算最後一次添加運動的增量
-  const todayProgressIncrease = computed(() => {
-    // 返回最後一次添加運動的增量
-    return lastWorkoutIncrement.value > 0 ? lastWorkoutIncrement.value : 0;
-  });
-
-  const resetStore = () => {
-    // 重置 dailyWorkouts 為空物件
-    dailyWorkouts.value = {};
-
-    // 清除 localStorage 中的相關資料
-    if (!useMockData) {
-      const storageKey = 'dailyWorkout'; // Pinia 持久化存儲的默認鍵名
-      localStorage.removeItem(storageKey);
+  records.value = {
+    ...records.value,
+    "2025-09-23": {
+      "伏地挺身": [
+        { count: 15, weight: 0 },
+        { count: 12, weight: 0 },
+        { count: 10, weight: 0 }
+      ],
+      "深蹲": [
+        { count: 20, weight: 40 },
+        { count: 18, weight: 40 },
+        { count: 15, weight: 40 }
+      ],
+      "臥推": [
+        { count: 8, weight: 60 },
+        { count: 6, weight: 60 },
+        { count: 5, weight: 60 }
+      ]
+    },
+    "2025-09-24": {
+      "伏地挺身": [
+        { count: 18, weight: 0 },
+        { count: 15, weight: 0 },
+        { count: 12, weight: 0 }
+      ],
+      "引體向上": [
+        { count: 8, weight: 0 },
+        { count: 6, weight: 0 },
+        { count: 5, weight: 0 }
+      ],
+      "硬舉": [
+        { count: 5, weight: 80 },
+        { count: 5, weight: 80 },
+        { count: 4, weight: 80 }
+      ],
+      "肩推": [
+        { count: 10, weight: 30 },
+        { count: 8, weight: 30 },
+        { count: 6, weight: 30 }
+      ]
+    },
+    "2025-09-25": {
+      "深蹲": [
+        { count: 22, weight: 45 },
+        { count: 20, weight: 45 },
+        { count: 18, weight: 45 }
+      ],
+      "臥推": [
+        { count: 10, weight: 65 },
+        { count: 8, weight: 65 },
+        { count: 6, weight: 65 }
+      ],
+      "划船": [
+        { count: 12, weight: 50 },
+        { count: 10, weight: 50 },
+        { count: 8, weight: 50 }
+      ],
+      "二頭彎舉": [
+        { count: 15, weight: 15 },
+        { count: 12, weight: 15 },
+        { count: 10, weight: 15 }
+      ]
     }
   };
 
+  // 為 weightedRecords 添加假資料 (根據運動量和權重計算的總分)
+  weightedRecords.value = {
+    ...weightedRecords.value,
+    "2025-09-23": 2850,  // 基於運動組合計算的加權分數
+    "2025-09-24": 3200,  // 較高強度的訓練日
+    "2025-09-25": 3450   // 最高強度的訓練日
+  };
+
+  // 為 scores 添加假資料 (基於表現的評分系統)
+  scores.value = {
+    ...scores.value,
+    "2025-09-23": 75,   // 良好的開始分數
+    "2025-09-24": 85,   // 進步了10分
+    "2025-09-25": 95    // 持續進步，接近滿分
+  };
   return {
-    dailyWorkouts,
+    UNIT,
+
+    records,
+    weightedRecords,
+    scores,
+    ratios,
+    ratioIncrements,
+
+    pastRecords,
+    firstDateKey,
+    averageWeightByActivity,
     activityWeights,
-    dailyScore,
-    accDailyScore,
-    workoutOptions,
-    getScoreByDate,
-    addWorkout,
-    resetStore,
+    activityList,
+    todayActivityList,
+    normalizedTodayActivityWeights,
+    maxPastWeightedRecord,
+    todayRatio,
+    todayRatioIncrement,
+
+    addOneSet,
     todayProgress,
     todayProgressIncrease,
-    UNIT
+    getScoreByDate
   };
 },
-  {
-    persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
-      serializer: {
-        serialize: (state) => {
-          return JSON.stringify({
-            ...state,
-            startTime: state.startTime?.toISOString() || null,
-            endTime: state.endTime?.toISOString() || null
-          })
-        },
-        deserialize: (value) => {
-          const parsed = JSON.parse(value)
-          return {
-            ...parsed,
-            startTime: parsed.startTime ? new Date(parsed.startTime) : null,
-            endTime: parsed.endTime ? new Date(parsed.endTime) : null
-          }
-        }
-      }
-    }
-  }
+  // {
+  //   persist: {
+  //     serializer: {
+  //       serialize: (state) => {
+  //         return JSON.stringify({
+  //           ...state,
+  //           startTime: state.startTime?.toISOString() || null,
+  //           endTime: state.endTime?.toISOString() || null
+  //         })
+  //       },
+  //       deserialize: (value) => {
+  //         const parsed = JSON.parse(value)
+  //         return {
+  //           ...parsed,
+  //           startTime: parsed.startTime ? new Date(parsed.startTime) : null,
+  //           endTime: parsed.endTime ? new Date(parsed.endTime) : null
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 )

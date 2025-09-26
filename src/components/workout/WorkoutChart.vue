@@ -38,8 +38,6 @@ const {
   chartTitle,
   chartData,
   yAxisMax,
-  avgScore,
-  maxScore,
   todayProgress,
   todayProgressIncrease
 } = useChart(dailyWorkoutStore);

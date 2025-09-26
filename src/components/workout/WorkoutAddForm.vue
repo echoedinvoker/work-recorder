@@ -1,7 +1,7 @@
 <template>
   <TheForm title="新增動作" :handleSubmit="handleSubmit">
-    <FormInput type="select" v-model="selectWorkout" :options="workoutStore.workoutOptions"
-      v-if="workoutStore.workoutOptions.length > 1 && !inputWorkout" />
+    <FormInput type="select" v-model="selectWorkout" :options="activityOptions"
+      v-if="workoutStore.activityList.length > 1 && !inputWorkout" />
     <template v-if="!selectWorkout">
       <FormInput v-model="inputWorkout" type="text" placeholder="動作名稱" />
     </template>
@@ -21,7 +21,7 @@
 import TheForm from '../ui/TheForm.vue';
 import FormInput from '../ui/FormInput.vue'; // 引入新的 FormInput 組件
 import BaseButton from '../ui/BaseButton.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
 import { useToggleButton } from '@/composables/useToggleButton';
 
@@ -33,12 +33,18 @@ const inputWeight = ref<number | undefined>(undefined); // 用於綁定重量輸
 const workoutStore = useDailyWorkoutStore();
 const { toggleForm } = useToggleButton('workout');
 
+const activityOptions = computed(() => 
+  workoutStore.activityList.map(activity => ({
+    value: activity,
+    label: activity
+  }))
+);
+
 const handleSubmit = () => {
   const workout = selectWorkout.value || inputWorkout.value;
   
   if (workout && inputNumber.value && inputWeight.value) {
-    // 調用 store 的 addWorkout action
-    workoutStore.addWorkout(
+    workoutStore.addOneSet(
       workout,
       inputNumber.value,
       inputWeight.value
