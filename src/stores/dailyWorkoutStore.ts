@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 import { computed } from "vue";
 
@@ -217,86 +217,87 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     return todayRatioIncrement.value * 100 // 將比例增量轉換為百分比
   })
 
-  records.value = {
-    ...records.value,
-    "2025-09-23": {
-      "伏地挺身": [
-        { count: 15, weight: 0 },
-        { count: 12, weight: 0 },
-        { count: 10, weight: 0 }
-      ],
-      "深蹲": [
-        { count: 20, weight: 40 },
-        { count: 18, weight: 40 },
-        { count: 15, weight: 40 }
-      ],
-      "臥推": [
-        { count: 8, weight: 60 },
-        { count: 6, weight: 60 },
-        { count: 5, weight: 60 }
-      ]
-    },
-    "2025-09-24": {
-      "伏地挺身": [
-        { count: 18, weight: 0 },
-        { count: 15, weight: 0 },
-        { count: 12, weight: 0 }
-      ],
-      "引體向上": [
-        { count: 8, weight: 0 },
-        { count: 6, weight: 0 },
-        { count: 5, weight: 0 }
-      ],
-      "硬舉": [
-        { count: 5, weight: 80 },
-        { count: 5, weight: 80 },
-        { count: 4, weight: 80 }
-      ],
-      "肩推": [
-        { count: 10, weight: 30 },
-        { count: 8, weight: 30 },
-        { count: 6, weight: 30 }
-      ]
-    },
-    "2025-09-25": {
-      "深蹲": [
-        { count: 22, weight: 45 },
-        { count: 20, weight: 45 },
-        { count: 18, weight: 45 }
-      ],
-      "臥推": [
-        { count: 10, weight: 65 },
-        { count: 8, weight: 65 },
-        { count: 6, weight: 65 }
-      ],
-      "划船": [
-        { count: 12, weight: 50 },
-        { count: 10, weight: 50 },
-        { count: 8, weight: 50 }
-      ],
-      "二頭彎舉": [
-        { count: 15, weight: 15 },
-        { count: 12, weight: 15 },
-        { count: 10, weight: 15 }
-      ]
-    }
-  };
+  // records.value = {
+  //   ...records.value,
+  //   "2025-09-23": {
+  //     "伏地挺身": [
+  //       { count: 15, weight: 0 },
+  //       { count: 12, weight: 0 },
+  //       { count: 10, weight: 0 }
+  //     ],
+  //     "深蹲": [
+  //       { count: 20, weight: 40 },
+  //       { count: 18, weight: 40 },
+  //       { count: 15, weight: 40 }
+  //     ],
+  //     "臥推": [
+  //       { count: 8, weight: 60 },
+  //       { count: 6, weight: 60 },
+  //       { count: 5, weight: 60 }
+  //     ]
+  //   },
+  //   "2025-09-24": {
+  //     "伏地挺身": [
+  //       { count: 18, weight: 0 },
+  //       { count: 15, weight: 0 },
+  //       { count: 12, weight: 0 }
+  //     ],
+  //     "引體向上": [
+  //       { count: 8, weight: 0 },
+  //       { count: 6, weight: 0 },
+  //       { count: 5, weight: 0 }
+  //     ],
+  //     "硬舉": [
+  //       { count: 5, weight: 80 },
+  //       { count: 5, weight: 80 },
+  //       { count: 4, weight: 80 }
+  //     ],
+  //     "肩推": [
+  //       { count: 10, weight: 30 },
+  //       { count: 8, weight: 30 },
+  //       { count: 6, weight: 30 }
+  //     ]
+  //   },
+  //   "2025-09-25": {
+  //     "深蹲": [
+  //       { count: 22, weight: 45 },
+  //       { count: 20, weight: 45 },
+  //       { count: 18, weight: 45 }
+  //     ],
+  //     "臥推": [
+  //       { count: 10, weight: 65 },
+  //       { count: 8, weight: 65 },
+  //       { count: 6, weight: 65 }
+  //     ],
+  //     "划船": [
+  //       { count: 12, weight: 50 },
+  //       { count: 10, weight: 50 },
+  //       { count: 8, weight: 50 }
+  //     ],
+  //     "二頭彎舉": [
+  //       { count: 15, weight: 15 },
+  //       { count: 12, weight: 15 },
+  //       { count: 10, weight: 15 }
+  //     ]
+  //   }
+  // };
+  //
+  // // 為 weightedRecords 添加假資料 (根據運動量和權重計算的總分)
+  // weightedRecords.value = {
+  //   ...weightedRecords.value,
+  //   "2025-09-23": 2850,  // 基於運動組合計算的加權分數
+  //   "2025-09-24": 3200,  // 較高強度的訓練日
+  //   "2025-09-25": 3450   // 最高強度的訓練日
+  // };
+  //
+  // // 為 scores 添加假資料 (基於表現的評分系統)
+  // scores.value = {
+  //   ...scores.value,
+  //   "2025-09-23": 75,   // 良好的開始分數
+  //   "2025-09-24": 85,   // 進步了10分
+  //   "2025-09-25": 95    // 持續進步，接近滿分
+  // };
 
-  // 為 weightedRecords 添加假資料 (根據運動量和權重計算的總分)
-  weightedRecords.value = {
-    ...weightedRecords.value,
-    "2025-09-23": 2850,  // 基於運動組合計算的加權分數
-    "2025-09-24": 3200,  // 較高強度的訓練日
-    "2025-09-25": 3450   // 最高強度的訓練日
-  };
-
-  // 為 scores 添加假資料 (基於表現的評分系統)
-  scores.value = {
-    ...scores.value,
-    "2025-09-23": 75,   // 良好的開始分數
-    "2025-09-24": 85,   // 進步了10分
-    "2025-09-25": 95    // 持續進步，接近滿分
-  };
   return {
     UNIT,
 
@@ -323,25 +324,25 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     getScoreByDate
   };
 },
-  // {
-  //   persist: {
-  //     serializer: {
-  //       serialize: (state) => {
-  //         return JSON.stringify({
-  //           ...state,
-  //           startTime: state.startTime?.toISOString() || null,
-  //           endTime: state.endTime?.toISOString() || null
-  //         })
-  //       },
-  //       deserialize: (value) => {
-  //         const parsed = JSON.parse(value)
-  //         return {
-  //           ...parsed,
-  //           startTime: parsed.startTime ? new Date(parsed.startTime) : null,
-  //           endTime: parsed.endTime ? new Date(parsed.endTime) : null
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  {
+    persist: {
+      serializer: {
+        serialize: (state) => {
+          return JSON.stringify({
+            ...state,
+            startTime: state.startTime?.toISOString() || null,
+            endTime: state.endTime?.toISOString() || null
+          })
+        },
+        deserialize: (value) => {
+          const parsed = JSON.parse(value)
+          return {
+            ...parsed,
+            startTime: parsed.startTime ? new Date(parsed.startTime) : null,
+            endTime: parsed.endTime ? new Date(parsed.endTime) : null
+          }
+        }
+      }
+    }
+  }
 )

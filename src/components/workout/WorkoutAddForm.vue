@@ -15,6 +15,36 @@
       <BaseButton type="submit" color="green" text="新增紀錄" />
     </div>
   </TheForm>
+
+  <!-- 最近記錄清單 -->
+  <div v-if="recentSets.length > 0" class="mt-6">
+    <h3 class="text-lg font-semibold mb-3 text-gray-700">最近記錄</h3>
+    <div class="space-y-2">
+      <div 
+        v-for="(set, index) in recentSets" 
+        :key="`${set.date}-${index}`"
+        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+      >
+        <!-- 左側：次數和重量 -->
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-1">
+            <span class="text-lg font-bold text-blue-600">{{ set.count }}</span>
+            <span class="text-sm text-gray-500">次</span>
+          </div>
+          <div class="w-px h-6 bg-gray-300"></div>
+          <div class="flex items-center space-x-1">
+            <span class="text-lg font-bold text-green-600">{{ set.weight }}</span>
+            <span class="text-sm text-gray-500">kg</span>
+          </div>
+        </div>
+        
+        <!-- 右側：日期 -->
+        <div class="text-sm text-gray-400">
+          {{ formatDate(set.date) }}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -39,6 +69,65 @@ const activityOptions = computed(() =>
     label: activity
   }))
 );
+
+const recentSets = computed(() => {
+  const currentActivity = selectWorkout.value || inputWorkout.value;
+  
+  if (!currentActivity) return [];
+  
+  // 收集所有有該動作記錄的日期
+  const datesWithActivity: string[] = [];
+  
+  Object.entries(workoutStore.records).forEach(([date, dayRecord]) => {
+    if (dayRecord[currentActivity] && dayRecord[currentActivity].length > 0) {
+      datesWithActivity.push(date);
+    }
+  });
+  
+  // 按日期排序（最新的在前）並取前 3 個日期
+  const recentDates = datesWithActivity
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+    .slice(0, 3);
+  
+  // 收集這 3 個日期的所有 sets
+  const allSets: Array<{ count: number; weight: number; date: string }> = [];
+  
+  recentDates.forEach(date => {
+    const dayRecord = workoutStore.records[date];
+    if (dayRecord[currentActivity]) {
+      dayRecord[currentActivity].forEach(set => {
+        allSets.push({
+          ...set,
+          date
+        });
+      });
+    }
+  });
+  
+  // 按日期排序（最新的在前）
+  return allSets.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+});
+
+// 格式化日期顯示
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  // 檢查是否為今天
+  if (date.toDateString() === today.toDateString()) {
+    return '今天';
+  }
+  
+  // 檢查是否為昨天
+  if (date.toDateString() === yesterday.toDateString()) {
+    return '昨天';
+  }
+  
+  // 其他日期顯示月/日格式
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+};
 
 const handleSubmit = () => {
   const workout = selectWorkout.value || inputWorkout.value;
