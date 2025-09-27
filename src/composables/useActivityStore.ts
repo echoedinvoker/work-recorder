@@ -256,6 +256,10 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
       baseScore + scoreChange
     )
   }
+  const getRawRecordByDate = (date: Date): T | null => {
+    const dateKey = formatDateToKey(date)
+    return records.value[dateKey] || null
+  }
   const getScoreByDate = (date: Date): number => {
     const dateKey = formatDateToKey(date)
     return scores.value[dateKey] || 0
@@ -357,6 +361,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
 
     // Methods
     updateScoreAndRatio,
+    getRawRecordByDate,
     getScoreByDate,
     getScoreByWeek,
     getScoreByMonth,

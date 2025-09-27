@@ -27,6 +27,25 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
           }
         }
       },
+      right: {
+        unit: "感受",
+        data: {
+          '飢餓程度': {
+            getValueByDate: (date: Date) => baseStore.getRawRecordByDate(date)?.level,
+            getValueByWeek: (week: Date) => baseStore.getWeightedRecordByWeek(week),
+            getValueByMonth: (month: Date) => baseStore.getWeightedRecordByMonth(month)
+          }
+        },
+        formatValue: (level: number) => {
+          switch(level) {
+            case 2: return '超餓';
+            case 1: return '餓';
+            case -1: return '飽';
+            case -2: return '超飽';
+            default: return '';
+          }
+        }
+      }
     },
     thresholds: []
   })
