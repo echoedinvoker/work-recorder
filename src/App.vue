@@ -25,6 +25,16 @@
           </span>
         </button>
 
+        <!-- 使用說明按鈕 (只在非首頁顯示) -->
+        <button 
+          v-if="$route.path !== '/'"
+          @click="showUsageModal = true"
+          class="px-4 py-2 rounded-full text-sm transition-all border-2 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-2"
+        >
+          <span class="text-base">❓</span>
+          使用說明
+        </button>
+
         <!-- 清除資料按鈕 -->
         <button 
           @click="showConfirmDialog = true"
@@ -45,6 +55,62 @@
         class="w-2 h-2 rounded-full transition-all duration-300"
         :class="currentRouteIndex === index ? 'bg-blue-500' : 'bg-gray-300'"
       ></div>
+    </div>
+
+    <!-- 使用說明 Modal -->
+    <div v-if="showUsageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+          <h3 class="text-lg font-bold text-gray-800">{{ currentUsageInstruction?.title }}</h3>
+          <button 
+            @click="showUsageModal = false"
+            class="text-gray-500 hover:text-gray-700 text-xl"
+          >
+            ×
+          </button>
+        </div>
+        
+        <div class="p-6">
+          <div v-if="currentUsageInstruction">
+            <!-- 描述 -->
+            <div class="mb-6">
+              <p class="text-gray-600 text-left leading-relaxed">
+                {{ currentUsageInstruction.description }}
+              </p>
+            </div>
+
+            <!-- 計分規則 -->
+            <div class="mb-6">
+              <h4 class="text-md font-semibold text-gray-800 mb-3 text-left">計分規則</h4>
+              <ul class="space-y-2">
+                <li 
+                  v-for="rule in currentUsageInstruction.scoringRules" 
+                  :key="rule"
+                  class="text-sm text-gray-600 text-left flex items-start"
+                >
+                  <span class="text-blue-500 mr-2 mt-1">•</span>
+                  <span>{{ rule }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 使用技巧 -->
+            <div>
+              <h4 class="text-md font-semibold text-gray-800 mb-3 text-left">使用技巧</h4>
+              <ul class="space-y-2">
+                <li 
+                  v-for="tip in currentUsageInstruction.tips" 
+                  :key="tip"
+                  class="text-sm text-gray-600 text-left flex items-start"
+                >
+                  <span class="text-green-500 mr-2 mt-1">💡</span>
+                  <span>{{ tip }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 確認對話框 -->
@@ -86,6 +152,7 @@ import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
 import { useDailySwimmingStore } from './stores/dailySwimmingStore';
 import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
 import { useDailyHungryStore } from './stores/dailyHungryStore';
+import { getUsageInstructionByRoute } from './utils/usageInstructions';
 
 const router = useRouter();
 const route = useRoute();
@@ -93,6 +160,13 @@ const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 
 // 記錄上一個活動頁面
 const previousActivityRoute = ref<string | null>(null);
+
+// 使用說明相關
+const showUsageModal = ref(false);
+const currentUsageInstruction = computed(() => {
+  console.log('Current Route Name:', route.name);
+  return getUsageInstructionByRoute(route.name as string);
+});
 
 // 可導航的路由（排除 NotFound 和 overview）
 const navigableRoutes = computed(() => 
@@ -113,6 +187,9 @@ const previousActivityName = computed(() => {
 
 // 監聽路由變化，記錄活動頁面
 watch(() => route.name, (newRouteName, oldRouteName) => {
+  // 關閉使用說明 modal
+  showUsageModal.value = false;
+  
   // 如果從活動頁面切換到概覽頁面，記錄上一個活動頁面
   if (newRouteName === 'overview' && oldRouteName !== 'overview') {
     previousActivityRoute.value = oldRouteName as string;
