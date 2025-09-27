@@ -1,19 +1,26 @@
 <template>
-  <nav class="mb-4">
-    <div class="flex justify-center gap-3">
+  <nav class="mb-6">
+    <div class="flex justify-center gap-4">
       <!-- Toggle 概覽頁面按鈕 -->
       <button 
         @click="toggleOverview"
-        class="px-4 py-2 rounded-full text-sm transition-all border-2 border-blue-500 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center gap-2"
+        :disabled="isOnOverviewPage"
+        :class="[
+          'group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md',
+          isOnOverviewPage 
+            ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60' 
+            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:scale-105 active:scale-95'
+        ]"
       >
-        <span v-if="previousActivityName">
+        <span v-if="previousActivityName && !isOnOverviewPage" class="flex items-center gap-2">
           <!-- 返回活動頁面 -->
-          <span class="text-base">←</span>
-          {{ previousActivityName }}
+          <ArrowLeft :size="16" class="transition-transform group-hover:-translate-x-0.5" />
+          <span class="hidden sm:inline">{{ previousActivityName }}</span>
         </span>
-        <span v-else>
+        <span v-else class="flex items-center gap-2">
           <!-- 切換到概覽頁面 -->
-          <span class="text-base">📊</span>
+          <BarChart3 :size="16" :class="isOnOverviewPage ? '' : 'transition-transform group-hover:scale-110'" />
+          <span class="hidden sm:inline">概覽</span>
         </span>
       </button>
 
@@ -21,18 +28,26 @@
       <button 
         v-if="$route.path !== '/'"
         @click="$emit('showUsage')"
-        class="px-4 py-2 rounded-full text-sm transition-all border-2 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-2"
+        class="group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 
+               bg-gradient-to-r from-emerald-500 to-emerald-600 text-white 
+               hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg hover:scale-105
+               active:scale-95 flex items-center gap-2 shadow-md"
       >
-        <span class="text-base">❓</span>
+        <HelpCircle :size="16" class="transition-transform group-hover:scale-110" />
+        <span class="hidden sm:inline">說明</span>
       </button>
 
       <!-- 清除資料按鈕 -->
       <button 
         @click="$emit('showClearDialog')"
-        class="px-4 py-2 rounded-full text-sm transition-all border-2 border-red-500 bg-red-100 text-red-800 hover:bg-red-200 flex items-center gap-2"
+        class="group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 
+               bg-gradient-to-r from-red-500 to-red-600 text-white 
+               hover:from-red-600 hover:to-red-700 hover:shadow-lg hover:scale-105
+               active:scale-95 flex items-center gap-2 shadow-md"
         :title="clearButtonTitle"
       >
-        <span class="text-base">🗑️</span>
+        <Trash2 :size="16" class="transition-transform group-hover:scale-110" />
+        <span class="hidden sm:inline">清除</span>
       </button>
     </div>
   </nav>
@@ -41,6 +56,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { ArrowLeft, BarChart3, HelpCircle, Trash2 } from 'lucide-vue-next';
 
 // Props - 將 previousActivityName 設為可選
 interface Props {
@@ -61,8 +77,16 @@ const router = useRouter();
 const route = useRoute();
 const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 
+// 檢查是否在概覽頁面 (根路徑 '/')
+const isOnOverviewPage = computed(() => route.path === '/');
+
 // Toggle 概覽頁面功能
 const toggleOverview = () => {
+  // 如果已經在概覽頁面，不執行任何操作
+  if (isOnOverviewPage.value) {
+    return;
+  }
+  
   if (route.name === 'overview') {
     // 如果在概覽頁面且有記錄的活動頁面，返回該頁面
     if (props.previousActivityName) {
