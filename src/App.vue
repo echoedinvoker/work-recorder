@@ -6,131 +6,30 @@
     @touchend="handleTouchEnd"
   >
     <!-- 功能列表 -->
-    <nav class="mb-4">
-      <div class="flex justify-center gap-3">
-        <!-- Toggle 概覽頁面按鈕 -->
-        <button 
-          @click="toggleOverview"
-          class="px-4 py-2 rounded-full text-sm transition-all border-2 border-blue-500 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center gap-2"
-        >
-          <span v-if="!!previousActivityName">
-            <!-- 返回活動頁面 -->
-            <span class="text-base">←</span>
-            {{ previousActivityName }}
-          </span>
-          <span v-else>
-            <!-- 切換到概覽頁面 -->
-            <span class="text-base">📊</span>
-          </span>
-        </button>
+    <NavigationBar 
+      :previous-activity-name="previousActivityName"
+      @show-usage="showUsageModal = true"
+      @show-clear-dialog="showConfirmDialog = true"
+    />
 
-        <!-- 使用說明按鈕 (只在非首頁顯示) -->
-        <button 
-          v-if="$route.path !== '/'"
-          @click="showUsageModal = true"
-          class="px-4 py-2 rounded-full text-sm transition-all border-2 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-2"
-        >
-          <span class="text-base">❓</span>
-        </button>
-
-        <!-- 清除資料按鈕 -->
-        <button 
-          @click="showConfirmDialog = true"
-          class="px-4 py-2 rounded-full text-sm transition-all border-2 border-red-500 bg-red-100 text-red-800 hover:bg-red-200 flex items-center gap-2"
-          :title="clearButtonTitle"
-        >
-          <span class="text-base">🗑️</span>
-        </button>
-      </div>
-    </nav>
-
-    <!-- 滑動指示器 (只顯示活動頁面，排除概要頁面) -->
-    <div v-if="navigableRoutes.length > 0 && $route.name !== 'overview'" class="flex justify-center mb-4 space-x-1">
-      <div 
-        v-for="(route, index) in navigableRoutes" 
-        :key="String(route.name)"
-        class="w-2 h-2 rounded-full transition-all duration-300"
-        :class="currentRouteIndex === index ? 'bg-blue-500' : 'bg-gray-300'"
-      ></div>
-    </div>
+    <!-- 滑動指示器 -->
+    <PageIndicator />
 
     <!-- 使用說明 Modal -->
-    <div v-if="showUsageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-gray-800">{{ currentUsageInstruction?.title }}</h3>
-          <button 
-            @click="showUsageModal = false"
-            class="text-gray-500 hover:text-gray-700 text-xl"
-          >
-            ×
-          </button>
-        </div>
-        
-        <div class="p-6">
-          <div v-if="currentUsageInstruction">
-            <!-- 描述 -->
-            <div class="mb-6">
-              <p class="text-gray-600 text-left leading-relaxed">
-                {{ currentUsageInstruction.description }}
-              </p>
-            </div>
-
-            <!-- 計分規則 -->
-            <div class="mb-6">
-              <h4 class="text-md font-semibold text-gray-800 mb-3 text-left">計分規則</h4>
-              <ul class="space-y-2">
-                <li 
-                  v-for="rule in currentUsageInstruction.scoringRules" 
-                  :key="rule"
-                  class="text-sm text-gray-600 text-left flex items-start"
-                >
-                  <span class="text-blue-500 mr-2 mt-1">•</span>
-                  <span>{{ rule }}</span>
-                </li>
-              </ul>
-            </div>
-
-            <!-- 使用技巧 -->
-            <div>
-              <h4 class="text-md font-semibold text-gray-800 mb-3 text-left">使用技巧</h4>
-              <ul class="space-y-2">
-                <li 
-                  v-for="tip in currentUsageInstruction.tips" 
-                  :key="tip"
-                  class="text-sm text-gray-600 text-left flex items-start"
-                >
-                  <span class="text-green-500 mr-2 mt-1">💡</span>
-                  <span>{{ tip }}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <UsageModal 
+      :show="showUsageModal"
+      :usage-instruction="currentUsageInstruction"
+      @close="showUsageModal = false"
+    />
 
     <!-- 確認對話框 -->
-    <div v-if="showConfirmDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
-        <h3 class="text-lg font-bold mb-4 text-gray-800">確認清除資料</h3>
-        <p class="text-gray-600 mb-6">{{ confirmDialogMessage }}</p>
-        <div class="flex gap-3 justify-end">
-          <button 
-            @click="showConfirmDialog = false"
-            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-          >
-            取消
-          </button>
-          <button 
-            @click="clearData"
-            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-          >
-            確認清除
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDialog
+      :is-open="showConfirmDialog"
+      :title="'確認清除資料'"
+      :message="confirmDialogMessage"
+      @confirm="clearData"
+      @cancel="showConfirmDialog = false"
+    />
 
     <!-- 路由視圖 -->
     <router-view v-slot="{ Component }">
@@ -150,6 +49,10 @@ import { useDailySwimmingStore } from './stores/dailySwimmingStore';
 import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
 import { useDailyHungryStore } from './stores/dailyHungryStore';
 import { getUsageInstructionByRoute } from './utils/usageInstructions';
+import NavigationBar from './components/ui/NavigationBar.vue';
+import UsageModal from './components/ui/UsageModal.vue';
+import PageIndicator from './components/ui/PageIndicator.vue';
+import ConfirmDialog from './components/ui/ConfirmDialog.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -158,8 +61,11 @@ const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 // 記錄上一個活動頁面
 const previousActivityRoute = ref<string | null>(null);
 
-// 使用說明相關
+// Modal 狀態
 const showUsageModal = ref(false);
+const showConfirmDialog = ref(false);
+
+// 使用說明相關
 const currentUsageInstruction = computed(() => {
   console.log('Current Route Name:', route.name);
   return getUsageInstructionByRoute(route.name as string);
@@ -179,7 +85,7 @@ const currentRouteIndex = computed(() => {
 const previousActivityName = computed(() => {
   if (!previousActivityRoute.value) return '';
   const route = routes.find(r => r.name === previousActivityRoute.value);
-  return route?.meta?.title || route?.name || '';
+  return (route?.meta?.title as string) || (route?.name as string) || '';
 });
 
 // 監聽路由變化，記錄活動頁面
@@ -197,26 +103,11 @@ watch(() => route.name, (newRouteName, oldRouteName) => {
   }
 });
 
-// Toggle 概覽頁面功能
-const toggleOverview = () => {
-  if (route.name === 'overview') {
-    // 如果在概覽頁面且有記錄的活動頁面，返回該頁面
-    if (previousActivityRoute.value) {
-      router.push({ name: previousActivityRoute.value });
-    }
-  } else {
-    // 如果在活動頁面，切換到概覽頁面
-    router.push({ name: 'overview' });
-  }
-};
-
 // 觸控相關變數
 const touchStartX = ref(0);
 const touchEndX = ref(0);
 const minSwipeDistance = 50;
 const transitionName = ref('slide-left');
-
-const showConfirmDialog = ref(false);
 
 // Store 實例
 const noSugarStore = useDailyNoSugarStore();
@@ -234,16 +125,6 @@ const routeStoreMap = {
   hungry: hungryStore,
 } as const;
 
-// 清除按鈕標題
-const clearButtonTitle = computed(() => {
-  if (route.name === 'overview') {
-    return '清除所有資料';
-  }
-  const currentRoute = routes.find(r => r.name === route.name);
-  const pageTitle = currentRoute?.meta?.title || '當前頁面';
-  return `清除${pageTitle}資料`;
-});
-
 // 確認對話框訊息
 const confirmDialogMessage = computed(() => {
   if (route.name === 'overview') {
@@ -253,9 +134,6 @@ const confirmDialogMessage = computed(() => {
   const pageTitle = currentRoute?.meta?.title || '當前頁面';
   return `此操作將清除${pageTitle}的所有歷史記錄資料。此操作無法復原，確定要繼續嗎？`;
 });
-
-const today = new Date();
-const yesterday = new Date().setDate(today.getDate() - 1);
 
 // 觸控事件處理
 const handleTouchStart = (e: TouchEvent) => {

@@ -48,35 +48,35 @@ const activityConfig = {
     icon: '🚫',
     category: '飲食控制',
     store: noSugarStore,
-    routeName: 'NoSugar'
+    routeName: 'noSugar'
   },
   earlysleep: {
     title: '早睡',
     icon: '😴',
     category: '生活習慣',
     store: earlySleepStore,
-    routeName: 'EarlySleep'
+    routeName: 'earlySleep'
   },
   hungry: {
     title: '飢餓感',
     icon: '🍽️',
     category: '飲食控制',
     store: hungryStore,
-    routeName: 'Hungry'
+    routeName: 'hungry'
   },
   swimming: {
     title: '游泳',
     icon: '🏊',
     category: '運動',
     store: swimmingStore,
-    routeName: 'Swimming'
+    routeName: 'swimming'
   },
   workout: {
     title: '健身',
     icon: '💪',
     category: '運動',
     store: workoutStore,
-    routeName: 'Workout'
+    routeName: 'workout'
   }
 };
 
