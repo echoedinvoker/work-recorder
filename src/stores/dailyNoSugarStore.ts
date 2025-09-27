@@ -1,172 +1,102 @@
+import { useActivityStore } from "@/composables/useActivityStore";
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
+import { 
+  SCORING_CONSTANTS, 
+} from "@/constants/scoringConstants";
+import { formatDateToKey, getTodayKey } from "@/utils/dateUtils";
 
-const UNIT = '分數'
-
-// 戒糖成功/失敗的分數變化
-const SUCCESS_SCORE = 10
-const FAILURE_SCORE = -15
-const MIN_SCORE = 0
-
-const generateMockData = () => {
-  const mockData: Record<string, boolean> = {}
-  const today = new Date()
-
-  for (let i = 13; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    const dateKey = formatDateToKey(date)
-
-    // 隨機成功或失敗
-    mockData[dateKey] = Math.random() > 0.3
-  }
-
-  return mockData
+interface NoSugarRecord {
+  level: number; // 戒糖程度，範圍 -2 到 2
 }
 
-const useMockData = import.meta.env.VITE_USE_MOCK_DATA === 'true'
-
 export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
-  // 記錄每天是否成功戒糖 (true = 成功, false = 失敗)
-  const dailyNoSugarResults = ref<Record<string, boolean>>(useMockData ? generateMockData() : {});
-  
-  // 計算當前總分 - 從所有結果計算
-  const totalScore = computed(() => {
-    return calculateTotalScore(dailyNoSugarResults.value);
-  });
-
-  // 計算總分的輔助函數
-  const calculateTotalScore = (results: Record<string, boolean>) => {
-    let score = 0;
-    // 按日期排序，確保按時間順序計算
-    const sortedDates = Object.keys(results).sort();
-    
-    for (const date of sortedDates) {
-      const success = results[date];
-      score += success ? SUCCESS_SCORE : FAILURE_SCORE;
-      // 確保分數不低於最小值
-      score = Math.max(MIN_SCORE, score);
-    }
-    
-    return score;
-  };
-
-  // 檢查今天是否有記錄，如果沒有則添加一筆默認為false的記錄
-  const checkAndInitTodayRecord = () => {
-    const today = getTodayKey();
-    if (dailyNoSugarResults.value[today] === undefined) {
-      dailyNoSugarResults.value[today] = false;
-    }
-  };
-
-  // 在store初始化時檢查今天的記錄
-  checkAndInitTodayRecord();
-
-  // 記錄當天戒糖結果
-  const recordResult = (success: boolean) => {
-    const today = getTodayKey();
-    dailyNoSugarResults.value[today] = success;
-    // 不需要手動更新分數，因為它是計算屬性
-  };
-
-  // 獲取特定日期的戒糖結果
-  const getResultByDate = (date: Date) => {
-    const dateKey = formatDateToKey(date);
-    return dailyNoSugarResults.value[dateKey];
-  };
-
-  // 計算特定日期的分數貢獻
-  const getScoreContributionByDate = (date: Date) => {
-    const result = getResultByDate(date);
-    if (result === undefined) return 0;
-    return result ? SUCCESS_SCORE : FAILURE_SCORE;
-  };
-
-  // 獲取當前總分
-  const getCurrentScore = () => {
-    return totalScore.value;
-  };
-
-  // 清除所有歷史記錄
-  const clearAllHistory = () => {
-    dailyNoSugarResults.value = {};
-    // 初始化今天的記錄
-    checkAndInitTodayRecord();
-  };
-
-  // 計算特定日期的累計分數
-  const getScoreByDate = (targetDate: Date) => {
-    let cumulativeScore = 0;
-    const targetDateKey = formatDateToKey(targetDate);
-    
-    // 獲取所有日期並排序
-    const dates = Object.keys(dailyNoSugarResults.value).sort();
-    
-    // 計算目標日期（含）之前的所有分數
-    for (const dateKey of dates) {
-      // 如果日期大於目標日期，則跳過
-      if (dateKey > targetDateKey) continue;
-      
-      // 累加分數
-      const success = dailyNoSugarResults.value[dateKey];
-      cumulativeScore += success ? SUCCESS_SCORE : FAILURE_SCORE;
-      // 確保分數不低於最小值
-      cumulativeScore = Math.max(MIN_SCORE, cumulativeScore);
-    }
-    
-    return cumulativeScore;
-  };
-
-  // 獲取一段時間內的每日累計分數
-  const getScoreHistory = (startDate: Date, endDate: Date) => {
-    const history: Record<string, number> = {};
-    const currentDate = new Date(startDate);
-    
-    while (currentDate <= endDate) {
-      const dateKey = formatDateToKey(currentDate);
-      history[dateKey] = getScoreByDate(currentDate);
-      
-      // 移至下一天
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return history;
-  };
-
-  return {
-    dailyNoSugarResults,
-    recordResult,
-    getResultByDate,
-    getScoreContributionByDate,
-    getCurrentScore,
-    clearAllHistory,
-    getScoreByDate,
-    getScoreHistory,
-    checkAndInitTodayRecord, // 導出這個方法以便在需要時手動調用
-    UNIT
-  };
-},
-  {
-    persist: useMockData ? false : { // 不使用假資料時啟用持久化存儲
-      serializer: {
-        serialize: (state) => {
-          return JSON.stringify({
-            ...state,
-            startTime: state.startTime?.toISOString() || null,
-            endTime: state.endTime?.toISOString() || null
-          })
+  const baseStore = useActivityStore<NoSugarRecord>({
+    title: "飲控",
+    initialScore: SCORING_CONSTANTS.COMMON.DEFAULT_SUCCESS_BONUS,
+    absencePenalty: SCORING_CONSTANTS.COMMON.DEFAULT_DAILY_PENALTY,
+    getScoreChange: () => 0,
+    calculateWeightedRecord: () => 0,
+    chartConfig: {
+      left: {
+        unit: "分",
+        data: {
+          '分數': {
+            getValueByDate: (date: Date) => baseStore.getScoreByDate(date),
+            getValueByWeek: (week: Date) => baseStore.getScoreByWeek(week),
+            getValueByMonth: (month: Date) => baseStore.getScoreByMonth(month)
+          }
+        }
+      },
+      right: {
+        unit: "程度",
+        data: {
+          '飲控狀況': {
+            getValueByDate: (date: Date) => baseStore.getRawRecordByDate(date)?.level,
+            getValueByWeek: (week: Date) => baseStore.getWeightedRecordByWeek(week),
+            getValueByMonth: (month: Date) => baseStore.getWeightedRecordByMonth(month)
+          }
         },
-        deserialize: (value) => {
-          const parsed = JSON.parse(value)
-          return {
-            ...parsed,
-            startTime: parsed.startTime ? new Date(parsed.startTime) : null,
-            endTime: parsed.endTime ? new Date(parsed.endTime) : null
+        formatValue: (level: number) => {
+          switch(level) {
+            case 2: return '嚴守紀律';
+            case 1: return '大致遵守';
+            case -1: return '偶爾放縱';
+            case -2: return '完全失控';
+            default: return '';
           }
         }
       }
+    },
+    thresholds: []
+  })
+
+  const recordNoSugarLevel = (level: number) => {
+    const todayKey = getTodayKey()
+    baseStore.records.value[todayKey] = { level }
+
+    // 填補缺失的分數記錄
+    const lastScoreDateKey = Object.keys(baseStore.scores.value)
+      .filter(key => key !== todayKey)
+      .sort()
+      .pop()
+
+    if (lastScoreDateKey) {
+      let startScore = baseStore.scores.value[lastScoreDateKey]
+      for (let date = new Date(lastScoreDateKey); formatDateToKey(date) < todayKey; date.setDate(date.getDate() + 1)) {
+        const dateKey = formatDateToKey(date)
+        if (!baseStore.scores.value[dateKey]) {
+          baseStore.scores.value[dateKey] = Math.max(
+            SCORING_CONSTANTS.COMMON.MIN_SCORE,
+            startScore + SCORING_CONSTANTS.COMMON.DEFAULT_DAILY_PENALTY
+          )
+        }
+      }
+    } else {
+      // 設置昨日分數0
+      const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
+      baseStore.scores.value[yesterdayKey] = 0;
+    }
+
+    const lastDateKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
+    const scoreChange = level * 5 // 每個戒糖等級變化對應5分變化
+    const baseScore = baseStore.scores.value[lastDateKey] || 0
+
+    baseStore.scores.value[todayKey] = Math.max(
+      SCORING_CONSTANTS.COMMON.MIN_SCORE,
+      baseScore + scoreChange
+    )
+  }
+
+  return {
+    ...baseStore,
+    recordNoSugarLevel
+  }
+}, {
+  persist: {
+    serializer: {
+      serialize: (state) => JSON.stringify(state),
+      deserialize: (value) => JSON.parse(value)
     }
   }
-);
+})
 

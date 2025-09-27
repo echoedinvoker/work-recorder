@@ -4,35 +4,36 @@
       <!-- 左軸標籤 -->
       <div v-if="hasVisibleLeftLegends"
            class="absolute left-0 top-0 flex flex-col justify-between text-xs text-gray-500 pr-2"
-           :style="{ height: `${chartHeight}px` }">
-        <span>{{ leftYAxisMax }}</span>
-        <span>{{ Math.round(leftYAxisMax * 0.67) }}</span>
-        <span>{{ Math.round(leftYAxisMax * 0.33) }}</span>
-        <span>0</span>
+           :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
+        <!-- 使用 line-height 確保文字垂直居中對齊 -->
+        <span class="leading-none">{{ leftYAxisMax }}</span>
+        <span class="leading-none">{{ Math.round(leftYAxisMax * 0.67) }}</span>
+        <span class="leading-none">{{ Math.round(leftYAxisMax * 0.33) }}</span>
+        <span class="leading-none">0</span>
       </div>
 
       <!-- 右軸標籤 (如果有右軸數據且有可見圖例) -->
       <div v-if="dataProvider.right && hasVisibleRightLegends" 
            class="absolute right-0 top-0 flex flex-col justify-between text-xs text-gray-500 pl-2"
-           :style="{ height: `${chartHeight}px` }">
-        <span>{{ rightYAxisMax }}</span>
-        <span>{{ Math.round(rightYAxisMax * 0.67) }}</span>
-        <span>{{ Math.round(rightYAxisMax * 0.33) }}</span>
-        <span>0</span>
+           :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
+        <span class="leading-none">{{ rightYAxisMax }}</span>
+        <span class="leading-none">{{ Math.round(rightYAxisMax * 0.67) }}</span>
+        <span class="leading-none">{{ Math.round(rightYAxisMax * 0.33) }}</span>
+        <span class="leading-none">0</span>
       </div>
 
       <!-- 圖表區域 -->
       <div ref="chartContainer" class="mx-8 relative" :style="{ height: `${chartHeight}px` }">
-        <!-- 網格線 -->
+        <!-- 網格線 - 確保與 Y軸標籤對齊 -->
         <div class="absolute inset-0">
           <div v-for="i in 4" :key="i" 
                class="absolute w-full border-t border-gray-200"
-               :style="{ top: `${(i - 1) * 25}%` }">
+               :style="{ top: `${(i - 1) * 33.333}%` }">
           </div>
         </div>
 
         <!-- SVG 折線圖 -->
-        <svg class="absolute inset-0 w-full h-full" :viewBox="`0 0 ${svgWidth} ${svgHeight}`">
+        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
           <!-- 左軸數據線條 -->
           <g v-for="(dataName, index) in Object.keys(dataProvider.left.data)" :key="`left-${dataName}`">
             <!-- 只顯示可見的圖例 -->
@@ -40,7 +41,7 @@
               <polyline
                 :points="getLeftLinePoints(dataName)"
                 :stroke="leftLineColors[index % leftLineColors.length]"
-                stroke-width="2"
+                stroke-width="0.8"
                 fill="none"
                 class="transition-all duration-300"
               />
@@ -50,9 +51,9 @@
                 :key="`left-point-${dataName}-${pointIndex}`"
                 :cx="getXPosition(pointIndex)"
                 :cy="getLeftYPosition(point.leftValues[dataName])"
-                r="4"
+                r="1.7"
                 :fill="leftLineColors[index % leftLineColors.length]"
-                class="hover:r-6 transition-all duration-200 cursor-pointer"
+                class="hover:r-1.5 transition-all duration-200 cursor-pointer"
                 @mouseenter="showTooltip($event, point, dataName, point.leftValues[dataName], 'left')"
                 @mouseleave="hideTooltip"
               />
@@ -62,9 +63,9 @@
                 v-for="(point, pointIndex) in chartData"
                 :key="`left-value-${dataName}-${pointIndex}`"
                 :x="getXPosition(pointIndex)"
-                :y="getLeftYPosition(point.leftValues[dataName]) - 8"
+                :y="getLeftYPosition(point.leftValues[dataName]) - 2"
                 :text-anchor="getTextAnchor(pointIndex)"
-                class="text-xs font-medium pointer-events-none"
+                class="text-[5px] font-medium pointer-events-none"
                 :fill="leftLineColors[index % leftLineColors.length]"
               >
                 {{ formatValue(point.leftValues[dataName], 'left') }}
@@ -81,9 +82,9 @@
               <polyline
                 :points="getRightLinePoints(dataName)"
                 :stroke="rightLineColors[index % rightLineColors.length]"
-                stroke-width="2"
+                stroke-width="0.8"
                 fill="none"
-                stroke-dasharray="5,5"
+                stroke-dasharray="2,2"
                 class="transition-all duration-300"
               />
               <!-- 數據點 -->
@@ -92,7 +93,7 @@
                 :key="`right-point-${dataName}-${pointIndex}`"
                 :cx="getXPosition(pointIndex)"
                 :cy="getRightYPosition(point.rightValues?.[dataName] || 0)"
-                r="4"
+                r="1.7"
                 :fill="rightLineColors[index % rightLineColors.length]"
                 class="hover:r-6 transition-all duration-200 cursor-pointer"
                 @mouseenter="showTooltip($event, point, dataName, point.rightValues?.[dataName] || 0, 'right')"
@@ -104,9 +105,9 @@
                 v-for="(point, pointIndex) in chartData"
                 :key="`right-value-${dataName}-${pointIndex}`"
                 :x="getXPosition(pointIndex)"
-                :y="getRightYPosition(point.rightValues?.[dataName] || 0) - 8"
+                :y="getRightYPosition(point.rightValues?.[dataName] || 0) - 2"
                 :text-anchor="getTextAnchor(pointIndex)"
-                class="text-xs font-medium pointer-events-none"
+                class="text-[5px] font-medium pointer-events-none"
                 :fill="rightLineColors[index % rightLineColors.length]"
               >
                 {{ formatValue(point.rightValues?.[dataName] || 0, 'right') }}
@@ -265,7 +266,6 @@ const rightLineColors = ['#8B5CF6', '#F97316', '#06B6D4', '#84CC16']
 
 // SVG 尺寸
 const svgWidth = 400
-const svgHeight = 240
 
 // 圖表容器引用
 const chartContainer = ref<HTMLElement>()
@@ -309,22 +309,20 @@ const getLegendTextClass = (state: number) => {
   }
 }
 
-// 計算 X 軸位置 (SVG 座標)
+// 修改位置計算函數
 const getXPosition = (index: number) => {
-  if (chartData.value.length <= 1) return svgWidth / 2
-  return (index / (chartData.value.length - 1)) * svgWidth
+  if (chartData.value.length <= 1) return 50
+  return (index / (chartData.value.length - 1)) * 100  // 返回百分比
 }
 
-// 計算左軸 Y 軸位置 (SVG 座標)
 const getLeftYPosition = (value: number) => {
   const percentage = Math.max(0, Math.min(1, (leftYAxisMax.value - value) / leftYAxisMax.value))
-  return percentage * svgHeight
+  return percentage * 100  // 返回百分比而非像素
 }
 
-// 計算右軸 Y 軸位置 (SVG 座標)
 const getRightYPosition = (value: number) => {
   const percentage = Math.max(0, Math.min(1, (rightYAxisMax.value - value) / rightYAxisMax.value))
-  return percentage * svgHeight
+  return percentage * 100  // 返回百分比而非像素
 }
 
 // 生成左軸線條路徑

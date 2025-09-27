@@ -1,12 +1,15 @@
 <template>
-  <div class="space-y-6">
-    <NoSugarButton />
-    <NoSugarChart />
+  <div>
+    <NoSugarButton class="mb-12" />
+    <LineChart :data-provider="store" />
   </div>
 </template>
 
 <script setup lang="ts">
-import NoSugarButton from '@/components/nosugar/NoSugarButton.vue';
-import NoSugarChart from '@/components/nosugar/NoSugarChart.vue';
+import { useDailyNoSugarStore } from '@/stores/dailyNoSugarStore';
+import NoSugarButton from '../nosugar/NoSugarButton.vue';
+import LineChart from '../ui/LineChart.vue';
+
+const store = useDailyNoSugarStore();  
 </script>
 

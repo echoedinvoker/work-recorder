@@ -84,7 +84,7 @@ const activities = [
   { name: 'work', title: '工作紀錄' },
   { name: 'workout', title: '重訓紀錄' },
   { name: 'swimming', title: '游泳紀錄' },
-  { name: 'noSugar', title: '戒糖紀錄' },
+  { name: 'noSugar', title: '飲控紀錄' },
   { name: 'singPractice', title: '歌唱練習' },
   { name: 'earlySleep', title: '早睡紀錄' },
   { name: 'faceSport', title: '臉部運動' },
@@ -100,7 +100,7 @@ const getActivityScore = (activityName: string) => {
     case 'work':
       return workStore.getScoreByDate(new Date()) - (workStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'noSugar':
-      return noSugarStore.getScoreByDate(new Date()) - (noSugarStore.getScoreByDate(new Date(yesterday)) || 0);
+      return noSugarStore.scoreDiffFromYesterday;
     case 'workout':
       return workoutStore.scoreDiffFromYesterday;
     case 'faceSport':
