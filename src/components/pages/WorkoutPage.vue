@@ -7,6 +7,7 @@
       <WorkoutAddForm />
     </template>
 
+  <AProgressBar :data-provider="store" class="mb-4" />
   <LineChart :data-provider="store" /> 
 
   </ToggleButton>
@@ -16,8 +17,9 @@
 import ToggleButton from '@/components/ui/ToggleButton.vue';
 import WorkoutAddForm from '@/components/workout/WorkoutAddForm.vue';
 import LineChart from '../ui/LineChart.vue';
+import AProgressBar from '../ui/AProgressBar.vue';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
-// import WorkoutChart from '@/components/workout/WorkoutChart.vue';
+
 const store = useDailyWorkoutStore()
 </script>
 

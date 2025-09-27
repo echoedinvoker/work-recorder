@@ -513,6 +513,8 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     maxPastWeightedRecord,
     todayRatio,
     todayRatioIncrement,
+    ratio: todayRatio,
+    ratioIncrement: todayRatioIncrement,
     consecutiveScoreGrowthDays,
     weeklyScores,
     consecutiveWeeklyGrowth,
@@ -553,7 +555,10 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
           getValueByMonth: getWeightedRecordByMonth
         }
       }
-    }
+    },
+
+    // for progress bar
+    thresholds: SCORING_CONSTANTS.WORKOUT.THRESHOLD_COLORS
   };
 },
   {

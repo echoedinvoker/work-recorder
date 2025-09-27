@@ -6,7 +6,7 @@
     @touchend="handleTouchEnd"
   >
     <!-- 功能列表 -->
-    <nav class="mb-8">
+    <nav class="mb-4">
       <div class="flex justify-center gap-3">
         <!-- Toggle 概覽頁面按鈕 -->
         <button 

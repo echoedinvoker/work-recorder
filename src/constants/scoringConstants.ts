@@ -7,6 +7,13 @@ export const SCORING_CONSTANTS = {
       GOOD: 0.8,         // >= 80% 表現良好  
       FAIR: 0.6,         // >= 60% 表現一般
     },
+    // 進度條顏色配置
+    THRESHOLD_COLORS: [
+      { value: 0.0, color: '#ef4444', message: '需要努力' },   // red-500 - 0% 開始為紅色 (差)
+      { value: 0.6, color: '#f59e0b', message: '表現一般' },   // amber-500 - 60% 一般表現
+      { value: 0.8, color: '#10b981', message: '表現良好' },   // green-500 - 80% 良好表現
+      { value: 1.0, color: '#3b82f6', message: '表現優秀' },   // blue-500 - 100% 優秀表現
+    ],
     // 分數增減
     SCORE_CHANGES: {
       EXCELLENT_BONUS: 10,  // 優秀表現獎勵分數
@@ -58,7 +65,7 @@ export type NoSugarConstants = typeof SCORING_CONSTANTS.NO_SUGAR;
 // 輔助函數：根據比例獲取重訓分數變化
 export const getWorkoutScoreChange = (ratio: number): number => {
   const { RATIO_THRESHOLDS, SCORE_CHANGES } = SCORING_CONSTANTS.WORKOUT;
-  
+
   if (ratio >= RATIO_THRESHOLDS.EXCELLENT) {
     return SCORE_CHANGES.EXCELLENT_BONUS;
   } else if (ratio >= RATIO_THRESHOLDS.GOOD) {
@@ -73,7 +80,7 @@ export const getWorkoutScoreChange = (ratio: number): number => {
 // 輔助函數：根據工作分數獲取累計分數變化
 export const getWorkScoreChange = (dailyScore: number): number => {
   const { TARGET_SCORE, SECONDARY_TARGET, SCORE_CHANGES } = SCORING_CONSTANTS.WORK;
-  
+
   if (dailyScore >= TARGET_SCORE) {
     return SCORE_CHANGES.EXCELLENT_BONUS;
   } else if (dailyScore >= SECONDARY_TARGET) {
@@ -81,4 +88,26 @@ export const getWorkScoreChange = (dailyScore: number): number => {
   } else {
     return SCORE_CHANGES.POOR_PENALTY;
   }
+};
+
+// 輔助函數：獲取 workout 進度條配置
+export const getWorkoutProgressConfig = (ratio: number, ratioIncrements: number = 0) => {
+  return {
+    ratio,
+    ratioIncrememts: ratioIncrements,
+    thresholds: SCORING_CONSTANTS.WORKOUT.THRESHOLD_COLORS
+  };
+};
+
+// 輔助函數：根據比例獲取對應顏色
+export const getWorkoutColor = (ratio: number): string => {
+  const thresholds = [...SCORING_CONSTANTS.WORKOUT.THRESHOLD_COLORS].sort((a, b) => a.value - b.value);
+
+  for (let i = thresholds.length - 1; i >= 0; i--) {
+    if (ratio >= thresholds[i].value) {
+      return thresholds[i].color;
+    }
+  }
+
+  return thresholds[0]?.color || '#ef4444';
 };
