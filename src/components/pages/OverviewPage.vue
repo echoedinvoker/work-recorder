@@ -13,7 +13,7 @@
         >
           <div class="text-sm font-medium">{{ activity.title }}</div>
           <div class="text-lg font-bold mt-1">
-            {{ getActivityScore(activity.name) > 0 ? '+' : '' }}{{ getActivityScore(activity.name) }}
+            {{ getActivityScore(activity.name)! > 0 ? '+' : '' }}{{ getActivityScore(activity.name) }}
           </div>
         </div>
       </div>
@@ -110,7 +110,7 @@ const getActivityScore = (activityName: string) => {
     case 'noDIY':
       return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'earlySleep':
-      return earlySleepStore.scoreDifference;
+      return earlySleepStore.scoreDiffFromYesterday;
     case 'hungry':
       return hungryStore.scoreDifference;
     case 'singPractice':

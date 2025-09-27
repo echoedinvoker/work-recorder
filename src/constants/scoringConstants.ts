@@ -76,6 +76,27 @@ export const SCORING_CONSTANTS = {
     MIN_SCORE: 0,              // 最低分數限制
   },
 
+  // 早睡 (Early Sleep) 相關常數
+  EARLY_SLEEP: {
+    // 時間閾值 (以分鐘為單位)
+    TIME_THRESHOLDS: {
+      EXCELLENT: 21 * 60,    // 21:00 或之前
+      GOOD: 22 * 60,         // 22:00 或之前
+    },
+    // 分數增減
+    SCORE_CHANGES: {
+      EXCELLENT_BONUS: 10,   // 21:00前上床獎勵
+      GOOD_BONUS: 5,         // 22:00前上床獎勵
+      POOR_PENALTY: -5,      // 太晚睡覺扣分
+    },
+    // 缺席懲罰
+    ABSENCE_PENALTY: -5,     // 每天未記錄扣分
+    // 初始分數
+    INITIAL_SCORE: 10,       // 首次記錄的初始分數
+    // 進度條顏色配置 (這裡不需要，因為沒有 progress bar)
+    THRESHOLD_COLORS: []
+  },
+
   // 通用常數
   COMMON: {
     MIN_SCORE: 0,              // 通用最低分數
@@ -90,6 +111,7 @@ export type WorkoutConstants = typeof SCORING_CONSTANTS.WORKOUT;
 export type SwimmingConstants = typeof SCORING_CONSTANTS.SWIMMING;
 export type WorkConstants = typeof SCORING_CONSTANTS.WORK;
 export type NoSugarConstants = typeof SCORING_CONSTANTS.NO_SUGAR;
+export type EarlySleepConstants = typeof SCORING_CONSTANTS.EARLY_SLEEP;
 
 // 輔助函數：根據比例獲取重訓分數變化
 export const getWorkoutScoreChange = (ratio: number): number => {
@@ -173,4 +195,17 @@ export const getSwimmingColor = (ratio: number): string => {
   }
 
   return thresholds[0]?.color || '#ef4444';
+};
+
+// 輔助函數：根據上床時間獲取分數變化
+export const getEarlySleepScoreChange = (bedtimeMinutes: number): number => {
+  const { TIME_THRESHOLDS, SCORE_CHANGES } = SCORING_CONSTANTS.EARLY_SLEEP;
+
+  if (bedtimeMinutes <= TIME_THRESHOLDS.EXCELLENT) {
+    return SCORE_CHANGES.EXCELLENT_BONUS;
+  } else if (bedtimeMinutes <= TIME_THRESHOLDS.GOOD) {
+    return SCORE_CHANGES.GOOD_BONUS;
+  } else {
+    return SCORE_CHANGES.POOR_PENALTY;
+  }
 };

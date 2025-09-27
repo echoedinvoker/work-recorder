@@ -198,13 +198,18 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
 
     return monthly
   })
+  const scoreDiffFromYesterday = computed<number | null>(() => {
+    const today = new Date()
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+    return scoreDiffBetweenDates(yesterday, today)
+  })
 
   // Methods
   const updateScoreAndRatio = (additionalWeightedRecord: number) => {
     const todayKey = getTodayKey()
 
     // 更新加權記錄
-    weightedRecords.value[todayKey] = 
+    weightedRecords.value[todayKey] =
       (weightedRecords.value[todayKey] || 0) + additionalWeightedRecord
 
     // 如果沒有歷史記錄，使用初始分數
@@ -230,6 +235,10 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
           )
         }
       }
+    } else {
+      // 設置昨日分數0
+      const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
+      scores.value[yesterdayKey] = 0;
     }
 
     // 計算比例和分數變化
@@ -240,7 +249,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     const lastDateKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
     const scoreChange = options.getScoreChange(ratio)
     const baseScore = scores.value[lastDateKey] || 0
-    
+
     scores.value[todayKey] = Math.max(
       SCORING_CONSTANTS.COMMON.MIN_SCORE,
       baseScore + scoreChange
@@ -283,7 +292,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     if (options.formatValue) {
       return options.formatValue(value)
     }
-    
+
     // 默認邏輯：大於等於1000時顯示為 "k" 格式
     if (value >= 1000) {
       return (value / 1000).toFixed(1) + 'k'
@@ -303,6 +312,16 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
     const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
+  }
+  const scoreDiffBetweenDates = (startDate: Date, endDate: Date): number | null => {
+    const startKey = formatDateToKey(startDate)
+    const endKey = formatDateToKey(endDate)
+
+    if (!(startKey in scores.value) || !(endKey in scores.value)) {
+      return null
+    }
+
+    return scores.value[endKey] - scores.value[startKey]
   }
 
   return {
@@ -330,6 +349,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     consecutiveMonthlyGrowth,
     weeklyWeightedRecord,
     monthlyWeightedRecord,
+    scoreDiffFromYesterday,
 
     // Methods
     updateScoreAndRatio,

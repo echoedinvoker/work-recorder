@@ -1,12 +1,14 @@
 <template>
-  <div class="space-y-6">
-    <EarlySleepButton />
-    <EarlySleepChart />
+  <div>
+    <EarlySleepButton class="mb-12" />
+    <LineChart :data-provider="store" />
   </div>
 </template>
 
 <script setup lang="ts">
-import EarlySleepButton from '@/components/earlysleep/EarlySleepButton.vue';
-import EarlySleepChart from '@/components/earlysleep/EarlySleepChart.vue';
-</script>
+import EarlySleepButton from '../earlysleep/EarlySleepButton.vue';
+import LineChart from '../ui/LineChart.vue';
+import { useDailyEarlySleepStore } from '@/stores/dailyEarlySleepStore';
 
+const store = useDailyEarlySleepStore();
+</script>
