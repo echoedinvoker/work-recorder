@@ -105,24 +105,11 @@
         今日活動概況
       </h2>
       <div class="grid grid-cols-2 gap-3">
-        <div 
-          v-for="activity in fatLossActivities" 
-          :key="activity.name"
-          class="p-3 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md"
-          :class="getActivityCardClass(activity)"
-          @click="navigateToActivity(activity.name)"
-        >
-          <div class="text-sm font-medium flex items-center">
-            <span class="mr-1">{{ activity.icon }}</span>
-            {{ activity.title }}
-          </div>
-          <div class="text-lg font-bold mt-1">
-            {{ getActivityScore(activity.name)! > 0 ? '+' : '' }}{{ getActivityScore(activity.name) ?? '--' }}
-          </div>
-          <div class="text-xs text-gray-500 mt-1">
-            {{ activity.category }}
-          </div>
-        </div>
+        <ActivityCard
+          v-for="activityName in fatLossActivityNames" 
+          :key="activityName"
+          :activity-name="activityName"
+        />
       </div>
     </div>
   </div>
@@ -138,6 +125,10 @@ import { useDailyEarlySleepStore } from '@/stores/dailyEarlySleepStore';
 import { useDailyHungryStore } from '@/stores/dailyHungryStore';
 import { useFatLossStore } from '@/stores/fatLossStore';
 import { SCORING_CONSTANTS } from '@/constants/scoringConstants';
+import ActivityCard from '@/components/overview/ActivityCard.vue';
+
+// 減脂相關活動名稱列表
+const fatLossActivityNames = ['nosugar', 'earlysleep', 'hungry', 'swimming', 'workout'];
 
 const router = useRouter();
 
