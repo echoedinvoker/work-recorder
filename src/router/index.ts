@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import OverviewPage from '@/components/pages/OverviewPage.vue'
 import StudyPage from '@/components/pages/StudyPage.vue'
 import WorkoutPage from '@/components/pages/WorkoutPage.vue'
 import SwimmingPage from '@/components/pages/SwimmingPage.vue'
@@ -15,6 +16,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      name: 'overview',
+      component: OverviewPage,
+      meta: { title: '活動概要' }
+    },
+    {
+      path: '/study',
       name: 'study',
       component: StudyPage,
       meta: { title: '學習紀錄' }

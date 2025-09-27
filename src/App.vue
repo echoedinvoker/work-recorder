@@ -5,47 +5,40 @@
     @touchmove="handleTouchMove"
     @touchend="handleTouchEnd"
   >
-    <!-- 導航菜單 -->
+    <!-- 功能列表 -->
     <nav class="mb-8">
-      <ul class="flex flex-wrap justify-center gap-2 space-y-2">
-        <li v-for="route in routes" :key="String(route.name)">
-          <router-link 
-            :to="{ name: route.name }" 
-            class="px-3 py-1 rounded-full text-sm transition-all"
-            :class="[
-              // 使用 border 來區分當前頁面
-              $route.name === route.name 
-                ? 'border-2 border-blue-500 font-bold' 
-                : 'border-2 border-transparent',
-              // 使用背景色來顯示分數是正數還是負數
-              route.name && getScoreForRoute(String(route.name)) > 0 
-                ? 'bg-green-100 text-green-800' 
-                : route.name && getScoreForRoute(String(route.name)) < 0 
-                  ? 'bg-red-100 text-red-800' 
-                  : 'bg-gray-200 text-gray-700'
-            ]"
-          >
-            {{ route.meta?.title || route.name }}
-          </router-link>
-        </li>
+      <div class="flex justify-center gap-3">
+        <!-- Toggle 概覽頁面按鈕 -->
+        <button 
+          @click="toggleOverview"
+          class="px-4 py-2 rounded-full text-sm transition-all border-2 border-blue-500 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center gap-2"
+        >
+          <span v-if="!!previousActivityName">
+            <!-- 返回活動頁面 -->
+            <span class="text-base">←</span>
+            {{ previousActivityName }}
+          </span>
+          <span v-else>
+            <!-- 切換到概覽頁面 -->
+            <span class="text-base">📊</span>
+            概覽
+          </span>
+        </button>
 
         <!-- 清除資料按鈕 -->
-        <li>
-          <button 
-            @click="showConfirmDialog = true"
-            class="px-3 py-1 rounded-full text-sm transition-all border-2 border-transparent bg-red-100 text-red-800 hover:bg-red-200 flex items-center gap-1"
-            title="清除所有資料"
-          >
-            <!-- 垃圾桶圖標 (使用 Unicode) -->
-            <span class="text-base">🗑️</span>
-            <span class="hidden sm:inline">清除</span>
-          </button>
-        </li>
-      </ul>
+        <button 
+          @click="showConfirmDialog = true"
+          class="px-4 py-2 rounded-full text-sm transition-all border-2 border-red-500 bg-red-100 text-red-800 hover:bg-red-200 flex items-center gap-2"
+          :title="clearButtonTitle"
+        >
+          <span class="text-base">🗑️</span>
+          清除
+        </button>
+      </div>
     </nav>
 
-    <!-- 滑動指示器 -->
-    <div class="flex justify-center mb-4 space-x-1">
+    <!-- 滑動指示器 (只顯示活動頁面，排除概要頁面) -->
+    <div v-if="navigableRoutes.length > 0 && $route.name !== 'overview'" class="flex justify-center mb-4 space-x-1">
       <div 
         v-for="(route, index) in navigableRoutes" 
         :key="String(route.name)"
@@ -58,7 +51,7 @@
     <div v-if="showConfirmDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
         <h3 class="text-lg font-bold mb-4 text-gray-800">確認清除資料</h3>
-        <p class="text-gray-600 mb-6">此操作將清除所有 localStorage 中的記錄，包括所有日期的分數資料。此操作無法復原，確定要繼續嗎？</p>
+        <p class="text-gray-600 mb-6">{{ confirmDialogMessage }}</p>
         <div class="flex gap-3 justify-end">
           <button 
             @click="showConfirmDialog = false"
@@ -67,7 +60,7 @@
             取消
           </button>
           <button 
-            @click="clearAllData"
+            @click="clearData"
             class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
           >
             確認清除
@@ -103,13 +96,50 @@ const router = useRouter();
 const route = useRoute();
 const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 
-// 可導航的路由（排除 NotFound）
-const navigableRoutes = computed(() => routes);
+// 記錄上一個活動頁面
+const previousActivityRoute = ref<string | null>(null);
 
-// 當前路由索引
+// 可導航的路由（排除 NotFound 和 overview）
+const navigableRoutes = computed(() => 
+  routes.filter(route => route.name !== 'overview')
+);
+
+// 當前路由索引（在可導航路由中的位置）
 const currentRouteIndex = computed(() => {
   return navigableRoutes.value.findIndex(r => r.name === route.name);
 });
+
+// 上一個活動頁面的名稱
+const previousActivityName = computed(() => {
+  if (!previousActivityRoute.value) return '';
+  const route = routes.find(r => r.name === previousActivityRoute.value);
+  return route?.meta?.title || route?.name || '';
+});
+
+// 監聽路由變化，記錄活動頁面
+watch(() => route.name, (newRouteName, oldRouteName) => {
+  // 如果從活動頁面切換到概覽頁面，記錄上一個活動頁面
+  if (newRouteName === 'overview' && oldRouteName !== 'overview') {
+    previousActivityRoute.value = oldRouteName as string;
+  }
+  // 如果從概覽頁面切換到活動頁面，清除記錄
+  else if (oldRouteName === 'overview' && newRouteName !== 'overview') {
+    previousActivityRoute.value = null;
+  }
+});
+
+// Toggle 概覽頁面功能
+const toggleOverview = () => {
+  if (route.name === 'overview') {
+    // 如果在概覽頁面且有記錄的活動頁面，返回該頁面
+    if (previousActivityRoute.value) {
+      router.push({ name: previousActivityRoute.value });
+    }
+  } else {
+    // 如果在活動頁面，切換到概覽頁面
+    router.push({ name: 'overview' });
+  }
+};
 
 // 觸控相關變數
 const touchStartX = ref(0);
@@ -131,6 +161,40 @@ const earlySleepStore = useDailyEarlySleepStore();
 const singPracticeStore = useDailySingPracticeStore();
 const hungryStore = useDailyHungryStore();
 
+// 路由名稱與 store 的映射關係
+const routeStoreMap = {
+  study: dailyScoreStore,
+  work: workStore,
+  noSugar: noSugarStore,
+  workout: workoutStore,
+  faceSport: faceSportStore,
+  swimming: swimmingStore,
+  noDIY: noDIYStore,
+  earlySleep: earlySleepStore,
+  singPractice: singPracticeStore,
+  hungry: hungryStore,
+} as const;
+
+// 清除按鈕標題
+const clearButtonTitle = computed(() => {
+  if (route.name === 'overview') {
+    return '清除所有資料';
+  }
+  const currentRoute = routes.find(r => r.name === route.name);
+  const pageTitle = currentRoute?.meta?.title || '當前頁面';
+  return `清除${pageTitle}資料`;
+});
+
+// 確認對話框訊息
+const confirmDialogMessage = computed(() => {
+  if (route.name === 'overview') {
+    return '此操作將清除所有 localStorage 中的記錄，包括所有日期的分數資料。此操作無法復原，確定要繼續嗎？';
+  }
+  const currentRoute = routes.find(r => r.name === route.name);
+  const pageTitle = currentRoute?.meta?.title || '當前頁面';
+  return `此操作將清除${pageTitle}的所有歷史記錄資料。此操作無法復原，確定要繼續嗎？`;
+});
+
 const today = new Date();
 const yesterday = new Date().setDate(today.getDate() - 1);
 
@@ -151,28 +215,73 @@ const handleTouchEnd = (e: TouchEvent) => {
 
 // 處理滑動邏輯
 const handleSwipe = () => {
+  // 如果在概要頁面，不處理滑動
+  if (route.name === 'overview') {
+    return;
+  }
+
   const swipeDistance = touchStartX.value - touchEndX.value;
   const currentIndex = currentRouteIndex.value;
   
   // 向左滑動（下一頁）
-  if (swipeDistance > minSwipeDistance && currentIndex < navigableRoutes.value.length - 1) {
+  if (swipeDistance > minSwipeDistance) {
     transitionName.value = 'slide-left';
-    const nextRoute = navigableRoutes.value[currentIndex + 1];
+    let nextIndex;
+    
+    if (currentIndex === navigableRoutes.value.length - 1) {
+      // 在最後一個活動頁面，切換到第一個活動頁面
+      nextIndex = 0;
+    } else {
+      nextIndex = currentIndex + 1;
+    }
+    
+    const nextRoute = navigableRoutes.value[nextIndex];
     router.push({ name: nextRoute.name });
   }
   // 向右滑動（上一頁）
-  else if (swipeDistance < -minSwipeDistance && currentIndex > 0) {
+  else if (swipeDistance < -minSwipeDistance) {
     transitionName.value = 'slide-right';
-    const prevRoute = navigableRoutes.value[currentIndex - 1];
+    let prevIndex;
+    
+    if (currentIndex === 0) {
+      // 在第一個活動頁面，切換到最後一個活動頁面
+      prevIndex = navigableRoutes.value.length - 1;
+    } else {
+      prevIndex = currentIndex - 1;
+    }
+    
+    const prevRoute = navigableRoutes.value[prevIndex];
     router.push({ name: prevRoute.name });
   }
 };
 
-const clearAllData = () => {
+// 根據當前頁面清除對應資料
+const clearData = () => {
   try {
-    localStorage.clear();
+    if (route.name === 'overview') {
+      // 在概覽頁面，清除整個 localStorage
+      localStorage.clear();
+    } else {
+      // 在特定活動頁面，只清除該頁面對應的 store 資料
+      const currentRouteName = route.name as keyof typeof routeStoreMap;
+      const store = routeStoreMap[currentRouteName];
+      
+      if (store && typeof store.clearAllHistory === 'function') {
+        // 調用 store 的清除方法
+        store.clearAllHistory();
+        
+        // 同時從 localStorage 中移除該 store 的資料
+        const storeId = store.$id;
+        localStorage.removeItem(storeId);
+      }
+    }
+    
     showConfirmDialog.value = false;
-    window.location.reload();
+    
+    // 如果清除的是整個 localStorage，則重新載入頁面
+    if (route.name === 'overview') {
+      window.location.reload();
+    }
   } catch (error) {
     console.error('清除資料時發生錯誤:', error);
     alert('清除資料時發生錯誤，請重試');

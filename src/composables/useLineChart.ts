@@ -6,21 +6,14 @@ enum ChartPeriod {
   Month = 'month'
 }
 
-// 圖例顯示狀態枚舉
 enum LegendState {
-  Hidden = 0,    // 隱藏
-  Visible = 1,   // 顯示
-  WithValues = 2 // 顯示並顯示數值
+  Hidden = 0,
+  Visible = 1,
+  WithValues = 2
 }
 
 const DayNames: Record<string, string> = {
-  0: '日',
-  1: '一',
-  2: '二',
-  3: '三',
-  4: '四',
-  5: '五',
-  6: '六'
+  0: '日', 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六'
 }
 
 export interface DataProvider {
@@ -29,6 +22,8 @@ export interface DataProvider {
     data: {
       [name: string]: {
         getValueByDate: (date: Date) => number
+        getValueByWeek: (date: Date) => number
+        getValueByMonth: (date: Date) => number
       }
     }
   },
@@ -37,6 +32,8 @@ export interface DataProvider {
     data: {
       [name: string]: {
         getValueByDate: (date: Date) => number
+        getValueByWeek: (date: Date) => number
+        getValueByMonth: (date: Date) => number
       }
     }
   }
@@ -54,11 +51,9 @@ export function useLineChart(dataProvider: DataProvider) {
   const period = ref<ChartPeriod>(ChartPeriod.Day)
   const chartHeight = 240
 
-  // 圖例狀態管理（使用數字表示狀態）
   const leftLegendStates = ref<Record<string, LegendState>>({})
   const rightLegendStates = ref<Record<string, LegendState>>({})
 
-  // 初始化圖例狀態（預設為顯示狀態）
   const initializeLegendStates = () => {
     Object.keys(dataProvider.left.data).forEach(name => {
       if (!(name in leftLegendStates.value)) {
@@ -75,49 +70,40 @@ export function useLineChart(dataProvider: DataProvider) {
     }
   }
 
-  // 切換左軸圖例狀態（循環：顯示 -> 顯示數值 -> 隱藏 -> 顯示）
   const toggleLeftLegend = (dataName: string) => {
     const currentState = leftLegendStates.value[dataName]
     leftLegendStates.value[dataName] = (currentState + 1) % 3 as LegendState
   }
 
-  // 切換右軸圖例狀態
   const toggleRightLegend = (dataName: string) => {
     const currentState = rightLegendStates.value[dataName]
     rightLegendStates.value[dataName] = (currentState + 1) % 3 as LegendState
   }
 
-  // 檢查左軸是否有任何可見圖例
   const hasVisibleLeftLegends = computed(() => {
     return Object.values(leftLegendStates.value).some(state => state !== LegendState.Hidden)
   })
 
-  // 檢查右軸是否有任何可見圖例
   const hasVisibleRightLegends = computed(() => {
     return Object.values(rightLegendStates.value).some(state => state !== LegendState.Hidden)
   })
 
-  // 檢查左軸圖例是否可見
   const isLeftLegendVisible = (dataName: string) => {
     return leftLegendStates.value[dataName] !== LegendState.Hidden
   }
 
-  // 檢查右軸圖例是否可見
   const isRightLegendVisible = (dataName: string) => {
     return rightLegendStates.value[dataName] !== LegendState.Hidden
   }
 
-  // 檢查左軸圖例是否顯示數值
   const shouldShowLeftValues = (dataName: string) => {
     return leftLegendStates.value[dataName] === LegendState.WithValues
   }
 
-  // 檢查右軸圖例是否顯示數值
   const shouldShowRightValues = (dataName: string) => {
     return rightLegendStates.value[dataName] === LegendState.WithValues
   }
 
-  // 計算圖表標題
   const chartTitle = computed(() => {
     const periodTitles = {
       [ChartPeriod.Day]: '近七日趨勢',
@@ -127,141 +113,86 @@ export function useLineChart(dataProvider: DataProvider) {
     return periodTitles[period.value]
   })
 
-  // 生成圖表數據
+  // 簡化的數據生成函數
+  const generateDataPoint = (date: Date, index: number): LineChartDataPoint => {
+    // 根據週期選擇對應的數據獲取方法
+    const getValueMethod = {
+      [ChartPeriod.Day]: 'getValueByDate',
+      [ChartPeriod.Week]: 'getValueByWeek',
+      [ChartPeriod.Month]: 'getValueByMonth'
+    }[period.value] as keyof DataProvider['left']['data'][string]
+
+    // 獲取左軸數據
+    const leftValues: { [name: string]: number } = {}
+    Object.keys(dataProvider.left.data).forEach(name => {
+      leftValues[name] = dataProvider.left.data[name][getValueMethod](date)
+    })
+
+    // 獲取右軸數據
+    const rightValues: { [name: string]: number } = {}
+    if (dataProvider.right) {
+      Object.keys(dataProvider.right.data).forEach(name => {
+        rightValues[name] = dataProvider.right!.data[name][getValueMethod](date)
+      })
+    }
+
+    // 生成標籤
+    const { label, dateLabel } = generateLabels(date, index)
+
+    return {
+      date,
+      label,
+      dateLabel,
+      leftValues,
+      rightValues: dataProvider.right ? rightValues : undefined
+    }
+  }
+
+  // 生成標籤的輔助函數
+  const generateLabels = (date: Date, index: number) => {
+    if (period.value === ChartPeriod.Day) {
+      const label = index === 0 ? '今天' : index === 1 ? '昨天' : `週${DayNames[date.getDay().toString()]}`
+      const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`
+      return { label, dateLabel }
+    } else if (period.value === ChartPeriod.Week) {
+      const label = index === 0 ? '本週' : `${index}週前`
+      const startDate = new Date(date)
+      startDate.setDate(date.getDate() - 6)
+      const dateLabel = `${startDate.getMonth() + 1}/${startDate.getDate()}`
+      return { label, dateLabel }
+    } else {
+      const label = index === 0 ? '本月' : `${index}月前`
+      const dateLabel = `${date.getMonth() + 1}月`
+      return { label, dateLabel }
+    }
+  }
+
+  // 簡化的圖表數據生成
   const chartData = computed((): LineChartDataPoint[] => {
     const data: LineChartDataPoint[] = []
     const today = new Date()
 
-    if (period.value === ChartPeriod.Day) {
-      // 日視圖：顯示過去7天
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(today)
+    for (let i = 6; i >= 0; i--) {
+      let date: Date
+
+      if (period.value === ChartPeriod.Day) {
+        date = new Date(today)
         date.setDate(today.getDate() - i)
-        
-        const leftValues: { [name: string]: number } = {}
-        Object.keys(dataProvider.left.data).forEach(name => {
-          leftValues[name] = dataProvider.left.data[name].getValueByDate(date)
-        })
-
-        const rightValues: { [name: string]: number } = {}
-        if (dataProvider.right) {
-          Object.keys(dataProvider.right.data).forEach(name => {
-            rightValues[name] = dataProvider.right!.data[name].getValueByDate(date)
-          })
-        }
-
-        const label = i === 0 ? '今天' : i === 1 ? '昨天' : `週${DayNames[date.getDay().toString()]}`
-        const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`
-
-        data.push({
-          date,
-          label,
-          dateLabel,
-          leftValues,
-          rightValues: dataProvider.right ? rightValues : undefined
-        })
-      }
-    } else if (period.value === ChartPeriod.Week) {
-      // 週視圖：顯示過去7週
-      for (let i = 6; i >= 0; i--) {
-        const endDate = new Date(today)
-        endDate.setDate(today.getDate() - (i * 7))
-        
-        const startDate = new Date(endDate)
-        startDate.setDate(endDate.getDate() - 6)
-
-        // 累積一週的數據
-        const leftValues: { [name: string]: number } = {}
-        Object.keys(dataProvider.left.data).forEach(name => {
-          leftValues[name] = 0
-        })
-
-        const rightValues: { [name: string]: number } = {}
-        if (dataProvider.right) {
-          Object.keys(dataProvider.right.data).forEach(name => {
-            rightValues[name] = 0
-          })
-        }
-
-        // 累積7天的數據
-        for (let d = 0; d < 7; d++) {
-          const currentDate = new Date(startDate)
-          currentDate.setDate(startDate.getDate() + d)
-
-          Object.keys(dataProvider.left.data).forEach(name => {
-            leftValues[name] += dataProvider.left.data[name].getValueByDate(currentDate)
-          })
-
-          if (dataProvider.right) {
-            Object.keys(dataProvider.right.data).forEach(name => {
-              rightValues[name] += dataProvider.right!.data[name].getValueByDate(currentDate)
-            })
-          }
-        }
-
-        const label = i === 0 ? '本週' : `${i}週前`
-        const dateLabel = `${startDate.getMonth() + 1}/${startDate.getDate()}`
-
-        data.push({
-          date: endDate,
-          label,
-          dateLabel,
-          leftValues,
-          rightValues: dataProvider.right ? rightValues : undefined
-        })
-      }
-    } else {
-      // 月視圖：顯示過去7個月
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(today)
+      } else if (period.value === ChartPeriod.Week) {
+        date = new Date(today)
+        date.setDate(today.getDate() - (i * 7))
+      } else {
+        date = new Date(today)
         date.setMonth(today.getMonth() - i)
         date.setDate(1) // 設為月初
-
-        const leftValues: { [name: string]: number } = {}
-        Object.keys(dataProvider.left.data).forEach(name => {
-          leftValues[name] = 0
-        })
-
-        const rightValues: { [name: string]: number } = {}
-        if (dataProvider.right) {
-          Object.keys(dataProvider.right.data).forEach(name => {
-            rightValues[name] = 0
-          })
-        }
-
-        // 累積整個月的數據
-        const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-        for (let d = 1; d <= daysInMonth; d++) {
-          const currentDate = new Date(date.getFullYear(), date.getMonth(), d)
-
-          Object.keys(dataProvider.left.data).forEach(name => {
-            leftValues[name] += dataProvider.left.data[name].getValueByDate(currentDate)
-          })
-
-          if (dataProvider.right) {
-            Object.keys(dataProvider.right.data).forEach(name => {
-              rightValues[name] += dataProvider.right!.data[name].getValueByDate(currentDate)
-            })
-          }
-        }
-
-        const label = i === 0 ? '本月' : `${i}月前`
-        const dateLabel = `${date.getMonth() + 1}月`
-
-        data.push({
-          date,
-          label,
-          dateLabel,
-          leftValues,
-          rightValues: dataProvider.right ? rightValues : undefined
-        })
       }
+
+      data.push(generateDataPoint(date, i))
     }
 
     return data
   })
 
-  // 計算左軸最大值（只考慮可見的圖例）
   const leftYAxisMax = computed(() => {
     const visibleLeftValues = chartData.value.flatMap(item => 
       Object.entries(item.leftValues)
@@ -272,7 +203,6 @@ export function useLineChart(dataProvider: DataProvider) {
     return Math.ceil(maxValue * 1.2 / 5) * 5 || 10
   })
 
-  // 計算右軸最大值（只考慮可見的圖例）
   const rightYAxisMax = computed(() => {
     if (!dataProvider.right) return 0
     
@@ -285,7 +215,6 @@ export function useLineChart(dataProvider: DataProvider) {
     return Math.ceil(maxValue * 1.2 / 5) * 5 || 10
   })
 
-  // 切換圖表週期
   const toggleChartPeriod = () => {
     if (period.value === ChartPeriod.Day) {
       period.value = ChartPeriod.Week
@@ -296,25 +225,19 @@ export function useLineChart(dataProvider: DataProvider) {
     }
   }
 
-  // 初始化圖例狀態
   initializeLegendStates()
 
   return {
-    // 狀態
     period,
     chartHeight,
     leftLegendStates,
     rightLegendStates,
-    
-    // 計算屬性
     chartTitle,
     chartData,
     leftYAxisMax,
     rightYAxisMax,
     hasVisibleLeftLegends,
     hasVisibleRightLegends,
-    
-    // 方法
     toggleChartPeriod,
     toggleLeftLegend,
     toggleRightLegend,
@@ -322,8 +245,6 @@ export function useLineChart(dataProvider: DataProvider) {
     isRightLegendVisible,
     shouldShowLeftValues,
     shouldShowRightValues,
-    
-    // 常數
     dataProvider,
     LegendState
   }
