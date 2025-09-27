@@ -4,6 +4,7 @@ import {
   SCORING_CONSTANTS, 
   getSwimmingScoreChangeByRatio 
 } from "@/constants/scoringConstants";
+import { getTodayKey } from "@/utils/dateUtils";
 
 interface SwimmingRecord {
   distance: number; // in meters
