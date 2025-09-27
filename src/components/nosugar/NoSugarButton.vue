@@ -119,7 +119,7 @@ const getCurrentLevelText = () => {
       return text;
     }
   }
-  return '選擇戒糖程度';
+  return '選擇飲控程度';
 };
 
 // 處理按鈕點擊

@@ -25,7 +25,8 @@ export const getWorkoutUsageInstruction = (): UsageInstruction => {
       '系統會根據歷史平均重量計算各動作的權重',
       '重量越重的動作權重越低，確保平衡發展',
       '建議每日進行多種不同動作的訓練',
-      '持續記錄有助於系統更準確計算權重'
+      '持續記錄有助於系統更準確計算權重',
+      '⚠️ 第一次記錄時 progress bar 不會變動，需要第二次記錄才會有變化' // 新增說明
     ]
   }
 }
@@ -49,7 +50,8 @@ export const getSwimmingUsageInstruction = (): UsageInstruction => {
       '游泳速度 ≥25 m/min：距離 × 1.0 倍權重',
       '游泳速度 ≥20 m/min：距離 × 0.8 倍權重',
       '游泳速度 <20 m/min：距離 × 0.5 倍權重',
-      '提高游泳速度可獲得更高的加權里程數'
+      '提高游泳速度可獲得更高的加權里程數',
+      '⚠️ 第一次記錄時 progress bar 不會變動，需要第二次記錄才會有變化' // 新增說明
     ]
   }
 }
@@ -59,7 +61,7 @@ export const getNoSugarUsageInstruction = (): UsageInstruction => {
   
   return {
     title: '飲控使用說明',
-    description: '記錄每日的飲食控制狀況，根據戒糖程度給予相應的分數變化。',
+    description: '記錄每日的飲食控制狀況，根據當天飲食控管的程度給予相應的分數變化。',
     scoringRules: [
       `初始分數：${SCORING_CONSTANTS.COMMON.DEFAULT_SUCCESS_BONUS} 分`,
       '嚴守紀律 (+2)：+10 分',
@@ -72,7 +74,8 @@ export const getNoSugarUsageInstruction = (): UsageInstruction => {
       '每個等級變化對應 5 分的分數變化',
       '建議每日記錄以維持良好的飲食習慣',
       '長期堅持戒糖有助於健康管理',
-      '偶爾的放縱是正常的，重要的是整體趨勢'
+      '偶爾的放縱是正常的，重要的是整體趨勢',
+      '💡 建議自行制定更細節的規則來判斷四種等級的落點，每個人的標準可能不同，app 僅做粗分類' // 新增說明
     ]
   }
 }
@@ -104,7 +107,7 @@ export const getHungryUsageInstruction = (): UsageInstruction => {
   
   return {
     title: '飢餓使用說明',
-    description: '記錄每日的飢餓感受程度，幫助了解和管理飲食節奏。',
+    description: '記錄每日睡前的飢餓感受程度，幫助了解和管理飲食節奏。', // 修改描述強調睡前
     scoringRules: [
       `初始分數：${INITIAL_SCORE} 分`,
       '很餓 (+2)：+10 分',
@@ -117,7 +120,8 @@ export const getHungryUsageInstruction = (): UsageInstruction => {
       '每個飢餓等級變化對應 5 分的分數變化',
       '適度的飢餓感是健康的表現',
       '避免過度飽食或過度飢餓',
-      '記錄有助於了解個人的飲食模式'
+      '記錄有助於了解個人的飲食模式',
+      '🌙 建議在睡前感受自己的飢餓感，每天帶著飢餓感入睡的人一定可以快速減脂，但這需要強大的意志力！' // 新增睡前飢餓感說明
     ]
   }
 }
