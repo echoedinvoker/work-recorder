@@ -123,6 +123,7 @@ const getActivityScore = (activityName: string) => {
 // 獲取活動卡片樣式
 const getActivityCardClass = (activity: any) => {
   const score = getActivityScore(activity.name);
+  if (!score) return 'border-gray-300 bg-gray-50 text-gray-700';
   if (score > 0) {
     return 'border-green-300 bg-green-50 text-green-800';
   } else if (score < 0) {
@@ -135,7 +136,11 @@ const getActivityCardClass = (activity: any) => {
 // 本週總分
 const weeklyTotal = computed(() => {
   return activities.reduce((total, activity) => {
-    return total + getActivityScore(activity.name);
+    const activityScore = getActivityScore(activity.name);
+    if (activityScore) {
+      return total + activityScore;
+    }
+    return total;
   }, 0);
 });
 
@@ -148,10 +153,13 @@ const weeklyTotalClass = computed(() => {
 // 熱門活動（分數變化最大的前4個）
 const topActivities = computed(() => {
   return activities
-    .map(activity => ({
-      ...activity,
-      score: Math.abs(getActivityScore(activity.name))
-    }))
+    .map(activity => {
+      const activityScore = getActivityScore(activity.name);
+      return {
+        ...activity,
+        score: activityScore ? Math.abs(activityScore) : 0
+      }
+    })
     .sort((a, b) => b.score - a.score)
     .slice(0, 4);
 });
