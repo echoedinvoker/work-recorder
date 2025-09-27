@@ -95,12 +95,17 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
     return accDailyScore.value[dateKey] || 0
   }
 
+  const clearAllHistory = () => {
+    dailySwimmingDistance.value = {}
+  }
+
   return {
     dailySwimmingDistance,
     accDailyScore,
     scoreDifference,
     addDistance,
     getScoreByDate,
+    clearAllHistory,
     UNIT
   };
 },

@@ -103,6 +103,9 @@ export const useDailyEarlySleepStore = defineStore("dailyEarlySleep", () => {
     const dateKey = formatDateToKey(date);
     return accDailyScore.value[dateKey] || 0;
   };
+  const clearAllHistory = () => {
+    dailyEarlySleepResults.value = {};
+  }
 
   return {
     dailyEarlySleepResults,
@@ -111,6 +114,7 @@ export const useDailyEarlySleepStore = defineStore("dailyEarlySleep", () => {
     accDailyScore,
     scoreDifference,
     getScoreByDate,
+    clearAllHistory,
     UNIT
   };
 },

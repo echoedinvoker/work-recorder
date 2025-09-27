@@ -83,6 +83,9 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
     const dateKey = formatDateToKey(date);
     return accDailyScore.value[dateKey] || 0;
   };
+  const clearAllHistory = () => {
+    dailyHungryResults.value = {};
+  }
 
   return {
     dailyHungryResults,
@@ -91,6 +94,7 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
     accDailyScore,
     scoreDifference,
     getScoreByDate,
+    clearAllHistory,
     UNIT
   }
 },

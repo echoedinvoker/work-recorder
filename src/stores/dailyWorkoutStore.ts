@@ -393,6 +393,13 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     // 從 monthlyWeightedRecord computed 中取得該月的總加權運動量
     return monthlyWeightedRecord.value[monthKey] || 0
   }
+  const clearAllHistory = () => {
+    records.value = {};
+    weightedRecords.value = {};
+    scores.value = {};
+    ratios.value = {};
+    ratioIncrements.value = {};
+  };
 
   // helper functions
   const getWeekNumber = (date: Date): number => {
@@ -520,6 +527,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     getWeightedRecordByDate,
     getWeightedRecordByWeek,
     getWeightedRecordByMonth,
+    clearAllHistory,
 
     // for chart
     left: {
