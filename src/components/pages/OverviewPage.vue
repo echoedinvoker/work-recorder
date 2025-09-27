@@ -10,7 +10,8 @@
       <!-- 總分數和趨勢 -->
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div class="text-center">
-          <div class="text-3xl font-bold mb-1" :class="getTotalScoreClass()">
+          <!-- 使用與進度條相同的顏色邏輯 -->
+          <div class="text-3xl font-bold mb-1" :style="{ color: getProgressColor() }">
             {{ fatLossMetrics.totalScore }}
           </div>
           <div class="text-sm text-gray-600">總分數</div>
@@ -48,17 +49,51 @@
         </div>
       </div>
 
-      <!-- 進度條 -->
-      <div class="mt-4">
-        <div class="flex justify-between text-xs text-gray-600 mb-1">
-          <span>記錄進度</span>
-          <span>{{ getProgressMessage() }}</span>
+      <!-- 進度條 - 使用與 AProgressBar 相同的樣式 -->
+      <div class="mt-4 space-y-4">
+        <!-- 數值顯示區域 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl font-bold text-gray-800">
+              {{ ((fatLossMetrics.recordCount / 5) * 100).toFixed(1) }}
+            </span>
+            <span class="text-sm text-gray-500">%</span>
+          </div>
+
+          <!-- 狀態指示器 -->
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: getProgressColor() }"></div>
+            <span class="text-sm text-gray-600">
+              {{ getProgressStatusMessage() }}
+            </span>
+          </div>
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            class="h-2 rounded-full transition-all duration-500 bg-blue-500"
-            :style="{ width: `${(fatLossMetrics.recordCount / 5) * 100}%` }"
-          ></div>
+
+        <!-- 進度條容器 -->
+        <div class="relative">
+          <!-- 進度條背景 -->
+          <div class="w-full bg-gray-100 rounded-r-full h-4 shadow-inner overflow-hidden">
+            <!-- 基本進度條 -->
+            <div 
+              class="h-full transition-all duration-500 ease-out relative overflow-hidden rounded-r-full"
+              :style="{
+                width: `${(fatLossMetrics.recordCount / 5) * 100}%`,
+                backgroundColor: getProgressColor()
+              }"
+            >
+              <!-- 進度條光澤效果 -->
+              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
+            </div>
+
+            <!-- 閾值標記 -->
+            <div 
+              v-for="threshold in progressThresholds" 
+              :key="threshold.value"
+              class="absolute top-0 w-1 h-full bg-white shadow-sm opacity-80 transition-opacity hover:opacity-100"
+              :style="{ left: `${threshold.value * 100}%` }" 
+              :title="`目標: ${(threshold.value * 100).toFixed(1)}%`"
+            ></div>
+          </div>
         </div>
       </div>
     </div>
@@ -102,6 +137,7 @@ import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
 import { useDailyEarlySleepStore } from '@/stores/dailyEarlySleepStore';
 import { useDailyHungryStore } from '@/stores/dailyHungryStore';
 import { useFatLossStore } from '@/stores/fatLossStore';
+import { SCORING_CONSTANTS } from '@/constants/scoringConstants';
 
 const router = useRouter();
 
@@ -117,6 +153,47 @@ const fatLossStore = useFatLossStore();
 const fatLossMetrics = computed(() => {
   return fatLossStore.todayMetrics;
 });
+
+// 使用 WORKOUT.THRESHOLD_COLORS 作為進度條閾值
+const progressThresholds = computed(() => {
+  return SCORING_CONSTANTS.WORKOUT.THRESHOLD_COLORS.map(threshold => ({
+    value: threshold.value,
+    color: threshold.color,
+    message: threshold.message
+  }));
+});
+
+// 根據記錄完成度獲取進度條顏色
+const getProgressColor = () => {
+  const progress = fatLossMetrics.value.recordCount / 5; // 轉換為 0-1 範圍
+  const thresholds = [...SCORING_CONSTANTS.WORKOUT.THRESHOLD_COLORS].sort((a, b) => b.value - a.value);
+  
+  // 找到符合當前進度的最高閾值
+  for (const threshold of thresholds) {
+    if (progress >= threshold.value) {
+      return threshold.color;
+    }
+  }
+  
+  // 如果沒有找到匹配的閾值，返回第一個閾值的顏色
+  return thresholds[thresholds.length - 1]?.color || '#ef4444';
+};
+
+// 根據當前進度獲取狀態訊息
+const getProgressStatusMessage = () => {
+  const progress = fatLossMetrics.value.recordCount / 5; // 轉換為 0-1 範圍
+  const thresholds = [...SCORING_CONSTANTS.WORKOUT.THRESHOLD_COLORS].sort((a, b) => b.value - a.value);
+  
+  // 找到符合當前進度的最高閾值
+  for (const threshold of thresholds) {
+    if (progress >= threshold.value && threshold.message) {
+      return threshold.message;
+    }
+  }
+  
+  // 如果沒有找到匹配的閾值，返回第一個閾值的訊息
+  return thresholds[thresholds.length - 1]?.message || '未開始';
+};
 
 // 活動列表
 const fatLossActivities = [
@@ -158,14 +235,6 @@ const getActivityCardClass = (activity: any) => {
   }
 };
 
-// 樣式和文字方法
-const getTotalScoreClass = () => {
-  const score = fatLossMetrics.value.totalScore;
-  if (score > 0) return 'text-green-600';
-  if (score < 0) return 'text-red-600';
-  return 'text-gray-600';
-};
-
 const getRecordCountClass = () => {
   const count = fatLossMetrics.value.recordCount;
   if (count >= 4) return 'text-green-600';
@@ -185,14 +254,6 @@ const getTrendText = () => {
   if (trend === 'improving') return '📈 持續改善';
   if (trend === 'declining') return '📉 需要注意';
   return '📊 保持穩定';
-};
-
-const getProgressMessage = () => {
-  const count = fatLossMetrics.value.recordCount;
-  if (count === 5) return '全部完成';
-  if (count >= 3) return '進度良好';
-  if (count >= 1) return '繼續加油';
-  return '尚未開始';
 };
 
 // 導航到活動頁面

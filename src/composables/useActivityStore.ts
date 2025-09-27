@@ -207,17 +207,8 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
 
   // Methods
   const updateScoreAndRatio = (additionalWeightedRecord: number) => {
+
     const todayKey = getTodayKey()
-
-    // 更新加權記錄
-    weightedRecords.value[todayKey] =
-      (weightedRecords.value[todayKey] || 0) + additionalWeightedRecord
-
-    // 如果沒有歷史記錄，使用初始分數
-    if (maxPastWeightedRecord.value === 0) {
-      scores.value[todayKey] = options.initialScore
-      return
-    }
 
     // 填補缺失的分數記錄
     const lastScoreDateKey = Object.keys(scores.value)
@@ -241,6 +232,17 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
       const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
       scores.value[yesterdayKey] = 0;
     }
+
+    // 更新加權記錄
+    weightedRecords.value[todayKey] =
+      (weightedRecords.value[todayKey] || 0) + additionalWeightedRecord
+
+    // 如果沒有歷史記錄，使用初始分數
+    if (maxPastWeightedRecord.value === 0) {
+      scores.value[todayKey] = options.initialScore
+      return
+    }
+
 
     // 計算比例和分數變化
     const ratio = weightedRecords.value[todayKey] / maxPastWeightedRecord.value
