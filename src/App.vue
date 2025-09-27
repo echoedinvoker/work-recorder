@@ -21,7 +21,6 @@
           <span v-else>
             <!-- 切換到概覽頁面 -->
             <span class="text-base">📊</span>
-            概覽
           </span>
         </button>
 
@@ -32,7 +31,6 @@
           class="px-4 py-2 rounded-full text-sm transition-all border-2 border-green-500 bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-2"
         >
           <span class="text-base">❓</span>
-          使用說明
         </button>
 
         <!-- 清除資料按鈕 -->
@@ -42,7 +40,6 @@
           :title="clearButtonTitle"
         >
           <span class="text-base">🗑️</span>
-          清除
         </button>
       </div>
     </nav>
