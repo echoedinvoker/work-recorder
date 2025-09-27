@@ -25,7 +25,8 @@ export interface DataProvider {
         getValueByWeek: (date: Date) => number
         getValueByMonth: (date: Date) => number
       }
-    }
+    },
+    formatValue?: (value: number) => string // 左軸格式化方法
   },
   right?: {
     unit: string,
@@ -35,8 +36,12 @@ export interface DataProvider {
         getValueByWeek: (date: Date) => number
         getValueByMonth: (date: Date) => number
       }
-    }
-  }
+    },
+    formatValue?: (value: number) => string // 右軸格式化方法
+  },
+  // 格式化方法
+  formatLeftValue: (value: number) => string,
+  formatRightValue: (value: number) => string
 }
 
 export interface LineChartDataPoint {
@@ -102,6 +107,14 @@ export function useLineChart(dataProvider: DataProvider) {
 
   const shouldShowRightValues = (dataName: string) => {
     return rightLegendStates.value[dataName] === LegendState.WithValues
+  }
+
+  const formatLeftValue = (value: number): string => {
+    return dataProvider.formatLeftValue(value)
+  }
+
+  const formatRightValue = (value: number): string => {
+    return dataProvider.formatRightValue(value)
   }
 
   const chartTitle = computed(() => {
@@ -245,6 +258,8 @@ export function useLineChart(dataProvider: DataProvider) {
     isRightLegendVisible,
     shouldShowLeftValues,
     shouldShowRightValues,
+    formatLeftValue,  // 左軸格式化方法
+    formatRightValue, // 右軸格式化方法
     dataProvider,
     LegendState
   }

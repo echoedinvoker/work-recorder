@@ -12,14 +12,15 @@ interface BaseActivityStoreOptions<T> {
     left: {
       unit: string
       data: Record<string, any>
+      formatValue?: (value: number) => string // 左軸專用格式化方法
     }
     right?: {
       unit: string
       data: Record<string, any>
+      formatValue?: (value: number) => string // 右軸專用格式化方法
     }
   }
   thresholds: any
-  formatValue?: (value: number) => string
 }
 
 export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
@@ -287,18 +288,21 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     const monthKey = `${year}-${monthNumber.toString().padStart(2, '0')}`
     return monthlyWeightedRecord.value[monthKey] || 0
   }
-  const formatValue = (value: number): string => {
-    // 如果 options 中有自定義的 formatValue，使用它
-    if (options.formatValue) {
-      return options.formatValue(value)
+  const formatLeftValue = (value: number): string => {
+    if (options.chartConfig.left.formatValue) {
+      return options.chartConfig.left.formatValue(value)
     }
-
-    // 默認邏輯：大於等於1000時顯示為 "k" 格式
-    if (value >= 1000) {
-      return (value / 1000).toFixed(1) + 'k'
-    }
-    return value.toString()
+    // 默認格式化邏輯
+    return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString()
   }
+  const formatRightValue = (value: number): string => {
+    if (options.chartConfig.right?.formatValue) {
+      return options.chartConfig.right.formatValue(value)
+    }
+    // 默認格式化邏輯
+    return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString()
+  }
+
   const clearAllHistory = () => {
     records.value = {}
     weightedRecords.value = {}
@@ -359,7 +363,8 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     getWeightedRecordByDate,
     getWeightedRecordByWeek,
     getWeightedRecordByMonth,
-    formatValue,
+    formatLeftValue,
+    formatRightValue,
     clearAllHistory,
 
     // Chart config

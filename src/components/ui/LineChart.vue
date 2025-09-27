@@ -67,7 +67,7 @@
                 class="text-xs font-medium pointer-events-none"
                 :fill="leftLineColors[index % leftLineColors.length]"
               >
-                {{ formatValue(point.leftValues[dataName]) }}
+                {{ formatValue(point.leftValues[dataName], 'left') }}
               </text>
             </template>
           </g>
@@ -109,7 +109,7 @@
                 class="text-xs font-medium pointer-events-none"
                 :fill="rightLineColors[index % rightLineColors.length]"
               >
-                {{ formatValue(point.rightValues?.[dataName] || 0) }}
+                {{ formatValue(point.rightValues?.[dataName] || 0, 'right') }}
               </text>
             </template>
           </g>
@@ -203,10 +203,30 @@ import { useLineChart, type DataProvider } from '@/composables/useLineChart'
 
 // Props
 const props = defineProps<{
-  dataProvider: DataProvider & {
-    formatValue?: (value: number) => string
-  }
+  dataProvider: DataProvider
 }>()
+
+// 格式化數值顯示 - 需要區分左軸和右軸
+const formatLeftValue = (value: number) => {
+  if (dataProvider.left.formatValue) {
+    return dataProvider.left.formatValue(value)
+  }
+  // 默認邏輯
+  return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString()
+}
+
+const formatRightValue = (value: number) => {
+  if (dataProvider.right?.formatValue) {
+    return dataProvider.right.formatValue(value)
+  }
+  // 默認邏輯
+  return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString()
+}
+
+// 通用格式化函數 - 根據軸來決定使用哪個格式化方法
+const formatValue = (value: number, axis: 'left' | 'right' = 'left') => {
+  return axis === 'left' ? formatLeftValue(value) : formatRightValue(value)
+}
 
 // 使用 composable
 const {
@@ -251,19 +271,6 @@ const tooltip = ref({
   value: 0,
   unit: ''
 })
-
-// 格式化數值顯示
-const formatValue = (value: number) => {
-  if (props.dataProvider.formatValue) {
-    return props.dataProvider.formatValue(value)
-  }
-  
-  // 默認邏輯
-  if (value >= 1000) {
-    return (value / 1000).toFixed(1) + 'k'
-  }
-  return value.toString()
-}
 
 // 獲取圖例指示器樣式類
 const getLegendIndicatorClass = (state: number) => {

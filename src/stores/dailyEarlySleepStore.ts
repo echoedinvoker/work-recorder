@@ -44,20 +44,20 @@ export const useDailyEarlySleepStore = defineStore("dailyEarlySleep", () => {
             getValueByWeek: (week: Date) => baseStore.getWeightedRecordByWeek(week),
             getValueByMonth: (month: Date) => baseStore.getWeightedRecordByMonth(month)
           }
+        },
+        formatValue: (minutes: number) => {
+          if (minutes === 0) return '00:00';
+
+          // 對於右軸的時間數據，需要轉換回實際時間
+          const actualMinutes = 24 * 60 - minutes;
+          const hours = Math.floor(actualMinutes / 60);
+          const mins = actualMinutes % 60;
+          return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
         }
       }
     },
     thresholds: [], // 早睡不需要進度條
     // 自定義格式化函數，將分鐘轉換為時間格式
-    formatValue: (minutes: number) => {
-      if (minutes === 0) return '00:00';
-
-      // 對於右軸的時間數據，需要轉換回實際時間
-      const actualMinutes = 24 * 60 - minutes;
-      const hours = Math.floor(actualMinutes / 60);
-      const mins = actualMinutes % 60;
-      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-    }
   });
 
   // Helper function: 取得週數
