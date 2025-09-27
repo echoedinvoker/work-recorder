@@ -2,6 +2,10 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { formatDateToKey, getTodayKey } from '../utils/dateUtils'
 import { computed } from "vue";
+import { 
+  SCORING_CONSTANTS, 
+  getWorkoutScoreChange 
+} from '../constants/scoringConstants';
 
 const UNIT = '重量(公斤)'
 
@@ -318,7 +322,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       count * weight * normalizedTodayActivityWeights.value[activity]
 
     if (maxPastWeightedRecord.value === 0) {
-      scores.value[todayKey] = 10
+      scores.value[todayKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
       return
     }
 
@@ -329,7 +333,10 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       for (let date = new Date(lastScoreDateKey); formatDateToKey(date) < todayKey; date.setDate(date.getDate() + 1)) {
         const dateKey = formatDateToKey(date)
         if (!scores.value[dateKey]) {
-          scores.value[dateKey] = Math.max(0, startScore - 5) // 每天遞減5分
+          scores.value[dateKey] = Math.max(
+            SCORING_CONSTANTS.COMMON.MIN_SCORE, 
+            startScore + SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY
+          )
         }
       }
     }
@@ -339,15 +346,12 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     ratios.value[todayKey] = ratio
     const lastDateKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
 
-    if (ratio >= 1) {
-      scores.value[todayKey] = scores.value[lastDateKey] ? scores.value[lastDateKey] + 10 : 10
-    } else if (ratio >= 0.8) {
-      scores.value[todayKey] = scores.value[lastDateKey] ? scores.value[lastDateKey] + 5 : 5
-    } else if (ratio >= 0.6) {
-      scores.value[todayKey] = scores.value[lastDateKey] ? scores.value[lastDateKey] + 2 : 2
-    } else {
-      scores.value[todayKey] = scores.value[lastDateKey] ? Math.max(0, scores.value[lastDateKey] - 5) : 0
-    }
+    const scoreChange = getWorkoutScoreChange(ratio)
+    const baseScore = scores.value[lastDateKey] || 0
+    scores.value[todayKey] = Math.max(
+      SCORING_CONSTANTS.COMMON.MIN_SCORE,
+      baseScore + scoreChange
+    )
   }
   const getScoreByDate = (date: Date): number => {
     const dateKey = formatDateToKey(date)
