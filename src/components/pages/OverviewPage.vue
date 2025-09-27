@@ -1,7 +1,5 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">活動概要</h1>
-    
     <!-- 今日總覽 -->
     <div class="bg-white rounded-lg shadow-md p-4">
       <h2 class="text-lg font-semibold mb-4 text-gray-700">今日活動狀況</h2>
