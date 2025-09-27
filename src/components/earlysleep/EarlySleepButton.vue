@@ -7,8 +7,8 @@
         :color="buttonColor"
         :text="buttonText"
         :class="{ 
-          'pointer-events-none opacity-75 cursor-default': isRecordedToday,
-          'shadow-none border-none bg-gray-100 text-gray-700': isRecordedToday 
+          'pointer-events-none opacity-75 cursor-default shadow-none border-2 border-gray-300 bg-gray-100 text-gray-700': isRecordedToday,
+          'hover:scale-105': !isRecordedToday
         }"
         @click="handleButtonClick" 
       />
@@ -25,7 +25,7 @@
           <!-- 取消按鈕 (叉叉) -->
           <button 
             @click="cancelConfirmation"
-            class="w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors duration-200"
+            class="w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
             title="取消"
           >
             ✕
@@ -34,13 +34,18 @@
           <!-- 確認按鈕 (勾勾) -->
           <button 
             @click="confirmAction"
-            class="w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors duration-200"
+            class="w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
             title="確認記錄"
           >
             ✓
           </button>
         </div>
       </div>
+    </div>
+    
+    <!-- 已記錄提示 -->
+    <div v-if="isRecordedToday" class="text-center text-sm text-gray-500">
+      🔒 今日已記錄，無法修改
     </div>
   </div>
 </template>
@@ -56,7 +61,7 @@ const store = useDailyEarlySleepStore();
 // 控制確認狀態的響應式變數
 const showConfirmation = ref(false);
 
-// 獲取當前時間的分鐘數 (例如 21:30 = 21*60+30 = 1290)
+// 獲取當前時間的分鐘數
 const getCurrentTimeInMinutes = (): number => {
   const now = new Date();
   return now.getHours() * 60 + now.getMinutes();
@@ -70,7 +75,7 @@ const isRecordedToday = computed(() => {
 
 // 按鈕顏色邏輯
 const buttonColor = computed(() => {
-  return isRecordedToday.value ? 'green' : 'blue';
+  return isRecordedToday.value ? 'gray' : 'blue';
 });
 
 // 按鈕文字邏輯
@@ -81,7 +86,7 @@ const buttonText = computed(() => {
     const hours = Math.floor(bedtimeMinutes / 60);
     const minutes = bedtimeMinutes % 60;
     const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    return `已記錄 ${timeString}`;
+    return `已記錄: ${timeString}`;
   }
   return '記錄上床時間';
 });
@@ -89,7 +94,6 @@ const buttonText = computed(() => {
 // 處理按鈕點擊
 const handleButtonClick = () => {
   if (!isRecordedToday.value) {
-    // 顯示確認界面
     showConfirmation.value = true;
   }
 };
@@ -101,9 +105,7 @@ const cancelConfirmation = () => {
 
 // 確認執行動作
 const confirmAction = () => {
-  // 記錄上床時間
   store.recordBedtime(getCurrentTimeInMinutes());
-  // 隱藏確認界面
   showConfirmation.value = false;
 };
 </script>

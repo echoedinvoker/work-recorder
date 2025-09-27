@@ -63,7 +63,7 @@
                 :key="`left-value-${dataName}-${pointIndex}`"
                 :x="getXPosition(pointIndex)"
                 :y="getLeftYPosition(point.leftValues[dataName]) - 8"
-                text-anchor="middle"
+                :text-anchor="getTextAnchor(pointIndex)"
                 class="text-xs font-medium pointer-events-none"
                 :fill="leftLineColors[index % leftLineColors.length]"
               >
@@ -105,7 +105,7 @@
                 :key="`right-value-${dataName}-${pointIndex}`"
                 :x="getXPosition(pointIndex)"
                 :y="getRightYPosition(point.rightValues?.[dataName] || 0) - 8"
-                text-anchor="middle"
+                :text-anchor="getTextAnchor(pointIndex)"
                 class="text-xs font-medium pointer-events-none"
                 :fill="rightLineColors[index % rightLineColors.length]"
               >
@@ -226,6 +226,14 @@ const formatRightValue = (value: number) => {
 // 通用格式化函數 - 根據軸來決定使用哪個格式化方法
 const formatValue = (value: number, axis: 'left' | 'right' = 'left') => {
   return axis === 'left' ? formatLeftValue(value) : formatRightValue(value)
+}
+
+// 計算文字錨點位置 - 解決最左和最右側標籤被截斷的問題
+const getTextAnchor = (pointIndex: number) => {
+  const totalPoints = chartData.value.length
+  if (pointIndex === 0) return 'start'  // 第一個點：左對齊
+  if (pointIndex === totalPoints - 1) return 'end'  // 最後一個點：右對齊
+  return 'middle'  // 中間點：居中對齊
 }
 
 // 使用 composable

@@ -112,7 +112,7 @@ const getActivityScore = (activityName: string) => {
     case 'earlySleep':
       return earlySleepStore.scoreDiffFromYesterday;
     case 'hungry':
-      return hungryStore.scoreDifference;
+      return hungryStore.scoreDiffFromYesterday;
     case 'singPractice':
       return singPracticeStore.getScoreByDate(new Date()) - (singPracticeStore.getScoreByDate(new Date(yesterday)) || 0);
     default:

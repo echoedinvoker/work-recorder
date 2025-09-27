@@ -97,6 +97,11 @@ export const SCORING_CONSTANTS = {
     THRESHOLD_COLORS: []
   },
 
+  HUNGRY: {
+    INITIAL_SCORE: 10,
+    ABSENCE_PENALTY: -5,
+  },
+
   // 通用常數
   COMMON: {
     MIN_SCORE: 0,              // 通用最低分數
