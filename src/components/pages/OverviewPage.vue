@@ -13,7 +13,7 @@
         >
           <div class="text-sm font-medium">{{ activity.title }}</div>
           <div class="text-lg font-bold mt-1">
-            {{ getActivityScore(activity.name)! > 0 ? '+' : '' }}{{ getActivityScore(activity.name) }}
+            {{ getActivityScore(activity.name)! > 0 ? '+' : '' }}{{ getActivityScore(activity.name) ?? '--' }}
           </div>
         </div>
       </div>
@@ -102,11 +102,11 @@ const getActivityScore = (activityName: string) => {
     case 'noSugar':
       return noSugarStore.getScoreByDate(new Date()) - (noSugarStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'workout':
-      return workoutStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
+      return workoutStore.scoreDiffFromYesterday;
     case 'faceSport':
       return faceSportStore.getScoreByDate(new Date()) - (faceSportStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'swimming':
-      return swimmingStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
+      return swimmingStore.scoreDiffFromYesterday;
     case 'noDIY':
       return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'earlySleep':

@@ -38,10 +38,10 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
         },
         formatValue: (level: number) => {
           switch(level) {
-            case 2: return '超餓';
-            case 1: return '餓';
-            case -1: return '飽';
-            case -2: return '超飽';
+            case 2: return '很餓';
+            case 1: return '偏餓';
+            case -1: return '偏飽';
+            case -2: return '很飽';
             default: return '';
           }
         }
@@ -49,6 +49,13 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
     },
     thresholds: []
   })
+
+  // Helper function: 取得週數
+  const getWeekNumber = (date: Date): number => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  };
 
   const recordHungryLevel = (level: number) => {
     const todayKey = getTodayKey()

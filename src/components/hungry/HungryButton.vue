@@ -78,9 +78,8 @@ const store = useDailyHungryStore();
 // 定義飢餓程度對應的數值
 const hungryLevels = {
   '很餓': 2,
-  '餓': 1,
-  '無感': 0,
-  '飽': -2,
+  '偏餓': 1,
+  '偏飽': -2,
   '很飽': -3
 };
 

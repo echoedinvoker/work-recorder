@@ -65,7 +65,7 @@ export function useLineChart(dataProvider: DataProvider) {
         leftLegendStates.value[name] = LegendState.Visible
       }
     })
-    
+
     if (dataProvider.right) {
       Object.keys(dataProvider.right.data).forEach(name => {
         if (!(name in rightLegendStates.value)) {
@@ -168,13 +168,32 @@ export function useLineChart(dataProvider: DataProvider) {
       const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`
       return { label, dateLabel }
     } else if (period.value === ChartPeriod.Week) {
-      const label = index === 0 ? '本週' : `${index}週前`
+      let label: string
+      if (index === 0) {
+        label = '本週'
+      } else if (index === 1) {
+        label = '上週'
+      } else {
+        // 計算週數 (ISO 8601 週數)
+        const weekNumber = getWeekNumber(date)
+        label = `W${weekNumber}`
+      }
+
       const startDate = new Date(date)
       startDate.setDate(date.getDate() - 6)
       const dateLabel = `${startDate.getMonth() + 1}/${startDate.getDate()}`
       return { label, dateLabel }
     } else {
-      const label = index === 0 ? '本月' : `${index}月前`
+      let label: string
+      if (index === 0) {
+        label = '本月'
+      } else {
+        // 使用英文月份縮寫
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        label = monthNames[date.getMonth()]
+      }
+
       const dateLabel = `${date.getMonth() + 1}月`
       return { label, dateLabel }
     }
@@ -193,7 +212,14 @@ export function useLineChart(dataProvider: DataProvider) {
         date.setDate(today.getDate() - i)
       } else if (period.value === ChartPeriod.Week) {
         date = new Date(today)
-        date.setDate(today.getDate() - (i * 7))
+        // 找到本週的週一
+        const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay()
+        const mondayOfThisWeek = new Date(today)
+        mondayOfThisWeek.setDate(today.getDate() - dayOfWeek + 1)
+
+        // 從本週週一往前推 i 週
+        date = new Date(mondayOfThisWeek)
+        date.setDate(mondayOfThisWeek.getDate() - (i * 7))
       } else {
         date = new Date(today)
         date.setMonth(today.getMonth() - i)
@@ -207,7 +233,7 @@ export function useLineChart(dataProvider: DataProvider) {
   })
 
   const leftYAxisMax = computed(() => {
-    const visibleLeftValues = chartData.value.flatMap(item => 
+    const visibleLeftValues = chartData.value.flatMap(item =>
       Object.entries(item.leftValues)
         .filter(([name]) => isLeftLegendVisible(name))
         .map(([, value]) => value)
@@ -218,8 +244,8 @@ export function useLineChart(dataProvider: DataProvider) {
 
   const rightYAxisMax = computed(() => {
     if (!dataProvider.right) return 0
-    
-    const visibleRightValues = chartData.value.flatMap(item => 
+
+    const visibleRightValues = chartData.value.flatMap(item =>
       item.rightValues ? Object.entries(item.rightValues)
         .filter(([name]) => isRightLegendVisible(name))
         .map(([, value]) => value) : []
@@ -239,6 +265,15 @@ export function useLineChart(dataProvider: DataProvider) {
   }
 
   initializeLegendStates()
+
+  // helper functions
+  const getWeekNumber = (date: Date): number => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const dayNum = d.getUTCDay() || 7
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  }
 
   return {
     period,
