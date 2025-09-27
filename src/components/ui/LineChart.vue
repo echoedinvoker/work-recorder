@@ -203,7 +203,9 @@ import { useLineChart, type DataProvider } from '@/composables/useLineChart'
 
 // Props
 const props = defineProps<{
-  dataProvider: DataProvider
+  dataProvider: DataProvider & {
+    formatValue?: (value: number) => string
+  }
 }>()
 
 // 使用 composable
@@ -252,6 +254,11 @@ const tooltip = ref({
 
 // 格式化數值顯示
 const formatValue = (value: number) => {
+  if (props.dataProvider.formatValue) {
+    return props.dataProvider.formatValue(value)
+  }
+  
+  // 默認邏輯
   if (value >= 1000) {
     return (value / 1000).toFixed(1) + 'k'
   }
