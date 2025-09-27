@@ -32,8 +32,8 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
         data: {
           '飲控狀況': {
             getValueByDate: (date: Date) => baseStore.getRawRecordByDate(date)?.level,
-            getValueByWeek: (week: Date) => baseStore.getWeightedRecordByWeek(week),
-            getValueByMonth: (month: Date) => baseStore.getWeightedRecordByMonth(month)
+            getValueByWeek: (week: Date) => getMostFrequentLevelByWeek(week),
+            getValueByMonth: (month: Date) => getMostFrequentLevelByMonth(month)
           }
         },
         formatValue: (level: number) => {
@@ -49,6 +49,81 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
     },
     thresholds: []
   })
+
+  // 取得週數
+  const getWeekNumber = (date: Date): number => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
+    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
+  }
+
+  // 取得該週中出現最多的 level 值
+  const getMostFrequentLevelByWeek = (week: Date): number | undefined => {
+    const year = week.getFullYear()
+    const weekNumber = getWeekNumber(week)
+    
+    // 收集該週所有的 level 值
+    const levelCounts: { [level: number]: number } = {}
+    
+    Object.entries(baseStore.records.value).forEach(([dateKey, record]) => {
+      const recordDate = new Date(dateKey)
+      const recordYear = recordDate.getFullYear()
+      const recordWeekNumber = getWeekNumber(recordDate)
+      
+      // 檢查是否屬於同一週
+      if (recordYear === year && recordWeekNumber === weekNumber) {
+        const level = record.level
+        levelCounts[level] = (levelCounts[level] || 0) + 1
+      }
+    })
+    
+    // 找出出現次數最多的 level
+    let mostFrequentLevel: number | undefined
+    let maxCount = 0
+    
+    Object.entries(levelCounts).forEach(([level, count]) => {
+      if (count > maxCount) {
+        maxCount = count
+        mostFrequentLevel = parseInt(level)
+      }
+    })
+    
+    return mostFrequentLevel
+  }
+
+  // 取得該月中出現最多的 level 值
+  const getMostFrequentLevelByMonth = (month: Date): number | undefined => {
+    const year = month.getFullYear()
+    const monthNumber = month.getMonth() + 1
+    
+    // 收集該月所有的 level 值
+    const levelCounts: { [level: number]: number } = {}
+    
+    Object.entries(baseStore.records.value).forEach(([dateKey, record]) => {
+      const recordDate = new Date(dateKey)
+      const recordYear = recordDate.getFullYear()
+      const recordMonth = recordDate.getMonth() + 1
+      
+      // 檢查是否屬於同一月
+      if (recordYear === year && recordMonth === monthNumber) {
+        const level = record.level
+        levelCounts[level] = (levelCounts[level] || 0) + 1
+      }
+    })
+    
+    // 找出出現次數最多的 level
+    let mostFrequentLevel: number | undefined
+    let maxCount = 0
+    
+    Object.entries(levelCounts).forEach(([level, count]) => {
+      if (count > maxCount) {
+        maxCount = count
+        mostFrequentLevel = parseInt(level)
+      }
+    })
+    
+    return mostFrequentLevel
+  }
 
   const recordNoSugarLevel = (level: number) => {
     const todayKey = getTodayKey()
@@ -89,7 +164,9 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
 
   return {
     ...baseStore,
-    recordNoSugarLevel
+    recordNoSugarLevel,
+    getMostFrequentLevelByWeek,
+    getMostFrequentLevelByMonth
   }
 }, {
   persist: {

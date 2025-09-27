@@ -272,8 +272,6 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     const year = week.getFullYear()
     const weekNumber = getWeekNumber(week)
     const weekKey = `${year}-W${weekNumber.toString().padStart(2, '0')}`
-    console.log('date', week.toLocaleString())
-    console.log('weekKey', weekKey)
     return weeklyScores.value[weekKey] || 0
   }
   const getScoreByMonth = (month: Date): number => {
