@@ -1,6 +1,70 @@
 <template>
   <div class="space-y-6">
-    <!-- 今日總覽 -->
+    <!-- 減脂綜合指標 -->
+    <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg shadow-md p-4 border border-blue-200">
+      <h2 class="text-lg font-semibold mb-4 text-gray-700 flex items-center">
+        <span class="mr-2">🎯</span>
+        減脂綜合指標
+      </h2>
+      
+      <!-- 總分數和趨勢 -->
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-1" :class="getTotalScoreClass()">
+            {{ fatLossMetrics.totalScore }}
+          </div>
+          <div class="text-sm text-gray-600">總分數</div>
+          <div class="text-xs mt-1" :class="getTrendClass()">
+            {{ getTrendText() }}
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-1" :class="getConsistencyClass()">
+            {{ fatLossMetrics.consistency }}
+          </div>
+          <div class="text-sm text-gray-600">一致性</div>
+          <div class="text-xs mt-1 text-gray-500">
+            過去7天穩定度
+          </div>
+        </div>
+      </div>
+
+      <!-- 分類分數 -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+          <div class="text-lg font-bold text-orange-600">{{ fatLossMetrics.dietScore }}</div>
+          <div class="text-xs text-gray-600">飲食控制</div>
+          <div class="text-xs text-gray-500">40%</div>
+        </div>
+        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+          <div class="text-lg font-bold text-blue-600">{{ fatLossMetrics.exerciseScore }}</div>
+          <div class="text-xs text-gray-600">運動表現</div>
+          <div class="text-xs text-gray-500">35%</div>
+        </div>
+        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+          <div class="text-lg font-bold text-purple-600">{{ fatLossMetrics.lifestyleScore }}</div>
+          <div class="text-xs text-gray-600">生活習慣</div>
+          <div class="text-xs text-gray-500">25%</div>
+        </div>
+      </div>
+
+      <!-- 進度條 -->
+      <div class="mt-4">
+        <div class="flex justify-between text-xs text-gray-600 mb-1">
+          <span>進度</span>
+          <span>{{ getProgressMessage() }}</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            class="h-2 rounded-full transition-all duration-500"
+            :class="getProgressBarClass()"
+            :style="{ width: `${fatLossMetrics.totalScore}%` }"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 今日活動狀況 -->
     <div class="bg-white rounded-lg shadow-md p-4">
       <h2 class="text-lg font-semibold mb-4 text-gray-700">今日活動狀況</h2>
       <div class="grid grid-cols-2 gap-3">
@@ -19,29 +83,31 @@
       </div>
     </div>
 
-    <!-- 本週趨勢 -->
+    <!-- 減脂相關活動快速檢視 -->
     <div class="bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4 text-gray-700">本週趨勢</h2>
-      <div class="text-center text-gray-600">
-        <div class="text-2xl font-bold" :class="weeklyTotalClass">
-          {{ weeklyTotal > 0 ? '+' : '' }}{{ weeklyTotal }}
-        </div>
-        <div class="text-sm">本週總分變化</div>
-      </div>
-    </div>
-
-    <!-- 快速操作 -->
-    <div class="bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4 text-gray-700">快速操作</h2>
+      <h2 class="text-lg font-semibold mb-4 text-gray-700 flex items-center">
+        <span class="mr-2">🔥</span>
+        減脂相關活動
+      </h2>
       <div class="grid grid-cols-2 gap-3">
-        <router-link 
-          v-for="activity in topActivities" 
+        <div 
+          v-for="activity in fatLossActivities" 
           :key="activity.name"
-          :to="{ name: activity.name }"
-          class="p-3 rounded-lg border-2 border-blue-200 bg-blue-50 text-blue-800 text-center font-medium hover:bg-blue-100 transition-all"
+          class="p-3 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md"
+          :class="getActivityCardClass(activity)"
+          @click="navigateToActivity(activity.name)"
         >
-          {{ activity.title }}
-        </router-link>
+          <div class="text-sm font-medium flex items-center">
+            <span class="mr-1">{{ activity.icon }}</span>
+            {{ activity.title }}
+          </div>
+          <div class="text-lg font-bold mt-1">
+            {{ getActivityScore(activity.name)! > 0 ? '+' : '' }}{{ getActivityScore(activity.name) ?? '--' }}
+          </div>
+          <div class="text-xs text-gray-500 mt-1">
+            {{ activity.category }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -60,6 +126,7 @@ import { useDailyNoDIYStore } from '@/stores/dailyNoDIYStore';
 import { useDailyEarlySleepStore } from '@/stores/dailyEarlySleepStore';
 import { useDailySingPracticeStore } from '@/stores/dailySingPracticeStore';
 import { useDailyHungryStore } from '@/stores/dailyHungryStore';
+import { useFatLossStore } from '@/stores/fatLossStore';
 
 const router = useRouter();
 
@@ -74,9 +141,15 @@ const noDIYStore = useDailyNoDIYStore();
 const earlySleepStore = useDailyEarlySleepStore();
 const singPracticeStore = useDailySingPracticeStore();
 const hungryStore = useDailyHungryStore();
+const fatLossStore = useFatLossStore();
 
 const today = new Date();
 const yesterday = new Date().setDate(today.getDate() - 1);
+
+// 減脂綜合指標
+const fatLossMetrics = computed(() => {
+  return fatLossStore.getFatLossMetrics(today);
+});
 
 // 活動列表
 const activities = [
@@ -90,6 +163,15 @@ const activities = [
   { name: 'faceSport', title: '臉部運動' },
   { name: 'noDIY', title: 'NO DIY' },
   { name: 'hungry', title: '飢餓紀錄' }
+];
+
+// 減脂相關活動
+const fatLossActivities = [
+  { name: 'noSugar', title: '飲控紀錄', icon: '🚫', category: '飲食控制' },
+  { name: 'hungry', title: '飢餓紀錄', icon: '😋', category: '飲食控制' },
+  { name: 'workout', title: '重訓紀錄', icon: '💪', category: '運動表現' },
+  { name: 'swimming', title: '游泳紀錄', icon: '🏊', category: '運動表現' },
+  { name: 'earlySleep', title: '早睡紀錄', icon: '😴', category: '生活習慣' }
 ];
 
 // 獲取活動分數
@@ -131,6 +213,53 @@ const getActivityCardClass = (activity: any) => {
   } else {
     return 'border-gray-300 bg-gray-50 text-gray-700';
   }
+};
+
+// 減脂指標相關樣式和文字
+const getTotalScoreClass = () => {
+  const score = fatLossMetrics.value.totalScore;
+  if (score >= 80) return 'text-blue-600';
+  if (score >= 60) return 'text-green-600';
+  if (score >= 40) return 'text-orange-600';
+  return 'text-red-600';
+};
+
+const getConsistencyClass = () => {
+  const consistency = fatLossMetrics.value.consistency;
+  if (consistency >= 80) return 'text-blue-600';
+  if (consistency >= 60) return 'text-green-600';
+  if (consistency >= 40) return 'text-orange-600';
+  return 'text-red-600';
+};
+
+const getTrendClass = () => {
+  const trend = fatLossMetrics.value.trend;
+  if (trend === 'improving') return 'text-green-600';
+  if (trend === 'declining') return 'text-red-600';
+  return 'text-gray-600';
+};
+
+const getTrendText = () => {
+  const trend = fatLossMetrics.value.trend;
+  if (trend === 'improving') return '📈 持續改善';
+  if (trend === 'declining') return '📉 需要注意';
+  return '📊 保持穩定';
+};
+
+const getProgressMessage = () => {
+  const score = fatLossMetrics.value.totalScore;
+  if (score >= 80) return '表現優秀';
+  if (score >= 60) return '表現良好';
+  if (score >= 40) return '持續努力';
+  return '需要加油';
+};
+
+const getProgressBarClass = () => {
+  const score = fatLossMetrics.value.totalScore;
+  if (score >= 80) return 'bg-blue-500';
+  if (score >= 60) return 'bg-green-500';
+  if (score >= 40) return 'bg-orange-500';
+  return 'bg-red-500';
 };
 
 // 本週總分
