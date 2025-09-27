@@ -7,7 +7,7 @@
       <WorkoutAddForm />
     </template>
 
-    <WorkoutChart />
+  <LineChart :data-provider="store" /> 
 
   </ToggleButton>
 </template>
@@ -15,6 +15,9 @@
 <script setup lang="ts">
 import ToggleButton from '@/components/ui/ToggleButton.vue';
 import WorkoutAddForm from '@/components/workout/WorkoutAddForm.vue';
-import WorkoutChart from '@/components/workout/WorkoutChart.vue';
+import LineChart from '../ui/LineChart.vue';
+import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
+// import WorkoutChart from '@/components/workout/WorkoutChart.vue';
+const store = useDailyWorkoutStore()
 </script>
 
