@@ -7,8 +7,6 @@ import {
   getWorkoutScoreChange 
 } from '../constants/scoringConstants';
 
-const UNIT = '重量(公斤)'
-
 interface WorkoutRecord {
   [date: string]: {
     [activity: string]: {
@@ -157,15 +155,9 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     const todayKey = getTodayKey()
     return ratios.value[todayKey] || 0
   })
-  const todayProgress = computed<number>(() => {
-    return todayRatio.value * 100 // 將比例轉換為百分比
-  })
   const todayRatioIncrement = computed<number>(() => {
     const todayKey = getTodayKey()
     return ratioIncrements.value[todayKey] || 0
-  })
-  const todayProgressIncrease = computed<number>(() => {
-    return todayRatioIncrement.value * 100 // 將比例增量轉換為百分比
   })
   const consecutiveScoreGrowthDays = computed<number>(() => {
     const sortedDates = Object.keys(scores.value).sort().reverse() // 從最新日期開始
@@ -492,7 +484,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
   return {
     // constants
-    UNIT,
     TITLE,
 
     // states
@@ -511,8 +502,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     todayActivityList,
     normalizedTodayActivityWeights,
     maxPastWeightedRecord,
-    todayRatio,
-    todayRatioIncrement,
     ratio: todayRatio,
     ratioIncrement: todayRatioIncrement,
     consecutiveScoreGrowthDays,
@@ -525,8 +514,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
     // methods
     addOneSet,
-    todayProgress,
-    todayProgressIncrease,
     getScoreByDate,
     getScoreByWeek,
     getScoreByMonth,

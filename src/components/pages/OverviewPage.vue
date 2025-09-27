@@ -106,7 +106,7 @@ const getActivityScore = (activityName: string) => {
     case 'faceSport':
       return faceSportStore.getScoreByDate(new Date()) - (faceSportStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'swimming':
-      return swimmingStore.scoreDifference;
+      return swimmingStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'noDIY':
       return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
     case 'earlySleep':

@@ -54,13 +54,7 @@ export function useSwimmingRecorder() {
       const durationMinutes = Math.floor(
         (endTime.value.getTime() - startTime.value.getTime()) / (1000 * 60)
       )
-      const speed = distance.value / durationMinutes
-      const weightedDistance = distance.value * (
-        speed >= 25 ? 1 :
-        speed >= 20 ? 0.75 :
-        speed >= 15 ? 0.5 : 0
-      )
-      dailySwimmingStore.addDistance(weightedDistance)
+      dailySwimmingStore.addOneRecord(distance.value, durationMinutes)
       distance.value = undefined
     }
   }

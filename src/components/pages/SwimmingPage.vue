@@ -1,15 +1,17 @@
 <template>
   <div class="space-y-6">
-    <!-- 游泳計時按鈕 -->
     <SwimmingButton />
-    <SwimmingChart v-if="!isRecording" />
+    <AProgressBar :data-provider="store" class="mb-4" />
+    <LineChart :data-provider="store" /> 
   </div>
 </template>
 
 <script setup lang="ts">
-import { useSwimmingRecorder } from '@/composables/useSwimmingRecorder';
-import SwimmingChart from '../swimming/SwimmingChart.vue';
 import SwimmingButton from '@/components/swimming/SwimmingButton.vue';
-const { isRecording } = useSwimmingRecorder();
+import LineChart from '../ui/LineChart.vue';
+import AProgressBar from '../ui/AProgressBar.vue';
+import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
+
+const store = useDailySwimmingStore()
 </script>
 

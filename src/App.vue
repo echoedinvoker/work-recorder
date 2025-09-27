@@ -287,34 +287,6 @@ const clearData = () => {
     alert('清除資料時發生錯誤，請重試');
   }
 };
-
-// 根據路由名稱獲取對應的分數
-const getScoreForRoute = (routeName: string) => {
-  switch (routeName) {
-    case 'study':
-      return dailyScoreStore.getScoreByDate(new Date()) - (dailyScoreStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'work':
-      return workStore.getScoreByDate(new Date()) - (workStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'noSugar':
-      return noSugarStore.getScoreByDate(new Date()) - (noSugarStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'workout':
-      return workoutStore.getScoreByDate(new Date()) - (workoutStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'faceSport':
-      return faceSportStore.getScoreByDate(new Date()) - (faceSportStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'swimming':
-      return swimmingStore.scoreDifference;
-    case 'noDIY':
-      return noDIYStore.getScoreByDate(new Date()) - (noDIYStore.getScoreByDate(new Date(yesterday)) || 0);
-    case 'earlySleep':
-      return earlySleepStore.scoreDifference;
-    case 'hungry':
-      return hungryStore.scoreDifference;
-    case 'singPractice':
-      return singPracticeStore.getScoreByDate(new Date()) - (singPracticeStore.getScoreByDate(new Date(yesterday)) || 0);
-    default:
-      return 0;
-  }
-};
 </script>
 
 <style>
