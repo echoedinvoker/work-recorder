@@ -77,23 +77,23 @@ export const useDailySwimmingStore = defineStore("dailySwimming", () => {
   }
 
   // Mock data
-  baseStore.records.value = {
-    "2025-09-23": { distance: 1000, duration: 40 },
-    "2025-09-24": { distance: 1200, duration: 45 },
-    "2025-09-25": { distance: 1500, duration: 50 }
-  }
-
-  baseStore.weightedRecords.value = {
-    "2025-09-23": 1000,
-    "2025-09-24": 1200,
-    "2025-09-25": 1800
-  }
-
-  baseStore.scores.value = {
-    "2025-09-23": 70,
-    "2025-09-24": 78,
-    "2025-09-25": 88
-  }
+  // baseStore.records.value = {
+  //   "2025-09-23": { distance: 1000, duration: 40 },
+  //   "2025-09-24": { distance: 1200, duration: 45 },
+  //   "2025-09-25": { distance: 1500, duration: 50 }
+  // }
+  //
+  // baseStore.weightedRecords.value = {
+  //   "2025-09-23": 1000,
+  //   "2025-09-24": 1200,
+  //   "2025-09-25": 1800
+  // }
+  //
+  // baseStore.scores.value = {
+  //   "2025-09-23": 70,
+  //   "2025-09-24": 78,
+  //   "2025-09-25": 88
+  // }
 
   return {
     ...baseStore,

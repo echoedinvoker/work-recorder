@@ -81,16 +81,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useDailyScoreStore } from './stores/dailyScore';
 import { useDailyNoSugarStore } from './stores/dailyNoSugarStore';
 import { useDailyWorkoutStore } from './stores/dailyWorkoutStore';
-import { useDailyFaceSportStore } from './stores/dailyFaceSportStore';
 import { useDailySwimmingStore } from './stores/dailySwimmingStore';
-import { useDailyNoDIYStore } from './stores/dailyNoDIYStore';
 import { useDailyEarlySleepStore } from './stores/dailyEarlySleepStore';
-import { useDailySingPracticeStore } from './stores/dailySingPracticeStore';
 import { useDailyHungryStore } from './stores/dailyHungryStore';
-import { useDailyWorkStore } from './stores/dailyWorkStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -150,28 +145,18 @@ const transitionName = ref('slide-left');
 const showConfirmDialog = ref(false);
 
 // Store 實例
-const dailyScoreStore = useDailyScoreStore();
-const workStore = useDailyWorkStore();
 const noSugarStore = useDailyNoSugarStore();
 const workoutStore = useDailyWorkoutStore();
-const faceSportStore = useDailyFaceSportStore();
 const swimmingStore = useDailySwimmingStore();
-const noDIYStore = useDailyNoDIYStore();
 const earlySleepStore = useDailyEarlySleepStore();
-const singPracticeStore = useDailySingPracticeStore();
 const hungryStore = useDailyHungryStore();
 
 // 路由名稱與 store 的映射關係
 const routeStoreMap = {
-  study: dailyScoreStore,
-  work: workStore,
   noSugar: noSugarStore,
   workout: workoutStore,
-  faceSport: faceSportStore,
   swimming: swimmingStore,
-  noDIY: noDIYStore,
   earlySleep: earlySleepStore,
-  singPractice: singPracticeStore,
   hungry: hungryStore,
 } as const;
 
