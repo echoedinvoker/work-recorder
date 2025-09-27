@@ -121,7 +121,7 @@
         <div v-for="(item, index) in chartData" 
              :key="`label-${index}`"
              class="flex-1 text-xs text-gray-600 text-center">
-          <div>{{ item.label }}</div>
+          <div v-if="period === 'day'">{{ item.label }}</div>
           <div class="text-gray-400">{{ item.dateLabel }}</div>
         </div>
       </div>
@@ -238,6 +238,7 @@ const getTextAnchor = (pointIndex: number) => {
 
 // 使用 composable
 const {
+  period,
   chartTitle,
   chartData,
   leftYAxisMax,
