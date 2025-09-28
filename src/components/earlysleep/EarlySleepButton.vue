@@ -88,7 +88,7 @@ const buttonText = computed(() => {
     const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     return `已記錄: ${timeString}`;
   }
-  return '記錄上床時間';
+  return '記錄就寢時間';
 });
 
 // 處理按鈕點擊

@@ -85,16 +85,16 @@ export const getEarlySleepUsageInstruction = (): UsageInstruction => {
   
   return {
     title: '早睡使用說明',
-    description: '記錄每日的上床時間，根據睡眠時間的早晚給予相應的分數獎勵或懲罰。',
+    description: '記錄每日的就寢時間，根據睡眠時間的早晚給予相應的分數獎勵或懲罰。',
     scoringRules: [
       `初始分數：${INITIAL_SCORE} 分`,
-      `21:00 前上床：+${SCORE_CHANGES.EXCELLENT_BONUS} 分`,
-      `22:00 前上床：+${SCORE_CHANGES.GOOD_BONUS} 分`,
-      `22:00 後上床：${SCORE_CHANGES.POOR_PENALTY} 分`,
+      `21:00 前就寢：+${SCORE_CHANGES.EXCELLENT_BONUS} 分`,
+      `22:00 前就寢：+${SCORE_CHANGES.GOOD_BONUS} 分`,
+      `22:00 後就寢：${SCORE_CHANGES.POOR_PENALTY} 分`,
       `未記錄：每日 ${ABSENCE_PENALTY} 分`
     ],
     tips: [
-      '建議在 21:00 前上床以獲得最高分數',
+      '建議在 21:00 前就寢以獲得最高分數',
       '規律的睡眠時間有助於身體健康',
       '避免在睡前使用電子設備',
       '創造良好的睡眠環境'
