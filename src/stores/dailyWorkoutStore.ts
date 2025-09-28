@@ -212,86 +212,86 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   }
 
   // Mock data
-  baseStore.records.value = {
-    "2025-09-23": {
-      "深蹲": [
-        { count: 12, weight: 60 },
-        { count: 10, weight: 65 },
-        { count: 8, weight: 70 }
-      ],
-      "臥推": [
-        { count: 10, weight: 50 },
-        { count: 8, weight: 55 },
-        { count: 6, weight: 60 }
-      ],
-      "硬舉": [
-        { count: 8, weight: 80 },
-        { count: 6, weight: 85 },
-        { count: 5, weight: 90 }
-      ],
-      "肩推": [
-        { count: 12, weight: 30 },
-        { count: 10, weight: 32 },
-        { count: 8, weight: 35 }
-      ]
-    },
-    "2025-09-24": {
-      "深蹲": [
-        { count: 15, weight: 55 },
-        { count: 12, weight: 60 },
-        { count: 10, weight: 65 }
-      ],
-      "引體向上": [
-        { count: 8, weight: 0 },
-        { count: 6, weight: 5 },
-        { count: 5, weight: 10 }
-      ],
-      "划船": [
-        { count: 12, weight: 45 },
-        { count: 10, weight: 50 },
-        { count: 8, weight: 55 }
-      ],
-      "二頭彎舉": [
-        { count: 15, weight: 15 },
-        { count: 12, weight: 17 },
-        { count: 10, weight: 20 }
-      ]
-    },
-    "2025-09-25": {
-      "臥推": [
-        { count: 12, weight: 45 },
-        { count: 10, weight: 50 },
-        { count: 8, weight: 55 }
-      ],
-      "硬舉": [
-        { count: 10, weight: 75 },
-        { count: 8, weight: 80 },
-        { count: 6, weight: 85 }
-      ],
-      "三頭下壓": [
-        { count: 15, weight: 25 },
-        { count: 12, weight: 30 },
-        { count: 10, weight: 32 }
-      ],
-      "腿推": [
-        { count: 20, weight: 100 },
-        { count: 18, weight: 110 },
-        { count: 15, weight: 120 }
-      ]
-    }
-  }
-
-  baseStore.weightedRecords.value = {
-    "2025-09-23": 2850, // 根據動作計算的加權總量
-    "2025-09-24": 2420,
-    "2025-09-25": 3180
-  }
-
-  baseStore.scores.value = {
-    "2025-09-23": 85,
-    "2025-09-24": 78,
-    "2025-09-25": 92
-  }
+  // baseStore.records.value = {
+  //   "2025-09-23": {
+  //     "深蹲": [
+  //       { count: 12, weight: 60 },
+  //       { count: 10, weight: 65 },
+  //       { count: 8, weight: 70 }
+  //     ],
+  //     "臥推": [
+  //       { count: 10, weight: 50 },
+  //       { count: 8, weight: 55 },
+  //       { count: 6, weight: 60 }
+  //     ],
+  //     "硬舉": [
+  //       { count: 8, weight: 80 },
+  //       { count: 6, weight: 85 },
+  //       { count: 5, weight: 90 }
+  //     ],
+  //     "肩推": [
+  //       { count: 12, weight: 30 },
+  //       { count: 10, weight: 32 },
+  //       { count: 8, weight: 35 }
+  //     ]
+  //   },
+  //   "2025-09-24": {
+  //     "深蹲": [
+  //       { count: 15, weight: 55 },
+  //       { count: 12, weight: 60 },
+  //       { count: 10, weight: 65 }
+  //     ],
+  //     "引體向上": [
+  //       { count: 8, weight: 0 },
+  //       { count: 6, weight: 5 },
+  //       { count: 5, weight: 10 }
+  //     ],
+  //     "划船": [
+  //       { count: 12, weight: 45 },
+  //       { count: 10, weight: 50 },
+  //       { count: 8, weight: 55 }
+  //     ],
+  //     "二頭彎舉": [
+  //       { count: 15, weight: 15 },
+  //       { count: 12, weight: 17 },
+  //       { count: 10, weight: 20 }
+  //     ]
+  //   },
+  //   "2025-09-25": {
+  //     "臥推": [
+  //       { count: 12, weight: 45 },
+  //       { count: 10, weight: 50 },
+  //       { count: 8, weight: 55 }
+  //     ],
+  //     "硬舉": [
+  //       { count: 10, weight: 75 },
+  //       { count: 8, weight: 80 },
+  //       { count: 6, weight: 85 }
+  //     ],
+  //     "三頭下壓": [
+  //       { count: 15, weight: 25 },
+  //       { count: 12, weight: 30 },
+  //       { count: 10, weight: 32 }
+  //     ],
+  //     "腿推": [
+  //       { count: 20, weight: 100 },
+  //       { count: 18, weight: 110 },
+  //       { count: 15, weight: 120 }
+  //     ]
+  //   }
+  // }
+  //
+  // baseStore.weightedRecords.value = {
+  //   "2025-09-23": 2850, // 根據動作計算的加權總量
+  //   "2025-09-24": 2420,
+  //   "2025-09-25": 3180
+  // }
+  //
+  // baseStore.scores.value = {
+  //   "2025-09-23": 85,
+  //   "2025-09-24": 78,
+  //   "2025-09-25": 92
+  // }
 
   return {
     ...baseStore,
