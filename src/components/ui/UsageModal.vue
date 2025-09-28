@@ -42,10 +42,11 @@
               <li 
                 v-for="tip in usageInstruction.tips" 
                 :key="tip"
-                class="text-sm text-gray-600 text-left flex items-start"
+                class="text-sm text-gray-600 text-left flex items-center"
               >
-                <span class="text-green-500 mr-2 mt-1">💡</span>
-                <span>{{ tip }}</span>
+                <!-- 使用 Lucide Lightbulb icon 替換 emoji -->
+                <Lightbulb class="text-yellow-500 mr-2 flex-shrink-0" :size="16" />
+                <span class="flex-1">{{ tip }}</span>
               </li>
             </ul>
           </div>
@@ -56,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import { Lightbulb } from 'lucide-vue-next'
+
 interface UsageInstruction {
   title: string;
   description: string;

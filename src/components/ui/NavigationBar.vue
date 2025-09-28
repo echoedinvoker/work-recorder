@@ -26,7 +26,6 @@
 
       <!-- 使用說明按鈕 (只在非首頁顯示) -->
       <button 
-        v-if="$route.path !== '/'"
         @click="$emit('showUsage')"
         class="group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 
                bg-gradient-to-r from-emerald-500 to-emerald-600 text-white 

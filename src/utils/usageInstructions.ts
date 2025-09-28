@@ -126,6 +126,29 @@ export const getHungryUsageInstruction = (): UsageInstruction => {
   }
 }
 
+export const getOverviewUsageInstruction = (): UsageInstruction => {
+  return {
+    title: '概覽頁面使用說明',
+    description: '綜合顯示所有減脂相關活動的表現指標，提供整體進度追蹤和快速導航功能。',
+    scoringRules: [
+      '總分數：所有活動分數的加權平均',
+      '記錄完成度：當日已記錄活動數量 / 總活動數量',
+      '飲食控制分數：飲控紀錄 + 飢餓紀錄',
+      '運動表現分數：重訓紀錄 + 游泳紀錄',
+      '生活習慣分數：早睡紀錄',
+      '趨勢分析：與前一日表現比較'
+    ],
+    tips: [
+      '🎯 總分數會根據各項活動的權重計算',
+      '📊 進度條顏色反映當日完成度：紅色(<40%) → 橙色(40-70%) → 綠色(≥70%)',
+      '📈 趨勢指標幫助了解整體改善方向',
+      '🔥 點擊活動卡片可快速導航到對應頁面',
+      '💡 建議每日至少完成 3 項活動記錄以維持良好表現',
+      '⚡ 各項活動的詳細說明請點擊對應頁面的說明按鈕'
+    ]
+  }
+}
+
 // 根據路由名稱獲取對應的使用說明
 export const getUsageInstructionByRoute = (routeName: string): UsageInstruction | null => {
   switch (routeName) {
@@ -139,6 +162,8 @@ export const getUsageInstructionByRoute = (routeName: string): UsageInstruction 
       return getEarlySleepUsageInstruction()
     case 'hungry':
       return getHungryUsageInstruction()
+    case 'overview':
+      return getOverviewUsageInstruction()
     default:
       return null
   }

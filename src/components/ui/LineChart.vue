@@ -3,8 +3,8 @@
     <div class="relative mb-4">
       <!-- 左軸標籤 -->
       <div v-if="hasVisibleLeftLegends"
-           class="absolute left-0 top-0 flex flex-col justify-between text-xs text-gray-500 pr-2"
-           :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
+        class="absolute left-0 top-0 flex flex-col justify-between text-xs text-gray-500 pr-2"
+        :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
         <!-- 使用 line-height 確保文字垂直居中對齊 -->
         <span class="leading-none">{{ leftYAxisMax }}</span>
         <span class="leading-none">{{ Math.round(leftYAxisMax * 0.67) }}</span>
@@ -13,9 +13,9 @@
       </div>
 
       <!-- 右軸標籤 (如果有右軸數據且有可見圖例) -->
-      <div v-if="dataProvider.right && hasVisibleRightLegends" 
-           class="absolute right-0 top-0 flex flex-col justify-between text-xs text-gray-500 pl-2"
-           :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
+      <div v-if="dataProvider.right && hasVisibleRightLegends"
+        class="absolute right-0 top-0 flex flex-col justify-between text-xs text-gray-500 pl-2"
+        :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
         <span class="leading-none">{{ rightYAxisMax }}</span>
         <span class="leading-none">{{ Math.round(rightYAxisMax * 0.67) }}</span>
         <span class="leading-none">{{ Math.round(rightYAxisMax * 0.33) }}</span>
@@ -26,9 +26,8 @@
       <div ref="chartContainer" class="mx-8 relative" :style="{ height: `${chartHeight}px` }">
         <!-- 網格線 - 確保與 Y軸標籤對齊 -->
         <div class="absolute inset-0">
-          <div v-for="i in 4" :key="i" 
-               class="absolute w-full border-t border-gray-200"
-               :style="{ top: `${(i - 1) * 33.333}%` }">
+          <div v-for="i in 4" :key="i" class="absolute w-full border-t border-gray-200"
+            :style="{ top: `${(i - 1) * 33.333}%` }">
           </div>
         </div>
 
@@ -38,78 +37,46 @@
           <g v-for="(dataName, index) in Object.keys(dataProvider.left.data)" :key="`left-${dataName}`">
             <!-- 只顯示可見的圖例 -->
             <template v-if="isLeftLegendVisible(dataName)">
-              <polyline
-                :points="getLeftLinePoints(dataName)"
-                :stroke="leftLineColors[index % leftLineColors.length]"
-                stroke-width="0.8"
-                fill="none"
-                class="transition-all duration-300"
-              />
+              <polyline :points="getLeftLinePoints(dataName)" :stroke="leftLineColors[index % leftLineColors.length]"
+                stroke-width="0.8" fill="none" class="transition-all duration-300" />
               <!-- 數據點 -->
-              <circle
-                v-for="(point, pointIndex) in chartData"
-                :key="`left-point-${dataName}-${pointIndex}`"
-                :cx="getXPosition(pointIndex)"
-                :cy="getLeftYPosition(point.leftValues[dataName])"
-                r="1.7"
+              <circle v-for="(point, pointIndex) in chartData" :key="`left-point-${dataName}-${pointIndex}`"
+                :cx="getXPosition(pointIndex)" :cy="getLeftYPosition(point.leftValues[dataName])" r="1.7"
                 :fill="leftLineColors[index % leftLineColors.length]"
                 class="hover:r-1.5 transition-all duration-200 cursor-pointer"
                 @mouseenter="showTooltip($event, point, dataName, point.leftValues[dataName], 'left')"
-                @mouseleave="hideTooltip"
-              />
+                @mouseleave="hideTooltip" />
               <!-- 數值標籤 (如果該圖例設為顯示數值) -->
-              <text
-                v-if="shouldShowLeftValues(dataName)"
-                v-for="(point, pointIndex) in chartData"
-                :key="`left-value-${dataName}-${pointIndex}`"
-                :x="getXPosition(pointIndex)"
-                :y="getLeftYPosition(point.leftValues[dataName]) - 2"
-                :text-anchor="getTextAnchor(pointIndex)"
+              <text v-if="shouldShowLeftValues(dataName)" v-for="(point, pointIndex) in chartData"
+                :key="`left-value-${dataName}-${pointIndex}`" :x="getXPosition(pointIndex)"
+                :y="getLeftYPosition(point.leftValues[dataName]) - 2" :text-anchor="getTextAnchor(pointIndex)"
                 class="text-[5px] font-medium pointer-events-none"
-                :fill="leftLineColors[index % leftLineColors.length]"
-              >
+                :fill="leftLineColors[index % leftLineColors.length]">
                 {{ formatValue(point.leftValues[dataName], 'left') }}
               </text>
             </template>
           </g>
 
           <!-- 右軸數據線條 (如果有) -->
-          <g v-if="dataProvider.right" 
-             v-for="(dataName, index) in Object.keys(dataProvider.right.data)" 
-             :key="`right-${dataName}`">
+          <g v-if="dataProvider.right" v-for="(dataName, index) in Object.keys(dataProvider.right.data)"
+            :key="`right-${dataName}`">
             <!-- 只顯示可見的圖例 -->
             <template v-if="isRightLegendVisible(dataName)">
-              <polyline
-                :points="getRightLinePoints(dataName)"
-                :stroke="rightLineColors[index % rightLineColors.length]"
-                stroke-width="0.8"
-                fill="none"
-                stroke-dasharray="2,2"
-                class="transition-all duration-300"
-              />
+              <polyline :points="getRightLinePoints(dataName)" :stroke="rightLineColors[index % rightLineColors.length]"
+                stroke-width="0.8" fill="none" stroke-dasharray="2,2" class="transition-all duration-300" />
               <!-- 數據點 -->
-              <circle
-                v-for="(point, pointIndex) in chartData"
-                :key="`right-point-${dataName}-${pointIndex}`"
-                :cx="getXPosition(pointIndex)"
-                :cy="getRightYPosition(point.rightValues?.[dataName] || 0)"
-                r="1.7"
+              <circle v-for="(point, pointIndex) in chartData" :key="`right-point-${dataName}-${pointIndex}`"
+                :cx="getXPosition(pointIndex)" :cy="getRightYPosition(point.rightValues?.[dataName] || 0)" r="1.7"
                 :fill="rightLineColors[index % rightLineColors.length]"
                 class="hover:r-6 transition-all duration-200 cursor-pointer"
                 @mouseenter="showTooltip($event, point, dataName, point.rightValues?.[dataName] || 0, 'right')"
-                @mouseleave="hideTooltip"
-              />
+                @mouseleave="hideTooltip" />
               <!-- 數值標籤 (如果該圖例設為顯示數值) -->
-              <text
-                v-if="shouldShowRightValues(dataName)"
-                v-for="(point, pointIndex) in chartData"
-                :key="`right-value-${dataName}-${pointIndex}`"
-                :x="getXPosition(pointIndex)"
-                :y="getRightYPosition(point.rightValues?.[dataName] || 0) - 2"
-                :text-anchor="getTextAnchor(pointIndex)"
+              <text v-if="shouldShowRightValues(dataName)" v-for="(point, pointIndex) in chartData"
+                :key="`right-value-${dataName}-${pointIndex}`" :x="getXPosition(pointIndex)"
+                :y="getRightYPosition(point.rightValues?.[dataName] || 0) - 2" :text-anchor="getTextAnchor(pointIndex)"
                 class="text-[5px] font-medium pointer-events-none"
-                :fill="rightLineColors[index % rightLineColors.length]"
-              >
+                :fill="rightLineColors[index % rightLineColors.length]">
                 {{ formatValue(point.rightValues?.[dataName] || 0, 'right') }}
               </text>
             </template>
@@ -119,9 +86,8 @@
 
       <!-- 日期標籤 -->
       <div class="mx-8 flex justify-between mt-2">
-        <div v-for="(item, index) in chartData" 
-             :key="`label-${index}`"
-             class="flex-1 text-xs text-gray-600 text-center">
+        <div v-for="(item, index) in chartData" :key="`label-${index}`"
+          class="flex-1 text-xs text-gray-600 text-center">
           <div>{{ item.label }}</div>
           <div class="text-gray-400">{{ item.dateLabel }}</div>
         </div>
@@ -133,20 +99,19 @@
       <!-- 左軸圖例 -->
       <div class="flex items-center gap-2">
         <span class="text-gray-600">{{ dataProvider.left.unit }}:</span>
-        <div v-for="(dataName, index) in Object.keys(dataProvider.left.data)" 
-             :key="`legend-left-${dataName}`"
-             class="flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
-             @click.stop="toggleLeftLegend(dataName)">
+        <div v-for="(dataName, index) in Object.keys(dataProvider.left.data)" :key="`legend-left-${dataName}`"
+          class="flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
+          @click.stop="toggleLeftLegend(dataName)">
           <!-- 圖例指示器 -->
           <div class="relative">
-            <div class="w-3 h-3 rounded-full transition-all duration-200" 
-                 :class="getLegendIndicatorClass(leftLegendStates[dataName])"
-                 :style="{ backgroundColor: leftLineColors[index % leftLineColors.length] }">
+            <div class="w-3 h-3 rounded-full transition-all duration-200"
+              :class="getLegendIndicatorClass(leftLegendStates[dataName])"
+              :style="{ backgroundColor: leftLineColors[index % leftLineColors.length] }">
             </div>
             <!-- 顯示數值狀態的額外指示器 -->
             <div v-if="leftLegendStates[dataName] === LegendState.WithValues"
-                 class="absolute -top-1 -right-1 w-2 h-2 bg-white border rounded-full text-xs flex items-center justify-center"
-                 :style="{ borderColor: leftLineColors[index % leftLineColors.length] }">
+              class="absolute -top-1 -right-1 w-2 h-2 bg-white border rounded-full text-xs flex items-center justify-center"
+              :style="{ borderColor: leftLineColors[index % leftLineColors.length] }">
               <span class="text-xs font-bold" :style="{ color: leftLineColors[index % leftLineColors.length] }">V</span>
             </div>
           </div>
@@ -159,21 +124,21 @@
       <!-- 右軸圖例 (如果有) -->
       <div v-if="dataProvider.right" class="flex items-center gap-2">
         <span class="text-gray-600">{{ dataProvider.right.unit }}:</span>
-        <div v-for="(dataName, index) in Object.keys(dataProvider.right.data)" 
-             :key="`legend-right-${dataName}`"
-             class="flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
-             @click.stop="toggleRightLegend(dataName)">
+        <div v-for="(dataName, index) in Object.keys(dataProvider.right.data)" :key="`legend-right-${dataName}`"
+          class="flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
+          @click.stop="toggleRightLegend(dataName)">
           <!-- 圖例指示器 -->
           <div class="relative">
-            <div class="w-3 h-3 rounded-full border-2 border-dashed transition-all duration-200" 
-                 :class="getLegendIndicatorClass(rightLegendStates[dataName])"
-                 :style="{ borderColor: rightLineColors[index % rightLineColors.length] }">
+            <div class="w-3 h-3 rounded-full border-2 border-dashed transition-all duration-200"
+              :class="getLegendIndicatorClass(rightLegendStates[dataName])"
+              :style="{ borderColor: rightLineColors[index % rightLineColors.length] }">
             </div>
             <!-- 顯示數值狀態的額外指示器 -->
             <div v-if="rightLegendStates[dataName] === LegendState.WithValues"
-                 class="absolute -top-1 -right-1 w-2 h-2 bg-white border rounded-full text-xs flex items-center justify-center"
-                 :style="{ borderColor: rightLineColors[index % rightLineColors.length] }">
-              <span class="text-xs font-bold" :style="{ color: rightLineColors[index % rightLineColors.length] }">V</span>
+              class="absolute -top-1 -right-1 w-2 h-2 bg-white border rounded-full text-xs flex items-center justify-center"
+              :style="{ borderColor: rightLineColors[index % rightLineColors.length] }">
+              <span class="text-xs font-bold"
+                :style="{ color: rightLineColors[index % rightLineColors.length] }">V</span>
             </div>
           </div>
           <span :class="getLegendTextClass(rightLegendStates[dataName])">
@@ -184,14 +149,15 @@
     </div>
 
     <!-- 圖例狀態說明 -->
-    <div class="mt-2 text-xs text-gray-500">
-      點擊圖例切換狀態：顯示 → 顯示數值 → 隱藏
+    <div class="mt-3 text-xs text-gray-500 flex flex-col items-start gap-1">
+      <div>點擊圖例切換狀態：顯示 → 顯示數值 → 隱藏</div>
+      <div>點擊圖卡可以切換圖表顯示週期：日 → 週 → 月</div>
     </div>
 
     <!-- 提示框 -->
-    <div v-if="tooltip.show" 
-         class="absolute bg-gray-800 text-white text-xs px-3 py-2 rounded shadow-lg pointer-events-none z-10"
-         :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }">
+    <div v-if="tooltip.show"
+      class="absolute bg-gray-800 text-white text-xs px-3 py-2 rounded shadow-lg pointer-events-none z-10"
+      :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }">
       <div>{{ tooltip.date }}</div>
       <div>{{ tooltip.dataName }}: {{ tooltip.value }}{{ tooltip.unit }}</div>
     </div>
@@ -362,4 +328,3 @@ const hideTooltip = () => {
   tooltip.value.show = false
 }
 </script>
-
