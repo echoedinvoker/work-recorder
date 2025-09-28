@@ -3,7 +3,8 @@
     <!-- 減脂綜合指標 -->
     <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg shadow-md p-4 border border-blue-200">
       <h2 class="text-lg font-semibold mb-4 text-gray-700 flex items-center">
-        <span class="mr-2">🎯</span>
+        <!-- 替換 🎯 為 Target icon -->
+        <Target class="mr-2 w-5 h-5" />
         減脂綜合指標
       </h2>
       
@@ -35,7 +36,7 @@
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
           <div class="text-lg font-bold text-orange-600">{{ fatLossMetrics.dietScore }}</div>
           <div class="text-xs text-gray-600">飲食控制</div>
-          <div class="text-xs text-gray-500">戒糖+飢餓</div>
+          <div class="text-xs text-gray-500">飲控+飢餓</div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
           <div class="text-lg font-bold text-blue-600">{{ fatLossMetrics.exerciseScore }}</div>
@@ -101,7 +102,8 @@
     <!-- 減脂相關活動快速檢視 -->
     <div class="bg-white rounded-lg shadow-md p-4">
       <h2 class="text-lg font-semibold mb-4 text-gray-700 flex items-center">
-        <span class="mr-2">🔥</span>
+        <!-- 替換 🔥 為 Flame icon -->
+        <Flame class="mr-2 w-5 h-5" />
         今日活動概況
       </h2>
       <div class="grid grid-cols-2 gap-3">
@@ -118,6 +120,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+// 導入 lucide icons
+import { Target, Flame, TrendingUp, TrendingDown, BarChart3 } from 'lucide-vue-next';
 import { useDailyNoSugarStore } from '@/stores/dailyNoSugarStore';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
 import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
@@ -240,11 +244,20 @@ const getTrendClass = () => {
   return 'text-gray-600';
 };
 
+// 修改 getTrendText 函數，使用 lucide icons
 const getTrendText = () => {
   const trend = fatLossMetrics.value.trend;
-  if (trend === 'improving') return '📈 持續改善';
-  if (trend === 'declining') return '📉 需要注意';
-  return '📊 保持穩定';
+  if (trend === 'improving') return '持續改善';
+  if (trend === 'declining') return '需要注意';
+  return '保持穩定';
+};
+
+// 新增獲取趨勢圖標的函數
+const getTrendIcon = () => {
+  const trend = fatLossMetrics.value.trend;
+  if (trend === 'improving') return TrendingUp;
+  if (trend === 'declining') return TrendingDown;
+  return BarChart3;
 };
 
 // 導航到活動頁面

@@ -5,7 +5,8 @@
     @click="handleClick"
   >
     <div class="text-sm font-medium flex items-center">
-      <span class="mr-1">{{ activity.icon }}</span>
+      <!-- 使用 Lucide icon 替代 emoji -->
+      <component :is="activity.iconComponent" class="w-4 h-4 mr-2" />
       {{ activity.title }}
     </div>
     <div class="text-lg font-bold mt-1">
@@ -26,7 +27,15 @@ import { useDailyHungryStore } from '@/stores/dailyHungryStore';
 import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
 
-// Props 只需要 activity name
+// 導入 Lucide icons
+import { 
+  Ban,           // 替代 🚫 (無糖)
+  Moon,          // 替代 😴 (早睡)
+  UtensilsCrossed, // 替代 🍽️ (飢餓)
+  Waves,         // 替代 🏊 (游泳)
+  Dumbbell       // 替代 💪 (健身)
+} from 'lucide-vue-next';
+
 interface Props {
   activityName: string;
 }
@@ -41,39 +50,39 @@ const hungryStore = useDailyHungryStore();
 const swimmingStore = useDailySwimmingStore();
 const workoutStore = useDailyWorkoutStore();
 
-// 活動配置
+// 活動配置 - 使用 Lucide icon 組件
 const activityConfig = {
   nosugar: {
-    title: '無糖飲食',
-    icon: '🚫',
+    title: '飲控',
+    iconComponent: Ban,
     category: '飲食控制',
     store: noSugarStore,
     routeName: 'noSugar'
   },
   earlysleep: {
     title: '早睡',
-    icon: '😴',
+    iconComponent: Moon,
     category: '生活習慣',
     store: earlySleepStore,
     routeName: 'earlySleep'
   },
   hungry: {
     title: '飢餓感',
-    icon: '🍽️',
+    iconComponent: UtensilsCrossed,
     category: '飲食控制',
     store: hungryStore,
     routeName: 'hungry'
   },
   swimming: {
     title: '游泳',
-    icon: '🏊',
+    iconComponent: Waves,
     category: '運動',
     store: swimmingStore,
     routeName: 'swimming'
   },
   workout: {
     title: '健身',
-    icon: '💪',
+    iconComponent: Dumbbell,
     category: '運動',
     store: workoutStore,
     routeName: 'workout'

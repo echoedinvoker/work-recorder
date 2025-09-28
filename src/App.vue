@@ -67,7 +67,6 @@ const showConfirmDialog = ref(false);
 
 // 使用說明相關
 const currentUsageInstruction = computed(() => {
-  console.log('Current Route Name:', route.name);
   return getUsageInstructionByRoute(route.name as string);
 });
 
@@ -85,7 +84,7 @@ const currentRouteIndex = computed(() => {
 const previousActivityName = computed(() => {
   if (!previousActivityRoute.value) return '';
   const route = routes.find(r => r.name === previousActivityRoute.value);
-  return (route?.meta?.title as string) || (route?.name as string) || '';
+  return route
 });
 
 // 監聽路由變化，記錄活動頁面

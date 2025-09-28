@@ -4,18 +4,18 @@
       <!-- Toggle 概覽頁面按鈕 -->
       <button 
         @click="toggleOverview"
-        :disabled="isOnOverviewPage"
+        :disabled="isOnOverviewPage && !previousActivityName"
         :class="[
           'group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-md',
-          isOnOverviewPage 
+          isOnOverviewPage && !previousActivityName
             ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60' 
             : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:scale-105 active:scale-95'
         ]"
       >
-        <span v-if="previousActivityName && !isOnOverviewPage" class="flex items-center gap-2">
+        <span v-if="previousActivityName && isOnOverviewPage" class="flex items-center gap-2">
           <!-- 返回活動頁面 -->
-          <ArrowLeft :size="16" class="transition-transform group-hover:-translate-x-0.5" />
-          <span class="hidden sm:inline">{{ previousActivityName }}</span>
+          <component :is="previousActivityName.meta.icon" class="w-4 h-4" />
+          <span class="hidden sm:inline">{{ previousActivityName.meta.title }}</span>
         </span>
         <span v-else class="flex items-center gap-2">
           <!-- 切換到概覽頁面 -->
@@ -55,11 +55,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { ArrowLeft, BarChart3, HelpCircle, Trash2 } from 'lucide-vue-next';
+import { BarChart3, HelpCircle, Trash2 } from 'lucide-vue-next';
 
 // Props - 將 previousActivityName 設為可選
 interface Props {
-  previousActivityName?: string;
+  previousActivityName?: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -81,26 +81,16 @@ const isOnOverviewPage = computed(() => route.path === '/');
 
 // Toggle 概覽頁面功能
 const toggleOverview = () => {
-  // 如果已經在概覽頁面，不執行任何操作
-  if (isOnOverviewPage.value) {
+  if (isOnOverviewPage.value && props.previousActivityName.name) {
+    router.push({ name: props.previousActivityName.name });
     return;
   }
-  
-  if (route.name === 'overview') {
-    // 如果在概覽頁面且有記錄的活動頁面，返回該頁面
-    if (props.previousActivityName) {
-      // 找到對應的路由名稱
-      const targetRoute = routes.find(r => 
-        r.meta?.title === props.previousActivityName || r.name === props.previousActivityName
-      );
-      if (targetRoute) {
-        router.push({ name: targetRoute.name });
-      }
-    }
-  } else {
-    // 如果在活動頁面，切換到概覽頁面
-    router.push({ name: 'overview' });
+
+  if (isOnOverviewPage.value && !props.previousActivityName) {
+    return;
   }
+
+  router.push({ name: 'overview' });
 };
 
 // 清除按鈕標題
