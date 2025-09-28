@@ -159,56 +159,133 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     }
 
     // rewrite today weightedRecord
-    let weightedRecord = 0
-    Object.entries(todayRecords).forEach(([act, sets]) => {
-      const actWeight = allActivityWeights[act] || 1
-      sets.forEach(set => {
-        weightedRecord += set.count * set.weight * actWeight
+    // let weightedRecord = 0
+    // Object.entries(todayRecords).forEach(([act, sets]) => {
+    //   const actWeight = allActivityWeights[act] || 1
+    //   sets.forEach(set => {
+    //     weightedRecord += set.count * set.weight * actWeight
+    //   })
+    // })
+    // baseStore.weightedRecords.value[todayKey] = weightedRecord
+
+    // 改成 rewrite whole weightedRecords
+    Object.entries(baseStore.records.value).forEach(([dateKey, dayRecord]) => {
+      let weightedRecord = 0
+      Object.entries(dayRecord).forEach(([act, sets]) => {
+        const actWeight = allActivityWeights[act] || 1
+        sets.forEach(set => {
+          weightedRecord += set.count * set.weight * actWeight
+        })
       })
+      baseStore.weightedRecords.value[dateKey] = weightedRecord
     })
-    baseStore.weightedRecords.value[todayKey] = weightedRecord
+    
 
-    const lastScoreDateKey = Object.keys(baseStore.scores.value)
-      .filter(key => key !== todayKey)
-      .sort()
-      .pop()
-
-    if (lastScoreDateKey) {
-      let startScore = baseStore.scores.value[lastScoreDateKey]
-      for (let date = new Date(lastScoreDateKey); formatDateToKey(date) < todayKey; date.setDate(date.getDate() + 1)) {
-        const dateKey = formatDateToKey(date)
-        if (!baseStore.scores.value[dateKey]) {
-          baseStore.scores.value[dateKey] = Math.max(
-            SCORING_CONSTANTS.COMMON.MIN_SCORE,
-            startScore + SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY
-          )
-        }
-      }
-    } else {
-      // 設置昨日分數0
-      const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
-      baseStore.scores.value[yesterdayKey] = 0;
-    }
-
-    // 如果沒有歷史記錄，使用初始分數
-    if (baseStore.maxPastWeightedRecord.value === 0) {
+    // const lastScoreDateKey = Object.keys(baseStore.scores.value)
+    //   .filter(key => key !== todayKey)
+    //   .sort()
+    //   .pop()
+    //
+    // if (lastScoreDateKey) {
+    //   let startScore = baseStore.scores.value[lastScoreDateKey]
+    //   for (let date = new Date(lastScoreDateKey); formatDateToKey(date) < todayKey; date.setDate(date.getDate() + 1)) {
+    //     const dateKey = formatDateToKey(date)
+    //     if (!baseStore.scores.value[dateKey]) {
+    //       baseStore.scores.value[dateKey] = Math.max(
+    //         SCORING_CONSTANTS.COMMON.MIN_SCORE,
+    //         startScore + SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY
+    //       )
+    //     }
+    //   }
+    // } else {
+    //   // 設置昨日分數0
+    //   const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
+    //   baseStore.scores.value[yesterdayKey] = 0;
+    // }
+    //
+    // // 如果沒有歷史記錄，使用初始分數
+    // if (baseStore.maxPastWeightedRecord.value === 0) {
+    //   baseStore.scores.value[todayKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
+    //   return
+    // }
+    //
+    // // 計算比例和分數變化
+    // const ratio = baseStore.weightedRecords.value[todayKey] / baseStore.maxPastWeightedRecord.value
+    // baseStore.ratioIncrements.value[todayKey] = ratio - (baseStore.ratios.value[todayKey] || 0)
+    // baseStore.ratios.value[todayKey] = ratio
+    //
+    // const lastDateKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
+    // const scoreChange = getWorkoutScoreChange(ratio)
+    // const baseScore = baseStore.scores.value[lastDateKey] || 0
+    //
+    // baseStore.scores.value[todayKey] = Math.max(
+    //   SCORING_CONSTANTS.COMMON.MIN_SCORE,
+    //   baseScore + scoreChange
+    // )
+    
+    const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
+    
+    // 改成 recalculate whole scores
+    const earlistDateKeyFromRecords = Object.keys(baseStore.records.value).sort()[0]
+    if (earlistDateKeyFromRecords === getTodayKey()) {
+      baseStore.scores.value[yesterdayKey] = SCORING_CONSTANTS.COMMON.MIN_SCORE
       baseStore.scores.value[todayKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
       return
     }
+    for (let date = new Date(earlistDateKeyFromRecords); formatDateToKey(date) <= todayKey; date.setDate(date.getDate() + 1)) {
+      const dateKey = formatDateToKey(date)
+      const yesterdayKey = formatDateToKey(new Date(date.getTime() - 24 * 60 * 60 * 1000))
 
-    // 計算比例和分數變化
-    const ratio = baseStore.weightedRecords.value[todayKey] / baseStore.maxPastWeightedRecord.value
-    baseStore.ratioIncrements.value[todayKey] = ratio - (baseStore.ratios.value[todayKey] || 0)
-    baseStore.ratios.value[todayKey] = ratio
+      // 當天無紀錄
+      if (!baseStore.records.value[dateKey]) {
+        const yesterdayScore = baseStore.scores.value[yesterdayKey] || SCORING_CONSTANTS.COMMON.MIN_SCORE
+        baseStore.scores.value[dateKey] = Math.max(
+          SCORING_CONSTANTS.COMMON.MIN_SCORE,
+          yesterdayScore + SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY
+        )
+        continue
+      }
 
-    const lastDateKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
-    const scoreChange = getWorkoutScoreChange(ratio)
-    const baseScore = baseStore.scores.value[lastDateKey] || 0
+      // 前一天無紀錄 --> 第一天 --> 給初始分數
+      if (!baseStore.records.value[yesterdayKey]) {
+        baseStore.scores.value[dateKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
+        continue
+      }
 
-    baseStore.scores.value[todayKey] = Math.max(
-      SCORING_CONSTANTS.COMMON.MIN_SCORE,
-      baseScore + scoreChange
-    )
+      // 非第一天有紀錄之日期
+      const pastRecords: { [key: string]: WorkoutRecord } = {}
+      Object.keys(baseStore.records.value).filter(key => key < dateKey).forEach(key => {
+        pastRecords[key] = baseStore.records.value[key]
+      })
+      const pastWeightedRecords: { [key: string]: number } = {}
+      Object.entries(pastRecords).forEach(([dKey, dayRecord]) => {
+        let weightedRecord = 0
+        Object.entries(dayRecord).forEach(([act, sets]) => {
+          const actWeight = allActivityWeights[act] || 1
+          sets.forEach(set => {
+            weightedRecord += set.count * set.weight * actWeight
+          })
+        })
+        pastWeightedRecords[dKey] = weightedRecord
+      })
+      const maxPastWeightedRecord = Math.max(...Object.values(pastWeightedRecords), 0)
+      // 需考量 maxPastWeightedRecord 為 0 的情況 (理論上不會發生，因為有前一天紀錄, 而且紀錄不可能輸入零, 但還是保險起見)
+      if (maxPastWeightedRecord === 0) {
+        baseStore.scores.value[dateKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
+        continue
+      }
+      const ratio = baseStore.weightedRecords.value[dateKey] / maxPastWeightedRecord
+      if (dateKey === todayKey) {
+        baseStore.ratioIncrements.value[todayKey] = ratio - (baseStore.ratios.value[todayKey] || 0)
+        baseStore.ratios.value[todayKey] = ratio
+      }
+      const scoreChange = getWorkoutScoreChange(ratio)
+      const yesterdayScore = baseStore.scores.value[yesterdayKey] || SCORING_CONSTANTS.COMMON.MIN_SCORE
+      baseStore.scores.value[dateKey] = Math.max(
+        SCORING_CONSTANTS.COMMON.MIN_SCORE,
+        yesterdayScore + scoreChange
+      )
+    }
   }
 
   // Mock data
