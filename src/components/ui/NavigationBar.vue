@@ -24,6 +24,19 @@
         </span>
       </button>
 
+      <!-- 匯出按鈕 (只在活動頁面顯示) -->
+      <button 
+        v-if="showExportButton"
+        @click="$emit('exportRecords')"
+        class="group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 
+               bg-gradient-to-r from-purple-500 to-purple-600 text-white 
+               hover:from-purple-600 hover:to-purple-700 hover:shadow-lg hover:scale-105
+               active:scale-95 flex items-center gap-2 shadow-md"
+      >
+        <Download :size="16" class="transition-transform group-hover:scale-110" />
+        <span class="hidden sm:inline">匯出</span>
+      </button>
+
       <!-- 使用說明按鈕 (只在非首頁顯示) -->
       <button 
         @click="$emit('showUsage')"
@@ -55,7 +68,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { BarChart3, HelpCircle, Trash2 } from 'lucide-vue-next';
+import { BarChart3, HelpCircle, Trash2, Download  } from 'lucide-vue-next';
 
 // Props - 將 previousActivityName 設為可選
 interface Props {
@@ -70,6 +83,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   showUsage: [];
   showClearDialog: [];
+  exportRecords: [];
 }>();
 
 const router = useRouter();
@@ -78,6 +92,11 @@ const routes = router.options.routes.filter(route => route.name !== 'NotFound');
 
 // 檢查是否在概覽頁面 (根路徑 '/')
 const isOnOverviewPage = computed(() => route.path === '/');
+
+// 檢查是否顯示匯出按鈕 (不在 overview 和 NotFound 頁面)
+const showExportButton = computed(() => {
+  return route.name !== 'overview' && route.name !== 'NotFound';
+});
 
 // Toggle 概覽頁面功能
 const toggleOverview = () => {

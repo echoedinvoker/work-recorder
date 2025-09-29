@@ -10,6 +10,7 @@
       :previous-activity-name="previousActivityName"
       @show-usage="showUsageModal = true"
       @show-clear-dialog="showConfirmDialog = true"
+      @export-records="handleExportRecords"
     />
 
     <!-- 滑動指示器 -->
@@ -133,6 +134,18 @@ const confirmDialogMessage = computed(() => {
   const pageTitle = currentRoute?.meta?.title || '當前頁面';
   return `此操作將清除${pageTitle}的所有歷史記錄資料。此操作無法復原，確定要繼續嗎？`;
 });
+
+// 處理匯出功能
+const handleExportRecords = () => {
+  const currentRouteName = route.name as keyof typeof routeStoreMap;
+  const store = routeStoreMap[currentRouteName];
+  
+  if (store && typeof store.exportRecordsToJson === 'function') {
+    store.exportRecordsToJson();
+  } else {
+    console.error('無法找到對應的 store 或匯出方法');
+  }
+};
 
 // 觸控事件處理
 const handleTouchStart = (e: TouchEvent) => {

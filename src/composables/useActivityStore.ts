@@ -308,13 +308,45 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     // 默認格式化邏輯
     return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString()
   }
-
   const clearAllHistory = () => {
     records.value = {}
     weightedRecords.value = {}
     scores.value = {}
     ratios.value = {}
     ratioIncrements.value = {}
+  }
+  const exportRecordsToJson = () => {
+    // 建立匯出資料結構
+    const exportData = {
+      title: options.title,
+      exportDate: new Date().toISOString(),
+      data: {
+        records: records.value,
+        weightedRecords: weightedRecords.value,
+        scores: scores.value,
+        ratios: ratios.value,
+        ratioIncrements: ratioIncrements.value
+      }
+    }
+
+    // 轉換為 JSON 字串
+    const jsonString = JSON.stringify(exportData, null, 2)
+
+    // 建立下載連結
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    // 設定檔案名稱 (使用活動標題和當前日期)
+    const today = new Date().toISOString().split('T')[0]
+    const fileName = `${options.title.replace(/\s+/g, '_')}_${today}.json`
+
+    link.href = url
+    link.download = fileName
+    link.click()
+
+    // 清理 URL
+    URL.revokeObjectURL(url)
   }
 
   // Helper functions
@@ -373,6 +405,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     formatLeftValue,
     formatRightValue,
     clearAllHistory,
+    exportRecordsToJson,
 
     // Chart config
     left: options.chartConfig.left,
