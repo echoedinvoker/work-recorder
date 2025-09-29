@@ -7,6 +7,7 @@ import {
   getWorkoutScoreChange
 } from '../constants/scoringConstants';
 import mockData from "@/data/mockWorkoutData.json";
+import type { Ref } from "vue";
 
 interface WorkoutRecord {
   [activity: string]: {
@@ -115,13 +116,41 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     const todayKey = getTodayKey()
 
     updateTodayRecord(todayKey, activity, count, weight)
-    recalculateFromRecords(todayKey)
+    recalculateFromRecords(
+      baseStore.records,
+      baseStore.weightedRecords,
+      baseStore.scores,
+      baseStore.ratios,
+      baseStore.ratioIncrements,
+      todayKey
+    )
   }
-
-  const recalculateFromRecords = (todayKey: string = getTodayKey()) => {
-    const allActivityWeights = calculateActivityWeights(todayKey)
-    recalculateAllWeightedRecords(allActivityWeights)
-    recalculateAllScores(todayKey, allActivityWeights)
+  const recalculateFromRecords = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    weightedRecords: Ref<{ [date: string]: number }>,
+    scores: Ref<{ [date: string]: number }>,
+    ratios: Ref<{ [date: string]: number }>,
+    ratioIncrements: Ref<{ [date: string]: number }>,
+    todayKey: string = getTodayKey()
+  ) => {
+    const allActivityWeights = calculateActivityWeights(
+      records,
+      todayKey
+    )
+    recalculateAllWeightedRecords(
+      records,
+      weightedRecords,
+      allActivityWeights
+    )
+    recalculateAllScores(
+      todayKey,
+      records,
+      weightedRecords,
+      scores,
+      ratios,
+      ratioIncrements,
+      allActivityWeights
+    )
   }
 
   // helper functions
@@ -134,9 +163,12 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     }
     baseStore.records.value[todayKey][activity].push({ count, weight })
   }
-  const calculateActivityWeights = (todayKey: string) => {
+  const calculateActivityWeights = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    todayKey: string
+  ) => {
     const allActivityWeights = { ...activityWeights.value }
-    const todayRecords = baseStore.records.value[todayKey]
+    const todayRecords = records.value[todayKey]
     const newActivityList = Object.keys(todayRecords).filter(act => !allActivityWeights[act])
 
     const newActivityAvgWeightPerRep: { [activity: string]: number } = {}
@@ -172,8 +204,12 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
     return allActivityWeights
   }
-  const recalculateAllWeightedRecords = (allActivityWeights: { [activity: string]: number }) => {
-    Object.entries(baseStore.records.value).forEach(([dateKey, dayRecord]) => {
+  const recalculateAllWeightedRecords = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    weightedRecords: Ref<{ [date: string]: number }>,
+    allActivityWeights: { [activity: string]: number }
+  ) => {
+    Object.entries(records.value).forEach(([dateKey, dayRecord]) => {
       let weightedRecord = 0
       Object.entries(dayRecord).forEach(([act, sets]) => {
         const actWeight = allActivityWeights[act] || 1
@@ -181,12 +217,20 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
           weightedRecord += set.count * set.weight * actWeight
         })
       })
-      baseStore.weightedRecords.value[dateKey] = weightedRecord
+      weightedRecords.value[dateKey] = weightedRecord
     })
   }
-  const recalculateAllScores = (todayKey: string, allActivityWeights: { [activity: string]: number }) => {
+  const recalculateAllScores = (
+    todayKey: string,
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    weightedRecords: Ref<{ [date: string]: number }>,
+    scores: Ref<{ [date: string]: number }>,
+    ratios: Ref<{ [date: string]: number }>,
+    ratioIncrements: Ref<{ [date: string]: number }>,
+    allActivityWeights: { [activity: string]: number }
+  ) => {
     const yesterdayKey = formatDateToKey(new Date(new Date(todayKey).getTime() - 24 * 60 * 60 * 1000))
-    const earlistDateKeyFromRecords = Object.keys(baseStore.records.value).sort()[0]
+    const earlistDateKeyFromRecords = Object.keys(records.value).sort()[0]
 
     if (earlistDateKeyFromRecords === getTodayKey()) {
       baseStore.scores.value[yesterdayKey] = SCORING_CONSTANTS.COMMON.MIN_SCORE
@@ -200,7 +244,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
       // 當天無記錄 - 扣分
       if (!baseStore.records.value[dateKey]) {
-        const yesterdayScore = baseStore.scores.value[yesterdayKey] || SCORING_CONSTANTS.COMMON.MIN_SCORE
+        const yesterdayScore = scores.value[yesterdayKey] || SCORING_CONSTANTS.COMMON.MIN_SCORE
         baseStore.scores.value[dateKey] = Math.max(
           SCORING_CONSTANTS.COMMON.MIN_SCORE,
           yesterdayScore + SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY
@@ -208,23 +252,38 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
         continue
       }
 
-      if (!baseStore.records.value[yesterdayKey]) {
-        baseStore.scores.value[dateKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
+      if (!records.value[yesterdayKey]) {
+        scores.value[dateKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
         continue
       }
 
-      calculateScoreBasedOnHistory(dateKey, yesterdayKey, todayKey, allActivityWeights)
+      calculateScoreBasedOnHistory(
+        records,
+        weightedRecords,
+        scores,
+        ratios,
+        ratioIncrements,
+        dateKey,
+        yesterdayKey,
+        todayKey,
+        allActivityWeights
+      )
     }
   }
   const calculateScoreBasedOnHistory = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    weightedRecords: Ref<{ [date: string]: number }>,
+    scores: Ref<{ [date: string]: number }>,
+    ratios: Ref<{ [date: string]: number }>,
+    ratioIncrements: Ref<{ [date: string]: number }>,
     dateKey: string,
     yesterdayKey: string,
     todayKey: string,
     allActivityWeights: { [activity: string]: number }
   ) => {
     const pastRecords: { [key: string]: WorkoutRecord } = {}
-    Object.keys(baseStore.records.value).filter(key => key < dateKey).forEach(key => {
-      pastRecords[key] = baseStore.records.value[key]
+    Object.keys(records.value).filter(key => key < dateKey).forEach(key => {
+      pastRecords[key] = records.value[key]
     })
 
     const pastWeightedRecords: { [key: string]: number } = {}
@@ -242,19 +301,19 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     const maxPastWeightedRecord = Math.max(...Object.values(pastWeightedRecords), 0)
 
     if (maxPastWeightedRecord === 0) {
-      baseStore.scores.value[dateKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
+      scores.value[dateKey] = SCORING_CONSTANTS.WORKOUT.INITIAL_SCORE
       return
     }
 
-    const ratio = baseStore.weightedRecords.value[dateKey] / maxPastWeightedRecord
+    const ratio = weightedRecords.value[dateKey] / maxPastWeightedRecord
 
     if (dateKey === todayKey) {
-      baseStore.ratioIncrements.value[todayKey] = ratio - (baseStore.ratios.value[todayKey] || 0)
-      baseStore.ratios.value[todayKey] = ratio
+      ratioIncrements.value[todayKey] = ratio - (ratios.value[todayKey] || 0)
+      ratios.value[todayKey] = ratio
     }
 
     const scoreChange = getWorkoutScoreChange(ratio)
-    const yesterdayScore = baseStore.scores.value[yesterdayKey] || SCORING_CONSTANTS.COMMON.MIN_SCORE
+    const yesterdayScore = scores.value[yesterdayKey] || SCORING_CONSTANTS.COMMON.MIN_SCORE
 
     baseStore.scores.value[dateKey] = Math.max(
       SCORING_CONSTANTS.COMMON.MIN_SCORE,
