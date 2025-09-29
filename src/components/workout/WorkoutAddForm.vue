@@ -1,6 +1,6 @@
 <template>
   <TheForm title="" :handleSubmit="handleSubmit">
-    <div class="grid grid-cols-[1fr_3fr] gap-2 items-center" v-if="workoutStore.activityList.length > 0 && !inputWorkout">
+    <div class="grid grid-cols-[1fr_2fr] gap-2 items-center" v-if="workoutStore.activityList.length > 0 && !inputWorkout">
       <span v-if="!selectWorkout" class="text-gray-500 text-md">選擇動作</span>
       <BaseButton v-else 
         type="button" 
@@ -12,7 +12,7 @@
          />
     </div>
     <template v-if="!selectWorkout">
-      <div class="grid grid-cols-[1fr_3fr] gap-2 items-center">
+      <div class="grid grid-cols-[1fr_2fr] gap-2 items-center">
         <span class="text-gray-500 text-md" v-if="!inputWorkout">新增動作</span>
         <BaseButton v-else 
           type="button" 
