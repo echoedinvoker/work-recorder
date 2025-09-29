@@ -22,6 +22,18 @@
         </span>
       </button>
 
+      <!-- 匯入按鈕 (只在活動頁面顯示) -->
+      <button 
+        v-if="showExportButton"
+        @click="handleImport"
+        class="group relative px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 
+               bg-gradient-to-r from-green-500 to-green-600 text-white 
+               hover:from-green-600 hover:to-green-700 hover:shadow-lg hover:scale-105
+               active:scale-95 flex items-center gap-2 shadow-md"
+      >
+        <Upload :size="16" class="transition-transform group-hover:scale-110" />
+      </button>
+
       <!-- 匯出按鈕 (只在活動頁面顯示) -->
       <button 
         v-if="showExportButton"
@@ -57,13 +69,22 @@
         <Trash2 :size="16" class="transition-transform group-hover:scale-110" />
       </button>
     </div>
+
+    <!-- 隱藏的檔案輸入元素 -->
+    <input 
+      ref="fileInput"
+      type="file" 
+      accept=".json"
+      @change="handleFileSelect"
+      style="display: none"
+    />
   </nav>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { BarChart3, HelpCircle, Trash2, Download  } from 'lucide-vue-next';
+import { BarChart3, HelpCircle, Trash2, Download, Upload } from 'lucide-vue-next';
 
 // Props - 將 previousActivityName 設為可選
 interface Props {
@@ -79,11 +100,15 @@ const emit = defineEmits<{
   showUsage: [];
   showClearDialog: [];
   exportRecords: [];
+  importRecords: [data: any];
 }>();
 
 const router = useRouter();
 const route = useRoute();
 const routes = router.options.routes.filter(route => route.name !== 'NotFound');
+
+// 檔案輸入元素的引用
+const fileInput = ref<HTMLInputElement>();
 
 // 檢查是否在概覽頁面 (根路徑 '/')
 const isOnOverviewPage = computed(() => route.path === '/');
@@ -107,6 +132,51 @@ const toggleOverview = () => {
   router.push({ name: 'overview' });
 };
 
+// 處理匯入按鈕點擊
+const handleImport = () => {
+  fileInput.value?.click();
+};
+
+// 處理檔案選擇
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  
+  if (!file) return;
+  
+  // 檢查檔案類型
+  if (!file.name.endsWith('.json')) {
+    alert('請選擇 JSON 檔案');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const content = e.target?.result as string;
+      const data = JSON.parse(content);
+      
+      // 驗證 JSON 結構
+      if (!data.data || !data.data.records) {
+        alert('無效的檔案格式：缺少必要的資料結構');
+        return;
+      }
+      
+      // 發送匯入事件
+      emit('importRecords', data);
+      
+    } catch (error) {
+      console.error('解析 JSON 檔案失敗:', error);
+      alert('檔案格式錯誤，請確認是否為有效的 JSON 檔案');
+    }
+  };
+  
+  reader.readAsText(file);
+  
+  // 清除檔案輸入，允許重複選擇同一檔案
+  target.value = '';
+};
+
 // 清除按鈕標題
 const clearButtonTitle = computed(() => {
   if (route.name === 'overview') {
@@ -117,4 +187,3 @@ const clearButtonTitle = computed(() => {
   return `清除${pageTitle}資料`;
 });
 </script>
-

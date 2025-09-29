@@ -11,6 +11,7 @@
       @show-usage="showUsageModal = true"
       @show-clear-dialog="showConfirmDialog = true"
       @export-records="handleExportRecords"
+      @import-records="handleImportRecords"
     />
 
     <!-- 滑動指示器 -->
@@ -135,7 +136,7 @@ const confirmDialogMessage = computed(() => {
   return `此操作將清除${pageTitle}的所有歷史記錄資料。此操作無法復原，確定要繼續嗎？`;
 });
 
-// 處理匯出功能
+// methods
 const handleExportRecords = () => {
   const currentRouteName = route.name as keyof typeof routeStoreMap;
   const store = routeStoreMap[currentRouteName];
@@ -144,6 +145,23 @@ const handleExportRecords = () => {
     store.exportRecordsToJson();
   } else {
     console.error('無法找到對應的 store 或匯出方法');
+  }
+};
+const handleImportRecords = (importData: any) => {
+  const currentRouteName = route.name as keyof typeof routeStoreMap;
+  const store = routeStoreMap[currentRouteName];
+  
+  if (store && typeof store.importRecordsFromJson === 'function') {
+    const result = store.importRecordsFromJson(importData);
+    
+    if (result.success) {
+      alert('匯入成功！');
+    } else {
+      alert(`匯入失敗：${result.message}`);
+    }
+  } else {
+    console.error('無法找到對應的 store 或匯入方法');
+    alert('匯入失敗：無法找到對應的處理方法');
   }
 };
 

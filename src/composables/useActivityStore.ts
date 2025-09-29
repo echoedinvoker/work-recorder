@@ -231,7 +231,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
       ratioIncrements,
     )
   }
-      
+
   const updateScoreAndRatio = (additionalWeightedRecord: number) => {
 
     const todayKey = getTodayKey()
@@ -374,6 +374,49 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     // 清理 URL
     URL.revokeObjectURL(url)
   }
+  const importRecordsFromJson = (importData: any) => {
+    try {
+      // 驗證匯入資料結構
+      if (!importData.data || typeof importData.data !== 'object') {
+        throw new Error('無效的資料格式：缺少 data 物件')
+      }
+
+      const { data } = importData
+
+      // 驗證必要欄位
+      if (!data.records || typeof data.records !== 'object') {
+        throw new Error('無效的資料格式：缺少 records 資料')
+      }
+
+      // 覆寫所有 ref 內容
+      records.value = data.records || {}
+      weightedRecords.value = data.weightedRecords || {}
+      scores.value = data.scores || {}
+      ratios.value = data.ratios || {}
+      ratioIncrements.value = data.ratioIncrements || {}
+
+      // 如果有自定義的重新計算邏輯，執行它
+      if (options.calculateFromRecords) {
+        const todayKey = getTodayKey()
+        options.calculateFromRecords(
+          records,
+          weightedRecords,
+          scores,
+          ratios,
+          ratioIncrements,
+          todayKey
+        )
+      }
+
+      return { success: true, message: '匯入成功' }
+    } catch (error) {
+      console.error('匯入資料失敗:', error)
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : '匯入失敗'
+      }
+    }
+  }
 
   // Helper functions
   const getWeekNumber = (date: Date): number => {
@@ -433,6 +476,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     formatRightValue,
     clearAllHistory,
     exportRecordsToJson,
+    importRecordsFromJson,
 
     // Chart config
     left: options.chartConfig.left,
