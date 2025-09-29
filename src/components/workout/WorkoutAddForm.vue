@@ -1,13 +1,25 @@
 <template>
   <TheForm title="" :handleSubmit="handleSubmit">
     <div class="grid grid-cols-[1fr_3fr] gap-2 items-center" v-if="workoutStore.activityList.length > 0 && !inputWorkout">
-      <span class="text-gray-500 text-md">選擇動作</span>
+      <span v-if="!selectWorkout" class="text-gray-500 text-md">選擇動作</span>
+      <BaseButton v-else 
+        type="button" 
+        color="gray" 
+        text="取消選擇"
+        class="!px-3 !py-2 !text-sm !font-normal"
+        @click="selectWorkout = ''" />
       <FormInput type="select" v-model="selectWorkout" :options="activityOptions"
          />
     </div>
     <template v-if="!selectWorkout">
       <div class="grid grid-cols-[1fr_3fr] gap-2 items-center">
-        <span class="text-gray-500 text-md">新增動作</span>
+        <span class="text-gray-500 text-md" v-if="!inputWorkout">新增動作</span>
+        <BaseButton v-else 
+          type="button" 
+          color="gray" 
+          text="取消新增"
+          class="!px-3 !py-2 !text-sm !font-normal"
+          @click="inputWorkout = ''" />
         <FormInput v-model="inputWorkout" type="text" placeholder="輸入動作名稱" />
       </div>
     </template>
@@ -145,10 +157,10 @@ const handleSubmit = () => {
     toggleForm();
 
     // 清空表單
-    inputWorkout.value = '';
-    selectWorkout.value = '';
-    inputNumber.value = undefined;
-    inputWeight.value = undefined;
+    // inputWorkout.value = '';
+    // selectWorkout.value = '';
+    // inputNumber.value = undefined;
+    // inputWeight.value = undefined;
   }
 };
 </script>

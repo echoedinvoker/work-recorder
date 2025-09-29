@@ -290,84 +290,68 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
   // Mock data
   // baseStore.records.value = {
-  //   "2025-09-23": {
-  //     "深蹲": [
-  //       { count: 12, weight: 60 },
-  //       { count: 10, weight: 65 },
-  //       { count: 8, weight: 70 }
-  //     ],
-  //     "臥推": [
-  //       { count: 10, weight: 50 },
-  //       { count: 8, weight: 55 },
-  //       { count: 6, weight: 60 }
+  //   "2025-09-28": {
+  //     "懸吊": [
+  //       { count: 13, weight: 70 },
+  //       { count: 10, weight: 70 },
+  //       { count: 7, weight: 70 },
   //     ],
   //     "硬舉": [
-  //       { count: 8, weight: 80 },
-  //       { count: 6, weight: 85 },
-  //       { count: 5, weight: 90 }
+  //       { count: 15, weight: 40 },
+  //       { count: 10, weight: 40 },
+  //       { count: 7, weight: 40 },
   //     ],
-  //     "肩推": [
-  //       { count: 12, weight: 30 },
-  //       { count: 10, weight: 32 },
-  //       { count: 8, weight: 35 }
-  //     ]
+  //     "機械下拉": [
+  //       { count: 15, weight: 31.8 },
+  //       { count: 10, weight: 31.8 },
+  //       { count: 7, weight: 31.8 },
+  //     ],
+  //     "機械低划船": [
+  //       { count: 15, weight: 31.8 },
+  //       { count: 10, weight: 31.8 },
+  //       { count: 7, weight: 31.8 },
+  //     ],
+  //     "啞鈴直立二頭彎舉": [
+  //       { count: 15, weight: 30 },
+  //       { count: 10, weight: 30 },
+  //       { count: 7, weight: 30 },
+  //     ],
   //   },
-  //   "2025-09-24": {
-  //     "深蹲": [
-  //       { count: 15, weight: 55 },
-  //       { count: 12, weight: 60 },
-  //       { count: 10, weight: 65 }
-  //     ],
-  //     "引體向上": [
-  //       { count: 8, weight: 0 },
-  //       { count: 6, weight: 5 },
-  //       { count: 5, weight: 10 }
-  //     ],
-  //     "划船": [
-  //       { count: 12, weight: 45 },
-  //       { count: 10, weight: 50 },
-  //       { count: 8, weight: 55 }
-  //     ],
-  //     "二頭彎舉": [
-  //       { count: 15, weight: 15 },
-  //       { count: 12, weight: 17 },
-  //       { count: 10, weight: 20 }
-  //     ]
-  //   },
-  //   "2025-09-25": {
-  //     "臥推": [
-  //       { count: 12, weight: 45 },
-  //       { count: 10, weight: 50 },
-  //       { count: 8, weight: 55 }
-  //     ],
-  //     "硬舉": [
-  //       { count: 10, weight: 75 },
-  //       { count: 8, weight: 80 },
-  //       { count: 6, weight: 85 }
-  //     ],
-  //     "三頭下壓": [
-  //       { count: 15, weight: 25 },
-  //       { count: 12, weight: 30 },
-  //       { count: 10, weight: 32 }
-  //     ],
-  //     "腿推": [
-  //       { count: 20, weight: 100 },
-  //       { count: 18, weight: 110 },
-  //       { count: 15, weight: 120 }
-  //     ]
-  //   }
+    // "2025-09-29": {
+    //   "懸吊": [
+    //     { count: 15, weight: 70 },
+    //     { count: 14, weight: 70 },
+    //     { count: 12, weight: 70 }
+    //   ],
+    //   "單啞鈴肩前束": [
+    //     { count: 13, weight: 25 },
+    //     { count: 10, weight: 25 },
+    //     { count: 8, weight: 25 },
+    //   ],
+    //   "啞鈴肩中束水平飛鳥": [
+    //     { count: 11, weight: 20 },
+    //     { count: 9, weight: 20 },
+    //     { count: 7, weight: 20 },
+    //   ],
+    //   "啞鈴肩後束飛鳥": [
+    //     { count: 12, weight: 20 },
+    //     { count: 9, weight: 20 },
+    //     { count: 7, weight: 20 },
+    //   ],
+    //   "下腹靠背抬腿": [
+    //     { count: 14, weight: 30 },
+    //     { count: 11, weight: 30 },
+    //   ],
+    // },
   // }
-  //
   // baseStore.weightedRecords.value = {
-  //   "2025-09-23": 2850, // 根據動作計算的加權總量
-  //   "2025-09-24": 2420,
-  //   "2025-09-25": 3180
+  //   // "2025-09-28": 4305.2,
+  //   // "2025-09-29": 160 
   // }
-  //
   // baseStore.scores.value = {
-  //   "2025-09-23": 85,
-  //   "2025-09-24": 78,
-  //   "2025-09-25": 92
+  //   // "2025-09-27": 0,
+  //   // "2025-09-28": 10,
+  //   // "2025-09-29": 5
   // }
 
   return {

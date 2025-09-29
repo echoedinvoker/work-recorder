@@ -9,7 +9,6 @@
 
   <AProgressBar :data-provider="store" class="mb-4" />
   <LineChart :data-provider="store" /> 
-
   </ToggleButton>
 </template>
 
