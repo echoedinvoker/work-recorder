@@ -9,14 +9,19 @@ interface BaseActivityStoreOptions<T> {
   absencePenalty: number
   getScoreChange: (ratio: number) => number
   calculateWeightedRecord: (record: T) => number
+  updateRecord?: (
+    records: Ref<{ [date: string]: T }>,
+    ...args: any[]
+  ) => void
   calculateFromRecords?: (
     records: Ref<{ [date: string]: T }>,
     weightedRecords: Ref<{ [date: string]: number }>,
     scores: Ref<{ [date: string]: number }>,
     ratios: Ref<{ [date: string]: number }>,
     ratioIncrements: Ref<{ [date: string]: number }>,
-    todayKey: string
+    dayKey?: string
   ) => void
+
   chartConfig: {
     left: {
       unit: string
@@ -215,6 +220,18 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
   })
 
   // Methods
+  const addRecord = (...args: any[]) => {
+    if (!options.updateRecord || !options.calculateFromRecords) return
+    options.updateRecord(records, ...args)
+    options.calculateFromRecords(
+      records,
+      weightedRecords,
+      scores,
+      ratios,
+      ratioIncrements,
+    )
+  }
+      
   const updateScoreAndRatio = (additionalWeightedRecord: number) => {
 
     const todayKey = getTodayKey()
@@ -403,6 +420,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     scoreDiffFromYesterday,
 
     // Methods
+    addRecord,
     updateScoreAndRatio,
     getRawRecordByDate,
     getScoreByDate,

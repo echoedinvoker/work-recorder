@@ -17,6 +17,21 @@ interface WorkoutRecord {
 }
 
 export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
+  const updateRecord = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    activity: string,
+    count: number,
+    weight: number,
+    dateKey: string = getTodayKey()
+  ) => {
+    if (!records.value[dateKey]) {
+      records.value[dateKey] = {}
+    }
+    if (!records.value[dateKey][activity]) {
+      records.value[dateKey][activity] = []
+    }
+    records.value[dateKey][activity].push({ count, weight })
+  }
   const recalculateFromRecords = (
     records: Ref<{ [date: string]: WorkoutRecord }>,
     weightedRecords: Ref<{ [date: string]: number }>,
@@ -52,6 +67,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     absencePenalty: SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY,
     getScoreChange: getWorkoutScoreChange,
     calculateWeightedRecord: () => 0, // 重訓的計算邏輯較複雜，在下面單獨處理
+    updateRecord,
     calculateFromRecords: recalculateFromRecords,
     chartConfig: {
       left: {
@@ -161,21 +177,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   }
 
   // helper functions
-  const updateRecord = (
-    records: Ref<{ [date: string]: WorkoutRecord }>,
-    activity: string,
-    count: number,
-    weight: number,
-    dateKey: string = getTodayKey()
-  ) => {
-    if (!records.value[dateKey]) {
-      records.value[dateKey] = {}
-    }
-    if (!records.value[dateKey][activity]) {
-      records.value[dateKey][activity] = []
-    }
-    records.value[dateKey][activity].push({ count, weight })
-  }
   const calculateActivityWeights = (
     records: Ref<{ [date: string]: WorkoutRecord }>,
     todayKey: string
@@ -335,7 +336,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   }
 
   // Mock data
-  baseStore.records.value = mockData
+  // baseStore.records.value = mockData
 
   return {
     ...baseStore,

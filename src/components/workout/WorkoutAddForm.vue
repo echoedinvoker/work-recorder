@@ -186,17 +186,11 @@ const handleSubmit = () => {
   const workout = selectWorkout.value || inputWorkout.value;
 
   if (workout && inputNumber.value && inputWeight.value) {
-    workoutStore.addOneSet(
+    workoutStore.addRecord(
       workout,
       inputNumber.value,
       inputWeight.value
     );
-    // workoutStore.addRecord({
-    //   [workout]: [{
-    //     count: inputNumber.value,
-    //     weight: inputWeight.value
-    //   }]
-    // });
 
     toggleForm();
     cancelForm();
