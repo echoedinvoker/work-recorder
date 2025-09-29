@@ -17,6 +17,34 @@ interface WorkoutRecord {
 }
 
 export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
+  const recalculateFromRecords = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    weightedRecords: Ref<{ [date: string]: number }>,
+    scores: Ref<{ [date: string]: number }>,
+    ratios: Ref<{ [date: string]: number }>,
+    ratioIncrements: Ref<{ [date: string]: number }>,
+    todayKey: string = getTodayKey()
+  ) => {
+    const allActivityWeights = calculateActivityWeights(
+      records,
+      todayKey
+    )
+    recalculateAllWeightedRecords(
+      records,
+      weightedRecords,
+      allActivityWeights
+    )
+    recalculateAllScores(
+      todayKey,
+      records,
+      weightedRecords,
+      scores,
+      ratios,
+      ratioIncrements,
+      allActivityWeights
+    )
+  }
+
   // 使用通用 composable
   const baseStore = useActivityStore<WorkoutRecord>({
     title: '重訓',
@@ -24,6 +52,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     absencePenalty: SCORING_CONSTANTS.WORKOUT.ABSENCE_PENALTY,
     getScoreChange: getWorkoutScoreChange,
     calculateWeightedRecord: () => 0, // 重訓的計算邏輯較複雜，在下面單獨處理
+    calculateFromRecords: recalculateFromRecords,
     chartConfig: {
       left: {
         unit: '分',
@@ -115,7 +144,12 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   const addOneSet = (activity: string, count: number, weight: number) => {
     const todayKey = getTodayKey()
 
-    updateTodayRecord(todayKey, activity, count, weight)
+    updateRecord(
+      baseStore.records,
+      activity,
+      count,
+      weight
+    )
     recalculateFromRecords(
       baseStore.records,
       baseStore.weightedRecords,
@@ -125,43 +159,22 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
       todayKey
     )
   }
-  const recalculateFromRecords = (
-    records: Ref<{ [date: string]: WorkoutRecord }>,
-    weightedRecords: Ref<{ [date: string]: number }>,
-    scores: Ref<{ [date: string]: number }>,
-    ratios: Ref<{ [date: string]: number }>,
-    ratioIncrements: Ref<{ [date: string]: number }>,
-    todayKey: string = getTodayKey()
-  ) => {
-    const allActivityWeights = calculateActivityWeights(
-      records,
-      todayKey
-    )
-    recalculateAllWeightedRecords(
-      records,
-      weightedRecords,
-      allActivityWeights
-    )
-    recalculateAllScores(
-      todayKey,
-      records,
-      weightedRecords,
-      scores,
-      ratios,
-      ratioIncrements,
-      allActivityWeights
-    )
-  }
 
   // helper functions
-  const updateTodayRecord = (todayKey: string, activity: string, count: number, weight: number) => {
-    if (!baseStore.records.value[todayKey]) {
-      baseStore.records.value[todayKey] = {}
+  const updateRecord = (
+    records: Ref<{ [date: string]: WorkoutRecord }>,
+    activity: string,
+    count: number,
+    weight: number,
+    dateKey: string = getTodayKey()
+  ) => {
+    if (!records.value[dateKey]) {
+      records.value[dateKey] = {}
     }
-    if (!baseStore.records.value[todayKey][activity]) {
-      baseStore.records.value[todayKey][activity] = []
+    if (!records.value[dateKey][activity]) {
+      records.value[dateKey][activity] = []
     }
-    baseStore.records.value[todayKey][activity].push({ count, weight })
+    records.value[dateKey][activity].push({ count, weight })
   }
   const calculateActivityWeights = (
     records: Ref<{ [date: string]: WorkoutRecord }>,

@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { formatDateToKey, getTodayKey } from '@/utils/dateUtils'
 import { SCORING_CONSTANTS } from '@/constants/scoringConstants'
+import type { Ref } from 'vue'
 
 interface BaseActivityStoreOptions<T> {
   title: string
@@ -8,6 +9,14 @@ interface BaseActivityStoreOptions<T> {
   absencePenalty: number
   getScoreChange: (ratio: number) => number
   calculateWeightedRecord: (record: T) => number
+  calculateFromRecords?: (
+    records: Ref<{ [date: string]: T }>,
+    weightedRecords: Ref<{ [date: string]: number }>,
+    scores: Ref<{ [date: string]: number }>,
+    ratios: Ref<{ [date: string]: number }>,
+    ratioIncrements: Ref<{ [date: string]: number }>,
+    todayKey: string
+  ) => void
   chartConfig: {
     left: {
       unit: string
