@@ -191,6 +191,12 @@ const handleSubmit = () => {
       inputNumber.value,
       inputWeight.value
     );
+    // workoutStore.addRecord({
+    //   [workout]: [{
+    //     count: inputNumber.value,
+    //     weight: inputWeight.value
+    //   }]
+    // });
 
     toggleForm();
     cancelForm();

@@ -15,12 +15,10 @@
         <span v-if="previousActivityName && isOnOverviewPage" class="flex items-center gap-2">
           <!-- 返回活動頁面 -->
           <component :is="previousActivityName.meta.icon" class="w-4 h-4" />
-          <span class="hidden sm:inline">{{ previousActivityName.meta.title }}</span>
         </span>
         <span v-else class="flex items-center gap-2">
           <!-- 切換到概覽頁面 -->
           <BarChart3 :size="16" :class="isOnOverviewPage ? '' : 'transition-transform group-hover:scale-110'" />
-          <span class="hidden sm:inline">概覽</span>
         </span>
       </button>
 
@@ -34,7 +32,6 @@
                active:scale-95 flex items-center gap-2 shadow-md"
       >
         <Download :size="16" class="transition-transform group-hover:scale-110" />
-        <span class="hidden sm:inline">匯出</span>
       </button>
 
       <!-- 使用說明按鈕 (只在非首頁顯示) -->
@@ -46,7 +43,6 @@
                active:scale-95 flex items-center gap-2 shadow-md"
       >
         <HelpCircle :size="16" class="transition-transform group-hover:scale-110" />
-        <span class="hidden sm:inline">說明</span>
       </button>
 
       <!-- 清除資料按鈕 -->
@@ -59,7 +55,6 @@
         :title="clearButtonTitle"
       >
         <Trash2 :size="16" class="transition-transform group-hover:scale-110" />
-        <span class="hidden sm:inline">清除</span>
       </button>
     </div>
   </nav>

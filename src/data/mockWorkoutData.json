@@ -1,0 +1,138 @@
+{
+  "2025-09-28": {
+    "懸吊": [
+      {
+        "count": 13,
+        "weight": 70
+      },
+      {
+        "count": 10,
+        "weight": 70
+      },
+      {
+        "count": 7,
+        "weight": 70
+      }
+    ],
+    "硬舉": [
+      {
+        "count": 15,
+        "weight": 40
+      },
+      {
+        "count": 10,
+        "weight": 40
+      },
+      {
+        "count": 7,
+        "weight": 40
+      }
+    ],
+    "機械下拉": [
+      {
+        "count": 15,
+        "weight": 31.8
+      },
+      {
+        "count": 10,
+        "weight": 31.8
+      },
+      {
+        "count": 7,
+        "weight": 31.8
+      }
+    ],
+    "機械低划船": [
+      {
+        "count": 15,
+        "weight": 31.8
+      },
+      {
+        "count": 10,
+        "weight": 31.8
+      },
+      {
+        "count": 7,
+        "weight": 31.8
+      }
+    ],
+    "啞鈴直立二頭彎舉": [
+      {
+        "count": 15,
+        "weight": 30
+      },
+      {
+        "count": 10,
+        "weight": 30
+      },
+      {
+        "count": 7,
+        "weight": 30
+      }
+    ]
+  },
+  "2025-09-29": {
+    "懸吊": [
+      {
+        "count": 15,
+        "weight": 70
+      },
+      {
+        "count": 14,
+        "weight": 70
+      },
+      {
+        "count": 12,
+        "weight": 70
+      }
+    ],
+    "單啞鈴肩前束": [
+      {
+        "count": 13,
+        "weight": 25
+      },
+      {
+        "count": 10,
+        "weight": 25
+      },
+      {
+        "count": 8,
+        "weight": 25
+      }
+    ],
+    "啞鈴肩中束水平飛鳥": [
+      {
+        "count": 11,
+        "weight": 20
+      },
+      {
+        "count": 9,
+        "weight": 20
+      },
+      {
+        "count": 7,
+        "weight": 20
+      }
+    ],
+    "啞鈴肩後束飛鳥": [
+      {
+        "count": 12,
+        "weight": 20
+      },
+      {
+        "count": 9,
+        "weight": 20
+      },
+      {
+        "count": 7,
+        "weight": 20
+      }
+    ],
+    "下腹靠背抬腿": [
+      {
+        "count": 14,
+        "weight": 30
+      }
+    ]
+  }
+}
