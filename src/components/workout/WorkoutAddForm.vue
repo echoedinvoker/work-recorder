@@ -7,7 +7,7 @@
         color="gray" 
         text="取消選擇"
         class="!px-3 !py-2 !text-sm !font-normal"
-        @click="selectWorkout = ''" />
+        @click="cancelForm" />
       <FormInput type="select" v-model="selectWorkout" :options="activityOptions"
          />
     </div>
@@ -19,7 +19,7 @@
           color="gray" 
           text="取消新增"
           class="!px-3 !py-2 !text-sm !font-normal"
-          @click="inputWorkout = ''" />
+          @click="cancelForm" />
         <FormInput v-model="inputWorkout" type="text" placeholder="輸入動作名稱" />
       </div>
     </template>
@@ -27,21 +27,22 @@
       <FormInput type="number" placeholder="輸入次數" v-model="inputNumber" />
       <FormInput type="number" placeholder="輸入重量" v-model="inputWeight" />
     </div>
-    <div class="grid grid-cols-2 gap-3" v-if="(inputWorkout || selectWorkout) && inputNumber && inputWeight">
-      <BaseButton type="button" color="gray" text="清除"
-        @click="() => { inputWorkout = ''; selectWorkout = ''; inputNumber = undefined; inputWeight = undefined; }" />
-      <BaseButton type="submit" color="green" text="新增紀錄" />
-    </div>
   </TheForm>
 
   <!-- 最近記錄清單 -->
   <div v-if="recentSets.length > 0" class="mt-6">
-    <h3 class="text-lg font-semibold mb-3 text-gray-700">最近記錄</h3>
+    <h3 class="text-lg font-semibold mb-3 text-gray-700">
+      {{ !selectWorkout && !inputWorkout ? '今天的紀錄' : '最近記錄' }}
+    </h3>
     <div class="space-y-2">
-      <div v-for="(set, index) in recentSets" :key="`${set.date}-${index}`"
-        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-        <!-- 左側：次數和重量 -->
+      <div v-for="(set, index) in recentSets" :key="`${set.date}-${set.activity}-${index}`"
+        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+        @click="fillFormWithSet(set)">
+        <!-- 左側：動作名稱（當顯示今天紀錄時） -->
         <div class="flex items-center space-x-4">
+          <div v-if="!selectWorkout && !inputWorkout" class="text-sm font-medium text-gray-700 min-w-0 flex-shrink-0">
+            {{ set.activity }}
+          </div>
           <div class="flex items-center space-x-1">
             <span class="text-lg font-bold text-blue-600">{{ set.count }}</span>
             <span class="text-sm text-gray-500">次</span>
@@ -64,16 +65,16 @@
 
 <script setup lang="ts">
 import TheForm from '../ui/TheForm.vue';
-import FormInput from '../ui/FormInput.vue'; // 引入新的 FormInput 組件
+import FormInput from '../ui/FormInput.vue';
 import BaseButton from '../ui/BaseButton.vue';
 import { ref, computed } from 'vue';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
 import { useToggleButton } from '@/composables/useToggleButton';
 
-const inputWorkout = ref(''); // 用於綁定輸入框的值
-const selectWorkout = ref(''); // 用於綁定下拉選單的值
-const inputNumber = ref<number | undefined>(undefined); // 用於綁定次數輸入框的值
-const inputWeight = ref<number | undefined>(undefined); // 用於綁定重量輸入框的值
+const inputWorkout = ref('');
+const selectWorkout = ref('');
+const inputNumber = ref<number | undefined>(undefined);
+const inputWeight = ref<number | undefined>(undefined);
 
 const workoutStore = useDailyWorkoutStore();
 const { toggleForm } = useToggleButton('workout');
@@ -88,9 +89,30 @@ const activityOptions = computed(() =>
 const recentSets = computed(() => {
   const currentActivity = selectWorkout.value || inputWorkout.value;
 
-  if (!currentActivity) return [];
+  // 如果沒有選擇動作，顯示今天的所有紀錄
+  if (!currentActivity) {
+    const today = new Date().toISOString().split('T')[0];
+    const todayRecord = workoutStore.records[today];
+    
+    if (!todayRecord) return [];
 
-  // 收集所有有該動作記錄的日期
+    const allSets: Array<{ count: number; weight: number; date: string; activity: string }> = [];
+    
+    Object.entries(todayRecord).forEach(([activity, sets]) => {
+      sets.forEach(set => {
+        allSets.push({
+          ...set,
+          date: today,
+          activity
+        });
+      });
+    });
+
+    // 按時間順序排序（最新的在前）
+    return allSets.reverse();
+  }
+
+  // 原有邏輯：顯示特定動作的最近紀錄
   const datesWithActivity: string[] = [];
 
   Object.entries(workoutStore.records).forEach(([date, dayRecord]) => {
@@ -99,13 +121,11 @@ const recentSets = computed(() => {
     }
   });
 
-  // 按日期排序（最新的在前）並取前 3 個日期
   const recentDates = datesWithActivity
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
     .slice(0, 3);
 
-  // 收集這 3 個日期的所有 sets
-  const allSets: Array<{ count: number; weight: number; date: string }> = [];
+  const allSets: Array<{ count: number; weight: number; date: string; activity: string }> = [];
 
   recentDates.forEach(date => {
     const dayRecord = workoutStore.records[date];
@@ -113,34 +133,47 @@ const recentSets = computed(() => {
       dayRecord[currentActivity].forEach(set => {
         allSets.push({
           ...set,
-          date
+          date,
+          activity: currentActivity
         });
       });
     }
   });
 
-  // 按日期排序（最新的在前）
   return allSets.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 });
 
-// 格式化日期顯示
+// 點擊紀錄帶入資料
+const fillFormWithSet = (set: { count: number; weight: number; activity: string }) => {
+  // 如果當前沒有選擇動作，則設定動作
+  if (!selectWorkout.value && !inputWorkout.value) {
+    // 檢查是否為已存在的動作
+    if (workoutStore.activityList.includes(set.activity)) {
+      selectWorkout.value = set.activity;
+    } else {
+      inputWorkout.value = set.activity;
+    }
+  }
+  
+  // 帶入次數和重量
+  inputNumber.value = set.count;
+  inputWeight.value = set.weight;
+};
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  // 檢查是否為今天
   if (date.toDateString() === today.toDateString()) {
     return '今天';
   }
 
-  // 檢查是否為昨天
   if (date.toDateString() === yesterday.toDateString()) {
     return '昨天';
   }
 
-  // 其他日期顯示月/日格式
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
 
@@ -155,12 +188,15 @@ const handleSubmit = () => {
     );
 
     toggleForm();
-
-    // 清空表單
-    // inputWorkout.value = '';
-    // selectWorkout.value = '';
-    // inputNumber.value = undefined;
-    // inputWeight.value = undefined;
+    cancelForm();
   }
 };
+
+const cancelForm = () => {
+  inputWorkout.value = '';
+  selectWorkout.value = '';
+  inputNumber.value = undefined;
+  inputWeight.value = undefined;
+};
 </script>
+
