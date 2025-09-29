@@ -32,7 +32,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     }
     records.value[dateKey][activity].push({ count, weight })
   }
-  const recalculateFromRecords = (
+  const calculateFromRecords = (
     records: Ref<{ [date: string]: WorkoutRecord }>,
     weightedRecords: Ref<{ [date: string]: number }>,
     scores: Ref<{ [date: string]: number }>,
@@ -68,7 +68,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     getScoreChange: getWorkoutScoreChange,
     calculateWeightedRecord: () => 0, // 重訓的計算邏輯較複雜，在下面單獨處理
     updateRecord,
-    calculateFromRecords: recalculateFromRecords,
+    calculateFromRecords,
     chartConfig: {
       left: {
         unit: '分',
@@ -157,24 +157,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   })
 
   // methods
-  const addOneSet = (activity: string, count: number, weight: number) => {
-    const todayKey = getTodayKey()
-
-    updateRecord(
-      baseStore.records,
-      activity,
-      count,
-      weight
-    )
-    recalculateFromRecords(
-      baseStore.records,
-      baseStore.weightedRecords,
-      baseStore.scores,
-      baseStore.ratios,
-      baseStore.ratioIncrements,
-      todayKey
-    )
-  }
 
   // helper functions
   const calculateActivityWeights = (
@@ -336,7 +318,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   }
 
   // Mock data
-  // baseStore.records.value = mockData
+  baseStore.records.value = mockData
 
   return {
     ...baseStore,
@@ -344,8 +326,6 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     activityList,
     pastAverageWeightByActivity,
     activityWeights,
-    // 重訓特定的方法
-    addOneSet
   }
 }, {
   persist: {
