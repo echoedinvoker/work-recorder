@@ -27,6 +27,7 @@
       <FormInput type="number" placeholder="輸入次數" v-model="inputNumber" />
       <FormInput type="number" placeholder="輸入重量" v-model="inputWeight" />
     </div>
+    <BaseButton v-if="isAllFieldsFilled" type="submit" color="blue" text="新增紀錄" class="w-full mt-4" />
   </TheForm>
 
   <!-- 最近記錄清單 -->
@@ -85,6 +86,10 @@ const activityOptions = computed(() =>
     label: activity
   }))
 );
+
+const isAllFieldsFilled = computed(() => {
+  return (inputWorkout.value || selectWorkout.value) && inputNumber.value !== undefined && inputWeight.value !== undefined;
+});
 
 const recentSets = computed(() => {
   const currentActivity = selectWorkout.value || inputWorkout.value;
