@@ -8,8 +8,7 @@
         text="取消選擇"
         class="!px-3 !py-2 !text-sm !font-normal"
         @click="cancelForm" />
-      <FormInput type="select" v-model="selectWorkout" :options="activityOptions"
-         />
+      <FormInput type="select" v-model="selectWorkout" :options="activityOptions" />
     </div>
     <template v-if="!selectWorkout">
       <div class="grid grid-cols-[1fr_2fr] gap-2 items-center">
@@ -31,15 +30,15 @@
   </TheForm>
 
   <!-- 最近記錄清單 -->
-  <div v-if="recentSets.length > 0" class="mt-6">
+  <div v-if="displayRecords.length > 0" class="mt-6">
     <h3 class="text-lg font-semibold mb-3 text-gray-700">
       {{ !selectWorkout && !inputWorkout ? '今天的紀錄' : '最近記錄' }}
     </h3>
     <div class="space-y-2">
-      <div v-for="(set, index) in recentSets" :key="`${set.date}-${set.activity}-${index}`"
+      <div v-for="(set, index) in displayRecords" :key="`${set.date || 'today'}-${set.activity}-${set.id}-${index}`"
         class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
         @click="fillFormWithSet(set)">
-        <!-- 左側：動作名稱（當顯示今天紀錄時） -->
+        <!-- 左側：動作名稱與數據 -->
         <div class="flex items-center space-x-4">
           <div v-if="!selectWorkout && !inputWorkout" class="text-sm font-medium text-gray-700 min-w-0 flex-shrink-0">
             {{ set.activity }}
@@ -57,7 +56,7 @@
 
         <!-- 右側：日期 -->
         <div class="text-sm text-gray-400">
-          {{ formatDate(set.date) }}
+          {{ set.date || '今天' }}
         </div>
       </div>
     </div>
@@ -91,61 +90,19 @@ const isAllFieldsFilled = computed(() => {
   return (inputWorkout.value || selectWorkout.value) && inputNumber.value !== undefined && inputWeight.value !== undefined;
 });
 
-const recentSets = computed(() => {
+// 使用 store 的 getter 來取得顯示的紀錄
+const displayRecords = computed(() => {
   const currentActivity = selectWorkout.value || inputWorkout.value;
 
-  // 如果沒有選擇動作，顯示今天的所有紀錄
+  // 沒有選擇動作時，顯示今天的所有紀錄
   if (!currentActivity) {
-    const today = new Date().toISOString().split('T')[0];
-    const todayRecord = workoutStore.records[today];
-    
-    if (!todayRecord) return [];
-
-    const allSets: Array<{ count: number; weight: number; date: string; activity: string }> = [];
-    
-    Object.entries(todayRecord).forEach(([activity, sets]) => {
-      sets.forEach(set => {
-        allSets.push({
-          ...set,
-          date: today,
-          activity
-        });
-      });
-    });
-
-    // 按時間順序排序（最新的在前）
-    return allSets.reverse();
+    return workoutStore.sortedTodayRecords;
   }
 
-  // 原有邏輯：顯示特定動作的最近紀錄
-  const datesWithActivity: string[] = [];
-
-  Object.entries(workoutStore.records).forEach(([date, dayRecord]) => {
-    if (dayRecord[currentActivity] && dayRecord[currentActivity].length > 0) {
-      datesWithActivity.push(date);
-    }
-  });
-
-  const recentDates = datesWithActivity
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-    .slice(0, 3);
-
-  const allSets: Array<{ count: number; weight: number; date: string; activity: string }> = [];
-
-  recentDates.forEach(date => {
-    const dayRecord = workoutStore.records[date];
-    if (dayRecord[currentActivity]) {
-      dayRecord[currentActivity].forEach(set => {
-        allSets.push({
-          ...set,
-          date,
-          activity: currentActivity
-        });
-      });
-    }
-  });
-
-  return allSets.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // 有選擇動作時，過濾最近紀錄中該動作的紀錄，並限制顯示數量
+  return workoutStore.sortedRecentRecords
+    .filter(record => record.activity === currentActivity)
+    .slice(0, 10); // 限制顯示最近 10 筆
 });
 
 // 點擊紀錄帶入資料
@@ -163,23 +120,6 @@ const fillFormWithSet = (set: { count: number; weight: number; activity: string 
   // 帶入次數和重量
   inputNumber.value = set.count;
   inputWeight.value = set.weight;
-};
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (date.toDateString() === today.toDateString()) {
-    return '今天';
-  }
-
-  if (date.toDateString() === yesterday.toDateString()) {
-    return '昨天';
-  }
-
-  return `${date.getMonth() + 1}/${date.getDate()}`;
 };
 
 const handleSubmit = () => {

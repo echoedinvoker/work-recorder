@@ -51,6 +51,10 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     if (dateKeys.length === 0) return getTodayKey()
     return dateKeys.sort()[0]
   })
+  const todayRecords = computed<T | null>(() => {
+    const todayKey = getTodayKey()
+    return records.value[todayKey] || null
+  })
   const pastRecords = computed<{ [date: string]: T }>(() => {
     const todayKey = getTodayKey()
     const filteredRecords: { [date: string]: T } = {}
@@ -448,6 +452,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
 
     // Computed
     firstDateKey,
+    todayRecords,
     pastRecords,
     pastWeightedRecords,
     maxPastWeightedRecord,

@@ -157,6 +157,66 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
 
     return weights
   })
+  const sortedRecentRecords = computed(() => {
+    // 取近10天紀錄
+    const sortedRecordsByDate: { [date: string]: WorkoutRecord } = {}
+    Object.keys(baseStore.records.value).sort((a, b) => (a < b ? 1 : -1)).slice(0, 10).forEach(dateKey => {
+      sortedRecordsByDate[dateKey] = baseStore.records.value[dateKey]
+    })
+    const sortedRecords: { date: string; id: number; activity: string; count: number; weight: number }[] = []
+    Object.entries(sortedRecordsByDate).forEach(([date, dayRecord]) => {
+      Object.entries(dayRecord).forEach(([activity, sets]) => {
+        sets.forEach(set => {
+          sortedRecords.push({
+            date,
+            id: set.id || 0,
+            activity,
+            count: set.count,
+            weight: set.weight
+          })
+        })
+      })
+    })
+    sortedRecords.sort((a, b) => {
+      if (a.date === b.date) {
+        return b.id - a.id
+      }
+      return a.date < b.date ? 1 : -1
+    })
+    // turn date key to '今天', '昨天' if applicable
+    const todayKey = getTodayKey()
+    const yesterdayKey = formatDateToKey(new Date(new Date().getTime() - 24 * 60 * 60 * 1000))
+    sortedRecords.forEach(record => {
+      if (record.date === todayKey) {
+        record.date = '今天'
+      } else if (record.date === yesterdayKey) {
+        record.date = '昨天'
+      }
+    })
+    return sortedRecords
+  })
+  const sortedTodayRecords = computed(() => {
+    if (!baseStore.todayRecords.value) return []
+
+    const sortedRecords: { id: number; activity: string; count: number; weight: number }[] = []
+
+    Object.entries(baseStore.todayRecords.value).forEach(([activity, sets]) => {
+      sets.forEach(set => {
+        sortedRecords.push({
+          id: set.id || 0,
+          activity,
+          count: set.count,
+          weight: set.weight
+        })
+      })
+    })
+
+    sortedRecords.sort((a, b) => {
+      return b.id - a.id
+    })
+
+    return sortedRecords
+  })
 
   // methods
 
@@ -328,6 +388,8 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     activityList,
     pastAverageWeightByActivity,
     activityWeights,
+    sortedRecentRecords,
+    sortedTodayRecords
   }
 }, {
   persist: {
