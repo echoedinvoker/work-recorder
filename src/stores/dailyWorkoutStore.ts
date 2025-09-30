@@ -198,7 +198,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
   const sortedTodayRecords = computed(() => {
     if (!baseStore.todayRecords.value) return []
 
-    const sortedRecords: { id: number; activity: string; count: number; weight: number }[] = []
+    const sortedRecords: { id: number; activity: string; count: number; weight: number; date: string }[] = []
 
     Object.entries(baseStore.todayRecords.value).forEach(([activity, sets]) => {
       sets.forEach(set => {
@@ -206,7 +206,8 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
           id: set.id || 0,
           activity,
           count: set.count,
-          weight: set.weight
+          weight: set.weight,
+          date: '今天'
         })
       })
     })

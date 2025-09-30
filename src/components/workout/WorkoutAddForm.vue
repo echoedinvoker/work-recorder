@@ -35,7 +35,7 @@
       {{ !selectWorkout && !inputWorkout ? '今天的紀錄' : '最近記錄' }}
     </h3>
     <div class="space-y-2">
-      <div v-for="(set, index) in displayRecords" :key="`${set.date || 'today'}-${set.activity}-${set.id}-${index}`"
+      <div v-for="(set, index) in displayRecords" :key="`${set.activity}-${set.id}-${index}`"
         class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
         @click="fillFormWithSet(set)">
         <!-- 左側：動作名稱與數據 -->
@@ -55,7 +55,7 @@
         </div>
 
         <!-- 右側：日期 -->
-        <div class="text-sm text-gray-400">
+        <div class="text-sm text-gray-400" v-if="selectWorkout || inputWorkout">
           {{ set.date || '今天' }}
         </div>
       </div>
