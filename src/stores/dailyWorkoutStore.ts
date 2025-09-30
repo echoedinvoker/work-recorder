@@ -112,7 +112,7 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
         }
         sets.forEach(set => {
           for (let i = 0; i < set.count; i++) {
-            pastActivityWeights[activity].push(set.weight)
+            pastActivityWeights[activity].push(Number(set.weight))
           }
         })
       })
