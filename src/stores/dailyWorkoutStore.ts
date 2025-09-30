@@ -11,6 +11,7 @@ import type { Ref } from "vue";
 
 interface WorkoutRecord {
   [activity: string]: {
+    id?: number;
     count: number;
     weight: number;
   }[];
@@ -30,7 +31,8 @@ export const useDailyWorkoutStore = defineStore("dailyWorkout", () => {
     if (!records.value[dateKey][activity]) {
       records.value[dateKey][activity] = []
     }
-    records.value[dateKey][activity].push({ count, weight })
+    const id = new Date().getTime()
+    records.value[dateKey][activity].push({ id, count, weight })
   }
   const calculateFromRecords = (
     records: Ref<{ [date: string]: WorkoutRecord }>,
