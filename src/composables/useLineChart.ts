@@ -139,19 +139,27 @@ export function useLineChart(dataProvider: DataProvider) {
       [ChartPeriod.Day]: 'getValueByDate',
       [ChartPeriod.Week]: 'getValueByWeek',
       [ChartPeriod.Month]: 'getValueByMonth'
-    }[period.value] as keyof DataProvider['left']['data'][string]
+    }[period.value] as 'getValueByDate' | 'getValueByWeek' | 'getValueByMonth'
 
     // 獲取左軸數據
     const leftValues: { [name: string]: number } = {}
     Object.keys(dataProvider.left.data).forEach(name => {
-      leftValues[name] = dataProvider.left.data[name][getValueMethod](date)
+      const dataConfig = dataProvider.left.data[name]
+      const getValue = dataConfig[getValueMethod]
+      if (typeof getValue === 'function') {
+        leftValues[name] = getValue(date)
+      }
     })
 
     // 獲取右軸數據
     const rightValues: { [name: string]: number } = {}
     if (dataProvider.right) {
       Object.keys(dataProvider.right.data).forEach(name => {
-        rightValues[name] = dataProvider.right!.data[name][getValueMethod](date)
+        const dataConfig = dataProvider.right!.data[name]
+        const getValue = dataConfig[getValueMethod]
+        if (typeof getValue === 'function') {
+          rightValues[name] = getValue(date)
+        }
       })
     }
 
