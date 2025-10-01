@@ -79,16 +79,16 @@ const store = useDailyHungryStore();
 const hungryLevels = {
   '很餓': 2,
   '偏餓': 1,
-  '偏飽': -2,
-  '很飽': -3
+  '偏飽': -1,
+  '很飽': -2
 };
 
 // 根據 level 獲取對應的顏色類別
 const getColorClass = (level: number | undefined) => {
   if (level === 2) return 'bg-red-500 hover:bg-red-600';
   if (level === 1) return 'bg-orange-500 hover:bg-orange-600';
-  if (level === -2) return 'bg-blue-500 hover:bg-blue-600';
-  if (level === -3) return 'bg-green-500 hover:bg-green-600';
+  if (level === -1) return 'bg-blue-500 hover:bg-blue-600';
+  if (level === -2) return 'bg-green-500 hover:bg-green-600';
   return 'bg-gray-500 hover:bg-gray-600';
 };
 

@@ -33,17 +33,27 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
           '飢餓程度': {
             getValueByDate: (date: Date) => baseStore.getRawRecordByDate(date)?.level,
             getValueByWeek: (week: Date) => getMostFrequentLevelByWeek(week),
-            getValueByMonth: (month: Date) => getMostFrequentLevelByMonth(month)
+            getValueByMonth: (month: Date) => getMostFrequentLevelByMonth(month),
+            isDiscrete: true,
+            discreteValues: [2, 1, 0, -1, -2],
+            discreteLabels: {
+              2: '很餓',
+              1: '偏餓',
+              0: '正常',
+              [-1]: '偏飽',  // 負數 key 需要用方括號
+              [-2]: '很飽'
+            } as Record<number, string>
           }
         },
         formatValue: (level: number) => {
-          switch(level) {
-            case 2: return '很餓';
-            case 1: return '偏餓';
-            case -1: return '偏飽';
-            case -2: return '很飽';
-            default: return '';
+          const labels: Record<number, string> = {
+            2: '很餓',
+            1: '偏餓',
+            0: '正常',
+            [-1]: '偏飽',
+            [-2]: '很飽'
           }
+          return labels[level] || ''
         }
       }
     },

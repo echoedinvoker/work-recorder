@@ -5,21 +5,19 @@
       <div v-if="hasVisibleLeftLegends"
         class="absolute left-0 top-0 flex flex-col justify-between text-xs text-gray-500 pr-2"
         :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
-        <!-- 使用 line-height 確保文字垂直居中對齊 -->
-        <span class="leading-none">{{ formatValue(leftYAxisMax, 'left') }}</span>
-        <span class="leading-none">{{ formatValue(Math.round(leftYAxisMax * 0.67), 'left') }}</span>
-        <span class="leading-none">{{ formatValue(Math.round(leftYAxisMax * 0.33), 'left') }}</span>
-        <span class="leading-none">{{ formatValue(0, 'left') }}</span>
+        <!-- 動態生成 Y 軸標籤 -->
+        <span v-for="(label, index) in leftYAxisLabels" :key="`left-${index}`" class="leading-none">
+          {{ label }}
+        </span>
       </div>
 
       <!-- 右軸標籤 (如果有右軸數據且有可見圖例) -->
       <div v-if="dataProvider.right && hasVisibleRightLegends"
         class="absolute right-0 top-0 flex flex-col justify-between text-xs text-gray-500 pl-2"
         :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
-        <span class="leading-none">{{ formatValue(rightYAxisMax, 'right') }}</span>
-        <span class="leading-none">{{ formatValue(Math.round(rightYAxisMax * 0.67), 'right') }}</span>
-        <span class="leading-none">{{ formatValue(Math.round(rightYAxisMax * 0.33), 'right') }}</span>
-        <span class="leading-none">{{ formatValue(0, 'right') }}</span>
+        <span v-for="(label, index) in rightYAxisLabels" :key="`right-${index}`" class="leading-none">
+          {{ label }}
+        </span>
       </div>
 
       <!-- 圖表區域 -->
@@ -35,21 +33,20 @@
         <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
           <!-- 左軸數據線條 -->
           <g v-for="(dataName, index) in Object.keys(dataProvider.left.data)" :key="`left-${dataName}`">
-            <!-- 只顯示可見的圖例 -->
             <template v-if="isLeftLegendVisible(dataName)">
               <polyline :points="getLeftLinePoints(dataName)" :stroke="leftLineColors[index % leftLineColors.length]"
                 stroke-width="0.8" fill="none" class="transition-all duration-300" />
-              <!-- 數據點 -->
+              <!-- 數據點 - 修正：傳入 dataName 參數 -->
               <circle v-for="(point, pointIndex) in chartData" :key="`left-point-${dataName}-${pointIndex}`"
-                :cx="getXPosition(pointIndex)" :cy="getLeftYPosition(point.leftValues[dataName])" r="1.7"
+                :cx="getXPosition(pointIndex)" :cy="getLeftYPosition(point.leftValues[dataName], dataName)" r="1.7"
                 :fill="leftLineColors[index % leftLineColors.length]"
                 class="hover:r-1.5 transition-all duration-200 cursor-pointer"
                 @mouseenter="showTooltip($event, point, dataName, point.leftValues[dataName], 'left')"
                 @mouseleave="hideTooltip" />
-              <!-- 數值標籤 (如果該圖例設為顯示數值) -->
+              <!-- 數值標籤 - 修正：傳入 dataName 參數 -->
               <text v-if="shouldShowLeftValues(dataName)" v-for="(point, pointIndex) in chartData"
                 :key="`left-value-${dataName}-${pointIndex}`" :x="getXPosition(pointIndex)"
-                :y="getLeftYPosition(point.leftValues[dataName]) - 2" :text-anchor="getTextAnchor(pointIndex)"
+                :y="getLeftYPosition(point.leftValues[dataName], dataName) - 2" :text-anchor="getTextAnchor(pointIndex)"
                 class="text-[5px] font-medium pointer-events-none"
                 :fill="leftLineColors[index % leftLineColors.length]">
                 {{ formatValue(point.leftValues[dataName], 'left') }}
@@ -60,22 +57,21 @@
           <!-- 右軸數據線條 (如果有) -->
           <g v-if="dataProvider.right" v-for="(dataName, index) in Object.keys(dataProvider.right.data)"
             :key="`right-${dataName}`">
-            <!-- 只顯示可見的圖例 -->
             <template v-if="isRightLegendVisible(dataName)">
               <polyline :points="getRightLinePoints(dataName)" :stroke="rightLineColors[index % rightLineColors.length]"
                 stroke-width="0.8" fill="none" stroke-dasharray="2,2" class="transition-all duration-300" />
-              <!-- 數據點 -->
+              <!-- 數據點 - 修正：傳入 dataName 參數 -->
               <circle v-for="(point, pointIndex) in chartData" :key="`right-point-${dataName}-${pointIndex}`"
-                :cx="getXPosition(pointIndex)" :cy="getRightYPosition(point.rightValues?.[dataName] || 0)" r="1.7"
-                :fill="rightLineColors[index % rightLineColors.length]"
+                :cx="getXPosition(pointIndex)" :cy="getRightYPosition(point.rightValues?.[dataName] || 0, dataName)"
+                r="1.7" :fill="rightLineColors[index % rightLineColors.length]"
                 class="hover:r-6 transition-all duration-200 cursor-pointer"
                 @mouseenter="showTooltip($event, point, dataName, point.rightValues?.[dataName] || 0, 'right')"
                 @mouseleave="hideTooltip" />
-              <!-- 數值標籤 (如果該圖例設為顯示數值) -->
+              <!-- 數值標籤 - 修正：傳入 dataName 參數 -->
               <text v-if="shouldShowRightValues(dataName)" v-for="(point, pointIndex) in chartData"
                 :key="`right-value-${dataName}-${pointIndex}`" :x="getXPosition(pointIndex)"
-                :y="getRightYPosition(point.rightValues?.[dataName] || 0) - 2" :text-anchor="getTextAnchor(pointIndex)"
-                class="text-[5px] font-medium pointer-events-none"
+                :y="getRightYPosition(point.rightValues?.[dataName] || 0, dataName) - 2"
+                :text-anchor="getTextAnchor(pointIndex)" class="text-[5px] font-medium pointer-events-none"
                 :fill="rightLineColors[index % rightLineColors.length]">
                 {{ formatValue(point.rightValues?.[dataName] || 0, 'right') }}
               </text>
@@ -173,6 +169,52 @@ const props = defineProps<{
   dataProvider: DataProvider
 }>()
 
+// 計算左軸標籤
+const leftYAxisLabels = computed(() => {
+  const hasDiscreteData = Object.values(dataProvider.left.data).some(config => config.isDiscrete)
+
+  if (hasDiscreteData) {
+    // 為離散數值生成標籤
+    const discreteConfig = Object.values(dataProvider.left.data).find(config => config.isDiscrete)
+    if (discreteConfig?.discreteValues && discreteConfig?.discreteLabels) {
+      // 按數值大小排序，從大到小顯示
+      return discreteConfig.discreteValues
+        .sort((a, b) => b - a)
+        .map(value => discreteConfig.discreteLabels![value] || value.toString())
+    }
+  }
+
+  // 原有的連續數值標籤邏輯
+  return [
+    formatValue(leftYAxisMax.value, 'left'),
+    formatValue(Math.round(leftYAxisMax.value * 0.67), 'left'),
+    formatValue(Math.round(leftYAxisMax.value * 0.33), 'left'),
+    formatValue(0, 'left')
+  ]
+})
+
+// 計算右軸標籤
+const rightYAxisLabels = computed(() => {
+  if (!dataProvider.right) return []
+
+  const hasDiscreteData = Object.values(dataProvider.right.data).some(config => config.isDiscrete)
+
+  if (hasDiscreteData) {
+    const discreteConfig = Object.values(dataProvider.right.data).find(config => config.isDiscrete)
+    if (discreteConfig?.discreteValues && discreteConfig?.discreteLabels) {
+      return discreteConfig.discreteValues
+        .sort((a, b) => b - a)
+        .map(value => discreteConfig.discreteLabels![value] || value.toString())
+    }
+  }
+
+  return [
+    formatValue(rightYAxisMax.value, 'right'),
+    formatValue(Math.round(rightYAxisMax.value * 0.67), 'right'),
+    formatValue(Math.round(rightYAxisMax.value * 0.33), 'right'),
+    formatValue(0, 'right')
+  ]
+})
 // 格式化數值顯示 - 需要區分左軸和右軸
 const formatLeftValue = (value: number) => {
   if (dataProvider.left.formatValue) {
@@ -223,7 +265,9 @@ const {
   isRightLegendVisible,
   shouldShowLeftValues,
   shouldShowRightValues,
-  LegendState
+  LegendState,
+  getLeftYPosition,  // 使用 composable 中的函數
+  getRightYPosition  // 使用 composable 中的函數
 } = useLineChart(props.dataProvider)
 
 // 顏色配置
@@ -281,21 +325,11 @@ const getXPosition = (index: number) => {
   return (index / (chartData.value.length - 1)) * 100  // 返回百分比
 }
 
-const getLeftYPosition = (value: number) => {
-  const percentage = Math.max(0, Math.min(1, (leftYAxisMax.value - value) / leftYAxisMax.value))
-  return percentage * 100  // 返回百分比而非像素
-}
-
-const getRightYPosition = (value: number) => {
-  const percentage = Math.max(0, Math.min(1, (rightYAxisMax.value - value) / rightYAxisMax.value))
-  return percentage * 100  // 返回百分比而非像素
-}
-
 // 生成左軸線條路徑
 const getLeftLinePoints = (dataName: string) => {
   return chartData.value.map((point, index) => {
     const x = getXPosition(index)
-    const y = getLeftYPosition(point.leftValues[dataName])
+    const y = getLeftYPosition(point.leftValues[dataName], dataName)
     return `${x},${y}`
   }).join(' ')
 }
@@ -304,7 +338,7 @@ const getLeftLinePoints = (dataName: string) => {
 const getRightLinePoints = (dataName: string) => {
   return chartData.value.map((point, index) => {
     const x = getXPosition(index)
-    const y = getRightYPosition(point.rightValues?.[dataName] || 0)
+    const y = getRightYPosition(point.rightValues?.[dataName] || 0, dataName)
     return `${x},${y}`
   }).join(' ')
 }

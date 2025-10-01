@@ -24,6 +24,9 @@ export interface DataProvider {
         getValueByDate: (date: Date) => number
         getValueByWeek: (date: Date) => number
         getValueByMonth: (date: Date) => number
+        isDiscrete?: boolean
+        discreteValues?: number[]
+        discreteLabels?: Record<number, string>
       }
     },
     formatValue?: (value: number) => string // 左軸格式化方法
@@ -35,6 +38,9 @@ export interface DataProvider {
         getValueByDate: (date: Date) => number
         getValueByWeek: (date: Date) => number
         getValueByMonth: (date: Date) => number
+        isDiscrete?: boolean
+        discreteValues?: number[]
+        discreteLabels?: Record<number, string>
       }
     },
     formatValue?: (value: number) => string // 右軸格式化方法
@@ -233,6 +239,24 @@ export function useLineChart(dataProvider: DataProvider) {
   })
 
   const leftYAxisMax = computed(() => {
+    // 檢查是否有離散數值
+    const hasDiscreteData = Object.values(dataProvider.left.data).some(config => config.isDiscrete)
+
+    if (hasDiscreteData) {
+      // 對於離散數值，使用預定義的範圍
+      const allDiscreteValues = Object.values(dataProvider.left.data)
+        .filter(config => config.isDiscrete && config.discreteValues)
+        .flatMap(config => config.discreteValues!)
+
+      if (allDiscreteValues.length > 0) {
+        const maxDiscrete = Math.max(...allDiscreteValues)
+        const minDiscrete = Math.min(...allDiscreteValues)
+        // 為離散數值添加一些邊距
+        return Math.max(Math.abs(maxDiscrete), Math.abs(minDiscrete)) + 1
+      }
+    }
+
+    // 原有的連續數值邏輯
     const visibleLeftValues = chartData.value.flatMap(item =>
       Object.entries(item.leftValues)
         .filter(([name]) => isLeftLegendVisible(name))
@@ -245,6 +269,22 @@ export function useLineChart(dataProvider: DataProvider) {
   const rightYAxisMax = computed(() => {
     if (!dataProvider.right) return 0
 
+    // 檢查是否有離散數值
+    const hasDiscreteData = Object.values(dataProvider.right.data).some(config => config.isDiscrete)
+
+    if (hasDiscreteData) {
+      const allDiscreteValues = Object.values(dataProvider.right.data)
+        .filter(config => config.isDiscrete && config.discreteValues)
+        .flatMap(config => config.discreteValues!)
+
+      if (allDiscreteValues.length > 0) {
+        const maxDiscrete = Math.max(...allDiscreteValues)
+        const minDiscrete = Math.min(...allDiscreteValues)
+        return Math.max(Math.abs(maxDiscrete), Math.abs(minDiscrete)) + 1
+      }
+    }
+
+    // 原有的連續數值邏輯
     const visibleRightValues = chartData.value.flatMap(item =>
       item.rightValues ? Object.entries(item.rightValues)
         .filter(([name]) => isRightLegendVisible(name))
@@ -275,6 +315,46 @@ export function useLineChart(dataProvider: DataProvider) {
     return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
   }
 
+  const getDiscreteYPosition = (value: number, discreteValues: number[], axisMax: number) => {
+    const sortedValues = [...discreteValues].sort((a, b) => b - a) // 從大到小排序
+    const index = sortedValues.indexOf(value)
+
+    if (index === -1) return 50 // 如果找不到值，返回中間位置
+
+    // 將離散值均勻分佈在 Y 軸上
+    const step = 100 / (sortedValues.length - 1)
+    return index * step
+  }
+
+  // 修改現有的位置計算函數
+  const getLeftYPosition = (value: number, dataName?: string) => {
+    // 檢查是否為離散數值
+    if (dataName && dataProvider.left.data[dataName]?.isDiscrete) {
+      const config = dataProvider.left.data[dataName]
+      if (config.discreteValues) {
+        return getDiscreteYPosition(value, config.discreteValues, leftYAxisMax.value)
+      }
+    }
+
+    // 原有的連續數值邏輯
+    const percentage = Math.max(0, Math.min(1, (leftYAxisMax.value - value) / leftYAxisMax.value))
+    return percentage * 100
+  }
+
+  const getRightYPosition = (value: number, dataName?: string) => {
+    // 檢查是否為離散數值
+    if (dataName && dataProvider.right?.data[dataName]?.isDiscrete) {
+      const config = dataProvider.right.data[dataName]
+      if (config.discreteValues) {
+        return getDiscreteYPosition(value, config.discreteValues, rightYAxisMax.value)
+      }
+    }
+
+    // 原有的連續數值邏輯
+    const percentage = Math.max(0, Math.min(1, (rightYAxisMax.value - value) / rightYAxisMax.value))
+    return percentage * 100
+  }
+
   return {
     period,
     chartHeight,
@@ -296,7 +376,9 @@ export function useLineChart(dataProvider: DataProvider) {
     formatLeftValue,  // 左軸格式化方法
     formatRightValue, // 右軸格式化方法
     dataProvider,
-    LegendState
+    LegendState,
+    getLeftYPosition,
+    getRightYPosition,
   }
 }
 

@@ -33,17 +33,27 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
           '飲控狀況': {
             getValueByDate: (date: Date) => baseStore.getRawRecordByDate(date)?.level,
             getValueByWeek: (week: Date) => getMostFrequentLevelByWeek(week),
-            getValueByMonth: (month: Date) => getMostFrequentLevelByMonth(month)
+            getValueByMonth: (month: Date) => getMostFrequentLevelByMonth(month),
+            isDiscrete: true,
+            discreteValues: [2, 1, 0, -1, -2],
+            discreteLabels: {
+              2: '嚴守紀律',
+              1: '大致遵守',
+              0: '普通',
+              [-1]: '偶爾放縱',
+              [-2]: '完全失控'
+            } as Record<number, string>
           }
         },
         formatValue: (level: number) => {
-          switch(level) {
-            case 2: return '嚴守紀律';
-            case 1: return '大致遵守';
-            case -1: return '偶爾放縱';
-            case -2: return '完全失控';
-            default: return '';
+          const labels: Record<number, string> = {
+            2: '嚴守紀律',
+            1: '大致遵守',
+            0: '普通',
+            [-1]: '偶爾放縱',
+            [-2]: '完全失控'
           }
+          return labels[level] || ''
         }
       }
     },
