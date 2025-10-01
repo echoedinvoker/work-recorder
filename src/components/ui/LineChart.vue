@@ -6,20 +6,20 @@
         class="absolute left-0 top-0 flex flex-col justify-between text-xs text-gray-500 pr-2"
         :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
         <!-- 使用 line-height 確保文字垂直居中對齊 -->
-        <span class="leading-none">{{ leftYAxisMax }}</span>
-        <span class="leading-none">{{ Math.round(leftYAxisMax * 0.67) }}</span>
-        <span class="leading-none">{{ Math.round(leftYAxisMax * 0.33) }}</span>
-        <span class="leading-none">0</span>
+        <span class="leading-none">{{ formatValue(leftYAxisMax, 'left') }}</span>
+        <span class="leading-none">{{ formatValue(Math.round(leftYAxisMax * 0.67), 'left') }}</span>
+        <span class="leading-none">{{ formatValue(Math.round(leftYAxisMax * 0.33), 'left') }}</span>
+        <span class="leading-none">{{ formatValue(0, 'left') }}</span>
       </div>
 
       <!-- 右軸標籤 (如果有右軸數據且有可見圖例) -->
       <div v-if="dataProvider.right && hasVisibleRightLegends"
         class="absolute right-0 top-0 flex flex-col justify-between text-xs text-gray-500 pl-2"
         :style="{ height: `${chartHeight}px`, paddingTop: '0px', paddingBottom: '0px' }">
-        <span class="leading-none">{{ rightYAxisMax }}</span>
-        <span class="leading-none">{{ Math.round(rightYAxisMax * 0.67) }}</span>
-        <span class="leading-none">{{ Math.round(rightYAxisMax * 0.33) }}</span>
-        <span class="leading-none">0</span>
+        <span class="leading-none">{{ formatValue(rightYAxisMax, 'right') }}</span>
+        <span class="leading-none">{{ formatValue(Math.round(rightYAxisMax * 0.67), 'right') }}</span>
+        <span class="leading-none">{{ formatValue(Math.round(rightYAxisMax * 0.33), 'right') }}</span>
+        <span class="leading-none">{{ formatValue(0, 'right') }}</span>
       </div>
 
       <!-- 圖表區域 -->

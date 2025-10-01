@@ -46,7 +46,7 @@ export const useDailyEarlySleepStore = defineStore("dailyEarlySleep", () => {
           }
         },
         formatValue: (minutes: number) => {
-          if (minutes === 0) return '00:00';
+          if (minutes === 0) return '';
 
           // 對於右軸的時間數據，需要轉換回實際時間
           const actualMinutes = 24 * 60 - minutes;
