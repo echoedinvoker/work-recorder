@@ -103,15 +103,14 @@ const todayScore = computed(() => {
 
 // 計算顯示分數
 const displayScore = computed(() => {
-  if (todayScore.value === null || todayScore.value === undefined || todayScore.value === 0) {
-    return '--';
-  }
-  return todayScore.value > 0 ? `+${todayScore.value}` : `${todayScore.value}`;
+  const scoreIncrement = activity.value.store.todayScoreIncrement;
+  if (scoreIncrement === null) return '--';
+  return scoreIncrement > 0 ? `+${scoreIncrement}` : `${scoreIncrement}`;
 });
 
 // 計算卡片樣式
 const cardClass = computed(() => {
-  const score = todayScore.value;
+  const score = activity.value.store.todayScoreIncrement;
   if (!score || score === 0) return 'border-gray-300 bg-gray-50 text-gray-700';
   
   if (score > 0) {

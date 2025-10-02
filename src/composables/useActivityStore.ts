@@ -67,6 +67,16 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
 
     return filteredRecords
   })
+  const todayScoreIncrement = computed<number | null>(() => {
+    const todayKey = getTodayKey()
+    const yesterdayKey = formatDateToKey(new Date(new Date().getTime() - 24 * 60 * 60 * 1000))
+
+    if (!(todayKey in scores.value) || !(yesterdayKey in scores.value)) {
+      return null
+    }
+
+    return scores.value[todayKey] - scores.value[yesterdayKey]
+  })
   const pastWeightedRecords = computed<{ [date: string]: number }>(() => {
     const todayKey = getTodayKey()
     const filteredWeights: { [date: string]: number } = {}
@@ -453,6 +463,7 @@ export function useActivityStore<T>(options: BaseActivityStoreOptions<T>) {
     // Computed
     firstDateKey,
     todayRecords,
+    todayScoreIncrement,
     pastRecords,
     pastWeightedRecords,
     maxPastWeightedRecord,
