@@ -39,7 +39,7 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
             discreteLabels: {
               2: '嚴守紀律',
               1: '大致遵守',
-              0: '普通',
+              0: '無紀錄',
               [-1]: '偶爾放縱',
               [-2]: '完全失控'
             } as Record<number, string>
@@ -49,7 +49,7 @@ export const useDailyNoSugarStore = defineStore("dailyNoSugar", () => {
           const labels: Record<number, string> = {
             2: '嚴守紀律',
             1: '大致遵守',
-            0: '普通',
+            0: '無紀錄',
             [-1]: '偶爾放縱',
             [-2]: '完全失控'
           }

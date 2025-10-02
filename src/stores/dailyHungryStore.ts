@@ -39,7 +39,7 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
             discreteLabels: {
               2: '很餓',
               1: '偏餓',
-              0: '正常',
+              0: '無紀錄',
               [-1]: '偏飽',  // 負數 key 需要用方括號
               [-2]: '很飽'
             } as Record<number, string>
@@ -49,7 +49,7 @@ export const useDailyHungryStore = defineStore("dailyHungry", () => {
           const labels: Record<number, string> = {
             2: '很餓',
             1: '偏餓',
-            0: '正常',
+            0: '無紀錄',
             [-1]: '偏飽',
             [-2]: '很飽'
           }
