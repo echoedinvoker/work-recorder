@@ -54,7 +54,7 @@ export function useSwimmingRecorder() {
       const durationMinutes = Math.floor(
         (endTime.value.getTime() - startTime.value.getTime()) / (1000 * 60)
       )
-      dailySwimmingStore.addOneRecord(distance.value, durationMinutes)
+      dailySwimmingStore.addRecord(distance.value, durationMinutes)
       distance.value = undefined
     }
   }
