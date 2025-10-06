@@ -5,12 +5,14 @@ import SwimmingPage from '@/components/pages/SwimmingPage.vue'
 import NoSugarPage from '@/components/pages/NoSugarPage.vue'
 import EarlySleepPage from '@/components/pages/EarlySleepPage.vue'
 import HungryPage from '@/components/pages/HungryPage.vue'
+import WaterPage from '@/components/pages/WaterPage.vue'
 import { 
   Ban,           // 替代 🚫 (無糖)
   Moon,          // 替代 😴 (早睡)
   UtensilsCrossed, // 替代 🍽️ (飢餓)
   Waves,         // 替代 🏊 (游泳)
-  Dumbbell       // 替代 💪 (健身)
+  Dumbbell,       // 替代 💪 (健身)
+  Droplet       // 替代 💧 (喝水)
 } from 'lucide-vue-next';
 
 const router = createRouter({
@@ -38,6 +40,15 @@ const router = createRouter({
       meta: {
         title: '游泳紀錄',
         icon: Waves
+      }
+    },
+    {
+      path: '/water',
+      name: 'water',
+      component: WaterPage,
+      meta: {
+        title: '喝水紀錄',
+        icon: Droplet
       }
     },
     {

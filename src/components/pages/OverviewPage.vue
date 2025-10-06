@@ -132,7 +132,7 @@ import { SCORING_CONSTANTS } from '@/constants/scoringConstants';
 import ActivityCard from '@/components/overview/ActivityCard.vue';
 
 // 減脂相關活動名稱列表
-const fatLossActivityNames = ['nosugar', 'earlysleep', 'hungry', 'swimming', 'workout'];
+const fatLossActivityNames = ['nosugar', 'earlysleep', 'hungry', 'swimming', 'workout', 'water'];
 
 const router = useRouter();
 
@@ -196,7 +196,8 @@ const fatLossActivities = [
   { name: 'hungry', title: '飢餓紀錄', icon: '😋', category: '飲食控制' },
   { name: 'workout', title: '重訓紀錄', icon: '💪', category: '運動表現' },
   { name: 'swimming', title: '游泳紀錄', icon: '🏊', category: '運動表現' },
-  { name: 'earlySleep', title: '早睡紀錄', icon: '😴', category: '生活習慣' }
+  { name: 'earlySleep', title: '早睡紀錄', icon: '😴', category: '生活習慣' },
+  { name: 'water', title: '喝水紀錄', icon: '💧', category: '生活習慣' }
 ];
 
 // 獲取活動分數

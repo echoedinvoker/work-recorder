@@ -84,9 +84,9 @@ const currentRouteIndex = computed(() => {
 
 // 上一個活動頁面的名稱
 const previousActivityName = computed(() => {
-  if (!previousActivityRoute.value) return '';
+  if (!previousActivityRoute.value) return null;
   const route = routes.find(r => r.name === previousActivityRoute.value);
-  return route
+  return route || null;
 });
 
 // 監聽路由變化，記錄活動頁面

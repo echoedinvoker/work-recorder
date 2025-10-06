@@ -26,6 +26,7 @@ import { useDailyEarlySleepStore } from '@/stores/dailyEarlySleepStore';
 import { useDailyHungryStore } from '@/stores/dailyHungryStore';
 import { useDailySwimmingStore } from '@/stores/dailySwimmingStore';
 import { useDailyWorkoutStore } from '@/stores/dailyWorkoutStore';
+import { useDailyWaterStore } from '@/stores/dailyWaterStore';
 
 // 導入 Lucide icons
 import { 
@@ -33,7 +34,8 @@ import {
   Moon,          // 替代 😴 (早睡)
   UtensilsCrossed, // 替代 🍽️ (飢餓)
   Waves,         // 替代 🏊 (游泳)
-  Dumbbell       // 替代 💪 (健身)
+  Dumbbell,       // 替代 💪 (健身)
+  Droplet       // 替代 💧 (喝水)
 } from 'lucide-vue-next';
 
 interface Props {
@@ -49,6 +51,7 @@ const earlySleepStore = useDailyEarlySleepStore();
 const hungryStore = useDailyHungryStore();
 const swimmingStore = useDailySwimmingStore();
 const workoutStore = useDailyWorkoutStore();
+const waterStore = useDailyWaterStore();
 
 // 活動配置 - 使用 Lucide icon 組件
 const activityConfig = {
@@ -86,19 +89,19 @@ const activityConfig = {
     category: '運動',
     store: workoutStore,
     routeName: 'workout'
+  },
+  water: {
+    title: '喝水',
+    iconComponent: Droplet,
+    category: '生活習慣',
+    store: waterStore,
+    routeName: 'water'
   }
 };
 
 // 取得當前活動配置
 const activity = computed(() => {
   return activityConfig[props.activityName as keyof typeof activityConfig];
-});
-
-// 取得今日分數
-const todayScore = computed(() => {
-  if (!activity.value) return null;
-  const today = new Date();
-  return activity.value.store.getScoreByDate(today);
 });
 
 // 計算顯示分數
