@@ -34,6 +34,10 @@ export const useDailyWaterStore = defineStore("dailyWater", () => {
     todayKey: string = getTodayKey()
   ) => {
     // Placeholder for future calculations
+    Object.keys(records.value).forEach(dateKey => {
+      const totalAmount = records.value[dateKey].reduce((sum, entry) => sum + entry.amount, 0);
+      weightedRecords.value[dateKey] = totalAmount;
+    });
   }
 
   const baseStore = useActivityStore<WaterRecord[]>({
@@ -49,9 +53,9 @@ export const useDailyWaterStore = defineStore("dailyWater", () => {
         unit: "ml",
         data: {
           '喝水量': {
-            getValueByDate: () => 0,
-            getValueByWeek: () => 0,
-            getValueByMonth: () => 0
+            getValueByDate: (date: Date) => baseStore.getWeightedRecordByDate(date),
+            getValueByWeek: (week: Date) => baseStore.getWeightedRecordByWeek(week),
+            getValueByMonth: (month: Date) => baseStore.getWeightedRecordByMonth(month)
           }
         }
       }
